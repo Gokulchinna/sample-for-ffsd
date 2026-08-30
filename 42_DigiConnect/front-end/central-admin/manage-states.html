@@ -130,8 +130,8 @@
                             <td style="font-weight:700;color:var(--navy-900);">🏛️ ${s.name}</td>
                             <td><span class="badge badge-neutral">${s.code}</span></td>
                             <td>
-                                <div style="font-weight:700;color:#1e3a8a;">${s.stateAdminName || 'K. Vijayanand IAS'}</div>
-                                <div style="font-size:0.75rem;color:var(--slate-500);">${s.stateAdminEmail || 'admin@' + s.code.toLowerCase() + '.gov.in'}</div>
+                                <div style="font-weight:700;color:#1e3a8a;">${s.stateAdmin?.name || s.stateAdminName || 'State Admin Appointee'}</div>
+                                <div style="font-size:0.75rem;color:var(--slate-500);">${s.stateAdmin?.email || s.stateAdminEmail || 'admin@' + (s.code ? s.code.toLowerCase() : 'state') + '.gov.in'}</div>
                             </td>
                             <td><span class="badge badge-success">● Active</span></td>
                             <td>

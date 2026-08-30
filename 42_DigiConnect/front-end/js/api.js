@@ -440,9 +440,20 @@ export async function apiCreateState(data) {
   });
 }
 
-export async function apiGetCentralRevenue() {
-  return apiFetch('/central/revenue');
+export async function apiDeleteState(id) {
+  return apiFetch(`/central/states/${id}`, {
+    method: 'DELETE',
+  });
 }
+
+export async function apiGetCentralRevenue() {
+  return apiFetch('/central/analytics/revenue');
+}
+
+export async function apiGetCentralMetrics() {
+  return apiFetch('/central/analytics/metrics');
+}
+
 
 // ──────────────────────────────────────────
 // STATE GOVERNMENT (STATE ADMIN)
