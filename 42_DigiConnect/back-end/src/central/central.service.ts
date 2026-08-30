@@ -139,11 +139,9 @@ export class CentralService {
     if (dto.code) state.code = dto.code.trim().toUpperCase();
 
     if (dto.stateAdminName || dto.stateAdminEmail) {
-      const admin = db.users.find((u) => u.id === state.stateAdminId);
-      if (admin) {
-        if (dto.stateAdminName) admin.name = dto.stateAdminName.trim();
-        if (dto.stateAdminEmail) admin.email = dto.stateAdminEmail.trim();
-      }
+      const admin = this.getOrCreateStateAdmin(state);
+      if (dto.stateAdminName) admin.name = dto.stateAdminName.trim();
+      if (dto.stateAdminEmail) admin.email = dto.stateAdminEmail.trim();
     }
 
     db.auditLogs.push({
@@ -178,14 +176,35 @@ export class CentralService {
   }
 
   /**
+   * Helper to ensure a State Admin User object exists for a state
+   */
+  private getOrCreateStateAdmin(state: StateGovernment): User {
+    let admin = db.users.find((u) => u.id === state.stateAdminId);
+    if (!admin) {
+      const code = state.code.toUpperCase();
+      admin = {
+        id: state.stateAdminId || `USR-SA-${code}`,
+        name: `${state.name} State Administrator`,
+        email: `admin@${code.toLowerCase()}.gov.in`,
+        phone: '+91 98765 43200',
+        aadhaar: '895421670000',
+        role: Role.STATE_ADMIN,
+        state: state.name,
+        status: 'Active',
+        joinedDate: state.createdAt || '2026-01-01T00:00:00.000Z',
+      };
+      state.stateAdminId = admin.id;
+      db.users.push(admin);
+    }
+    return admin;
+  }
+
+  /**
    * Toggle State Admin User Active / Inactive
    */
   setStateAdminStatus(id: string, status: 'Active' | 'Inactive'): { success: boolean; user: User } {
     const state = this.getStateById(id);
-    const admin = db.users.find((u) => u.id === state.stateAdminId);
-    if (!admin) {
-      throw new NotFoundException(`State Admin for state '${id}' not found.`);
-    }
+    const admin = this.getOrCreateStateAdmin(state);
     admin.status = status;
 
     db.auditLogs.push({
@@ -205,8 +224,7 @@ export class CentralService {
    */
   resetStateAdminPassword(id: string): { success: boolean; message: string; tempPass: string } {
     const state = this.getStateById(id);
-    const admin = db.users.find((u) => u.id === state.stateAdminId);
-    if (!admin) throw new NotFoundException(`State Admin for state '${id}' not found.`);
+    const admin = this.getOrCreateStateAdmin(state);
 
     const tempPass = `Gov@${state.code}${Math.floor(1000 + Math.random() * 9000)}`;
 
@@ -231,7 +249,7 @@ export class CentralService {
    */
   getStateDetails(id: string) {
     const state = this.getStateById(id);
-    const admin = db.users.find((u) => u.id === state.stateAdminId);
+    const admin = this.getOrCreateStateAdmin(state);
     const nodes = db.jurisdictionNodes.filter((n) => n.stateId === state.id);
     const depts = db.departments.filter((d) => d.stateId === state.id);
 

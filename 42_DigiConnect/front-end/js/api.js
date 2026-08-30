@@ -34,6 +34,7 @@ export async function apiFetch(path, options = {}) {
     delete headers['Content-Type']; // Browser will automatically set multipart/form-data boundary
   }
   const res = await fetch(`${BASE}${path}`, {
+    cache: 'no-store',
     ...options,
     headers,
   });
