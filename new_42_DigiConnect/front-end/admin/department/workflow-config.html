@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Workflow Pipelines – DigiConnect Department</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1300px; margin:0 auto; width:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">Multi-Stage Workflow Pipeline Builder</h1>
+                        <p style="color:#64748B; font-size:0.95rem; margin:0;">Construct linear multi-stage approval sequences and assign designated officer posts.</p>
+                    </div>
+                    <div>
+                        <select id="wfServiceSelect" onchange="loadWorkflow()" style="padding:9px 14px; border:1px solid #CBD5E1; border-radius:6px; font-weight:600; font-size:0.9rem;">
+                            <!-- Options populated -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Pipeline Stages Visualizer -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:32px;">
+                    <h2 style="font-size:1.15rem; font-weight:700; color:#0F172A; margin:0 0 24px 0;" id="wfTitle">Stages Pipeline</h2>
+                    <div id="wfStagesContainer" style="display:flex; flex-direction:column; gap:20px;">
+                        <!-- Stages -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/sidebar.js"></script>
+    <script src="../../js/topbar.js"></script>
+    <script>
+        let allServices = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['admin']);
+            if (!user) return;
+
+            Sidebar.render('workflow');
+            Topbar.render();
+
+            try {
+                allServices = await API.get('/services');
+                const sel = document.getElementById('wfServiceSelect');
+                sel.innerHTML = allServices.map(s => `
+                    <option value="${s.serviceId}">${s.serviceName}</option>
+                `).join('');
+                loadWorkflow();
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        async function loadWorkflow() {
+            const srvId = document.getElementById('wfServiceSelect').value;
+            try {
+                const wf = await API.get(`/workflow/service/${srvId}`);
+                document.getElementById('wfTitle').innerText = `${wf.serviceName} (${wf.stages.length} Verification Stages)`;
+                renderStages(wf.stages);
+            } catch (e) {
+                alert('Could not load workflow: ' + e.message);
+            }
+        }
+
+        function renderStages(stages) {
+            const container = document.getElementById('wfStagesContainer');
+            container.innerHTML = stages.map(stg => `
+                <div style="display:flex; gap:18px; align-items:center;">
+                    <div style="width:44px; height:44px; border-radius:50%; background:#2563EB; color:#FFF; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; flex-shrink:0;">
+                        ${stg.stageNumber}
+                    </div>
+                    <div style="flex:1; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:18px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <div style="font-size:0.75rem; font-weight:700; color:#2563EB; text-transform:uppercase;">Sequence Step ${stg.stageNumber}</div>
+                            <h3 style="font-size:1.1rem; font-weight:700; color:#0F172A; margin:2px 0 4px 0;">${stg.stageName}</h3>
+                            <div style="font-size:0.85rem; color:#475569;">Designated Official: <strong>${stg.assignedDesignationName}</strong> (${stg.assignedDesignationId})</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <span style="font-size:0.82rem; font-weight:700; background:#ECFDF5; color:#065F46; padding:4px 10px; border-radius:12px;">
+                                SLA: ${stg.slaDays} Days
+                            </span>
+                            ${stg.isFinalApproval ? `
+                                <div style="margin-top:6px; font-size:0.75rem; font-weight:700; color:#2563EB;">✓ FINAL SIGNING STAGE</div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

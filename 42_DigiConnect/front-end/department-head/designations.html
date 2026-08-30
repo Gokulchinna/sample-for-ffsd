@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage Designations – Department Head DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body data-page="dept-designations">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <!-- Topbar -->
+        <header class="topbar"></header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h1 class="page-title">Department Designations Management</h1>
+                    <p class="page-subtitle">Master Prompt Section 9: Designations are operational job roles, NOT numeric officer levels</p>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openCreateDesigModal()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    + Add Designation
+                </button>
+            </div>
+
+            <!-- Architecture Rule Card -->
+            <div style="background:#fefce8;border-left:4px solid #ca8a04;padding:12px 16px;border-radius:0 var(--radius-md) var(--radius-md) 0;margin-bottom:var(--space-lg);">
+                <div style="font-size:0.875rem;font-weight:700;color:#854d0e;">Important Architecture Rule:</div>
+                <div style="font-size:0.8125rem;color:#713f12;margin-top:2px;">
+                    "Designation is NOT an officer level. Do not create an officer-level hierarchy. Designations simply represent officer types/roles that can participate in service workflows."
+                </div>
+            </div>
+
+            <!-- Designations Table -->
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span class="card-title">Configured Designations</span>
+                    <span class="badge badge-purple" id="desigCountBadge">Loading...</span>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Designation ID</th>
+                                    <th>Title</th>
+                                    <th>Code</th>
+                                    <th>Typical Operational Scope</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="designationsTable">
+                                <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--slate-400);">Loading designations...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Designation Modal -->
+    <div class="modal-overlay" id="createDesigModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:540px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+            <div class="card-header" style="background:#f8fafc;display:flex;justify-content:space-between;align-items:center;">
+                <span class="card-title">👔 Create Department Designation</span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="closeCreateDesigModal()">✕</button>
+            </div>
+            <form id="createDesigForm" onsubmit="handleCreateDesig(event)" style="padding:var(--space-xl);">
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Designation Title *</label>
+                    <input type="text" id="desigTitleInput" class="form-input" placeholder="e.g. Village Revenue Officer, Tahsildar, Revenue Inspector" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Designation Code *</label>
+                    <input type="text" id="desigCodeInput" class="form-input" placeholder="e.g. VRO, MRO, TAH, RI" style="text-transform:uppercase;" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-lg);">
+                    <label class="form-label" style="font-weight:700;">Operational Description / Role</label>
+                    <textarea id="desigDescInput" class="form-input" rows="3" placeholder="Primary responsibility in processing citizen applications and field inspections."></textarea>
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeCreateDesigModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveDesigBtn">Create Designation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { initPage } from '../js/navigation.js';
+        import { apiGetDesignations, apiCreateDesignation } from '../js/api.js';
+        import { showToast } from '../js/utils.js';
+
+        initPage({
+            title: 'Department Designations',
+            breadcrumbs: [{ label: 'Department Head', href: 'department-head/dashboard.html' }, { label: 'Designations' }],
+            requiredRole: 'department_head'
+        });
+
+        window.openCreateDesigModal = () => {
+            document.getElementById('createDesigModal').style.display = 'flex';
+        };
+
+        window.closeCreateDesigModal = () => {
+            document.getElementById('createDesigModal').style.display = 'none';
+        };
+
+        async function loadDesignations() {
+            try {
+                const res = await apiGetDesignations('dept_rev_ap');
+                const list = res.data || [];
+                document.getElementById('desigCountBadge').textContent = `${list.length} Designations`;
+
+                const tbody = document.getElementById('designationsTable');
+                if (list.length > 0) {
+                    tbody.innerHTML = list.map(d => `
+                        <tr>
+                            <td><code>${d.id}</code></td>
+                            <td style="font-weight:700;color:var(--navy-900);">👔 ${d.title}</td>
+                            <td><span class="badge badge-neutral">${d.code}</span></td>
+                            <td style="color:var(--slate-600);font-size:0.8125rem;">${d.description || 'Application Review & Verification'}</td>
+                            <td><span class="badge badge-success">● Active</span></td>
+                            <td>
+                                <button class="btn btn-ghost btn-sm" onclick="showToast('Designation is in active service workflows', 'info')">View</button>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--slate-500);">No designations configured.</td></tr>`;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        window.handleCreateDesig = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveDesigBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            const payload = {
+                departmentId: 'dept_rev_ap',
+                title: document.getElementById('desigTitleInput').value.trim(),
+                code: document.getElementById('desigCodeInput').value.trim().toUpperCase(),
+                description: document.getElementById('desigDescInput').value.trim()
+            };
+
+            try {
+                await apiCreateDesignation(payload);
+                showToast(`Designation "${payload.title}" created successfully!`, 'success');
+                closeCreateDesigModal();
+                document.getElementById('createDesigForm').reset();
+                loadDesignations();
+            } catch (err) {
+                showToast(err.message || 'Failed to create designation', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Designation';
+            }
+        };
+
+        loadDesignations();
+    </script>
+</body>
+</html>

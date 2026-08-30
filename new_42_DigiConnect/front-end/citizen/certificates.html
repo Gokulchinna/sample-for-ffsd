@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certificates Vault – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1100px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:28px;">
+                    <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">Official Certificates Vault</h1>
+                    <p style="color:#64748B; font-size:0.95rem; margin:0;">Download, view, and print digitally signed statutory certificates sealed with QR authentication codes.</p>
+                </div>
+
+                <div id="certificatesContainer" style="display:flex; flex-direction:column; gap:24px;">
+                    <!-- Dynamically populated -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['citizen']);
+            if (!user) return;
+
+            Sidebar.render('certificates');
+            Topbar.render();
+
+            try {
+                const apps = await API.get('/applications/my');
+                const approvedApps = apps.filter(a => a.status === 'APPROVED');
+                renderCertificates(approvedApps);
+            } catch (err) {
+                console.error('Failed to load certificates:', err);
+            }
+        });
+
+        function renderCertificates(certs) {
+            const container = document.getElementById('certificatesContainer');
+            if (!certs || certs.length === 0) {
+                container.innerHTML = `
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:48px; text-align:center;">
+                        <span style="font-size:2.5rem;">📜</span>
+                        <h3 style="color:#0F172A; font-size:1.15rem; font-weight:700; margin:12px 0 6px 0;">No Approved Certificates Yet</h3>
+                        <p style="color:#64748B; font-size:0.9rem; margin:0 0 20px 0;">Your certificates will automatically appear here once approved by the competent authority.</p>
+                        <a href="apply-service.html" class="btn" style="background:#2563EB; color:#FFF; padding:10px 22px; font-weight:700; border-radius:6px; text-decoration:none;">Apply for a Certificate &rarr;</a>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = certs.map(c => `
+                <div style="background:#FFF; border:2px solid #10B981; border-radius:14px; padding:28px 32px; box-shadow:0 10px 15px -3px rgba(16,185,129,0.08); position:relative; overflow:hidden;">
+                    <!-- Government Watermark Icon -->
+                    <div style="position:absolute; right:-20px; bottom:-20px; font-size:12rem; opacity:0.04; pointer-events:none;">🏛️</div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; border-bottom:1px solid #F1F5F9; padding-bottom:18px; margin-bottom:20px;">
+                        <div>
+                            <span style="background:#ECFDF5; color:#065F46; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:12px; text-transform:uppercase;">
+                                ✓ Digitally Sealed Statutory Document
+                            </span>
+                            <h2 style="font-size:1.35rem; font-weight:800; color:#0F172A; margin:8px 0 4px 0;">${c.serviceName}</h2>
+                            <div style="color:#64748B; font-size:0.85rem;">Issued by Revenue Department, Government of ${c.stateCode === 'TS' ? 'Telangana' : c.stateCode}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:700; font-size:0.95rem; color:#2563EB;">#${c.certificateNumber}</div>
+                            <div style="font-size:0.8rem; color:#64748B; margin-top:2px;">Issued on ${new Date(c.certificateIssuedDate || c.submissionDate).toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' })}</div>
+                        </div>
+                    </div>
+
+                    <!-- Certificate Metadata Body -->
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:18px; margin-bottom:24px; font-size:0.9rem;">
+                        <div>
+                            <span style="color:#64748B; font-size:0.8rem; display:block;">Certificate Holder</span>
+                            <strong style="color:#0F172A;">${c.citizenName}</strong>
+                        </div>
+                        <div>
+                            <span style="color:#64748B; font-size:0.8rem; display:block;">Jurisdiction Area</span>
+                            <strong style="color:#0F172A;">${c.district}, ${c.mandalOrWard}</strong>
+                        </div>
+                        <div>
+                            <span style="color:#64748B; font-size:0.8rem; display:block;">Digital Authentication</span>
+                            <strong style="color:#10B981;">Signed by Tahsildar / MRO</strong>
+                        </div>
+                        <div>
+                            <span style="color:#64748B; font-size:0.8rem; display:block;">Validity Period</span>
+                            <strong style="color:#0F172A;">1 Year from Date of Issue</strong>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; background:#F8FAFC; border-radius:8px; padding:12px 18px;">
+                        <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#475569;">
+                            <span style="font-size:1.2rem;">🔒</span>
+                            <span>Secured with cryptographic QR Code signature verification.</span>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button onclick="printCertificate('${c.applicationId}')" class="btn" style="background:#2563EB; color:#FFF; padding:8px 18px; font-weight:700; border:none; border-radius:6px; cursor:pointer;">
+                                🖨️ Print Certificate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function printCertificate(id) {
+            window.print();
+        }
+    </script>
+</body>
+</html>

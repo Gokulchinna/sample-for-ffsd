@@ -6,6 +6,8 @@ import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { UsersService } from '../users/users.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { GeographyService } from '../geography/geography.service';
+import { CertificatesService } from '../certificates/certificates.service';
 import { generateId } from '../utils/helpers';
 import { paginate } from '../utils/pagination.util';
 import { AppStatus, GrievanceStatus } from '../models/enums';
@@ -15,6 +17,8 @@ export class ApplicationsService {
   constructor(
     private readonly usersService: UsersService,
     private readonly notificationsService: NotificationsService,
+    private readonly geographyService: GeographyService,
+    private readonly certificatesService: CertificatesService,
   ) {}
 
   submit(createApplicationDto: CreateApplicationDto): Application {
@@ -62,14 +66,28 @@ export class ApplicationsService {
         officer = off;
       }
     }
+    const selectedNodeId =
+      (createApplicationDto as any).selectedJurisdictionNodeId ||
+      createApplicationDto.formData?.selectedJurisdictionNodeId ||
+      citizen?.jurisdiction;
+
+    let jurisdictionPath = citizen && citizen.jurisdiction ? citizen.jurisdiction : '-';
+    if (selectedNodeId) {
+      const node = db.jurisdictionNodes.find((n) => n.id === selectedNodeId);
+      if (node) {
+        const ancestors = this.geographyService.getAncestors(node.id);
+        jurisdictionPath = [...ancestors.map((a) => a.name).reverse(), node.name].join(' > ');
+      }
+    }
+
     const newApp: Application = {
       id: generateId('APP'),
       serviceId: createApplicationDto.serviceId,
       serviceName: service ? service.name : 'Unknown Service',
-      serviceType: service ? service.cat.toLowerCase() : 'unknown',
+      serviceType: service ? ((service as any).category || (service as any).cat || 'certificate').toLowerCase() : 'certificate',
       citizenId: createApplicationDto.citizenId,
       citizenName: citizen ? citizen.name : 'Unknown Citizen',
-      jurisdiction: citizen && citizen.jurisdiction ? citizen.jurisdiction : '-',
+      jurisdiction: selectedNodeId || jurisdictionPath,
       officerId: officer ? officer.id : 'UNASSIGNED',
       officerName: officer ? officer.name : 'Unassigned',
       dept: createApplicationDto.dept,
@@ -80,11 +98,17 @@ export class ApplicationsService {
       paymentStatus: createApplicationDto.paymentTransactionId ? 'paid' : 'pending',
       paymentTransactionId: createApplicationDto.paymentTransactionId,
       submittedDate: new Date().toISOString(),
-      slaDate: new Date(Date.now() + (service ? service.sla : 7) * 24 * 60 * 60 * 1000).toISOString(),
+      slaDate: new Date(Date.now() + (service ? (service as any).sla || 7 : 7) * 24 * 60 * 60 * 1000).toISOString(),
       timeline: [{ action: 'Application Submitted', date: new Date().toISOString(), actor: citizen ? citizen.name : 'Citizen', note: 'Application received' }],
       documents: createApplicationDto.documents || [],
-      ...(createApplicationDto.formData || {})
+      ...(createApplicationDto.formData || {}),
     };
+
+    (newApp as any).selectedJurisdictionNodeId = selectedNodeId;
+    (newApp as any).jurisdictionPath = jurisdictionPath;
+    (newApp as any).currentStepNumber = 1;
+    (newApp as any).totalWorkflowSteps = 3;
+    (newApp as any).queries = [];
 
     if (createApplicationDto.paymentTransactionId) {
       const pMethod = createApplicationDto.paymentMethod || 'online';
@@ -308,11 +332,185 @@ export class ApplicationsService {
     return app;
   }
 
-  // ── Officer Dashboard Data ──
+  // ─── THE 3 PRIMARY OFFICER ACTIONS (Sections 18-22) ───
+
+  approve(appId: string, actorUserId: string, remarks?: string): { application: Application; certificate?: any } {
+    const app = this.findById(appId);
+
+    if ([AppStatus.REJECTED, AppStatus.COMPLETED].includes(app.status as AppStatus)) {
+      throw new BadRequestException('Application is finalized and cannot be approved.');
+    }
+
+    const timestamp = new Date().toISOString();
+    let officer = db.officers.find(o => o.id === actorUserId);
+    const actorName = officer ? `${officer.name} (${officer.designationTitle})` : (actorUserId || 'Verification Officer');
+
+    const currentStep = Number((app as any).currentStepNumber) || 1;
+    const totalSteps = Number((app as any).totalWorkflowSteps) || 3;
+    const nextStep = currentStep + 1;
+
+    let certData: any = null;
+
+    if (nextStep > totalSteps || (app as any).isFinalStep) {
+      // Final Approval -> Generate Digital Certificate!
+      app.status = AppStatus.COMPLETED;
+      (app as any).currentStatus = AppStatus.COMPLETED;
+
+      certData = this.certificatesService.generateCertificate({
+        applicationId: app.id,
+        citizenName: app.citizenName,
+        serviceName: app.serviceName,
+        jurisdictionPath: (app as any).jurisdictionPath || app.jurisdiction || 'State Administrative Division',
+        issuingAuthority: actorName,
+      });
+
+      (app as any).certificateId = certData.id;
+      (app as any).certificateIssuedDate = certData.issueDate;
+      (app as any).certificateDownloadUrl = certData.downloadUrl;
+
+      app.timeline.push({
+        action: 'Final Approval & Digital Certificate Issued',
+        date: timestamp,
+        actor: actorName,
+        note: remarks || `Application approved. Certificate ${certData.id} generated.`,
+      });
+
+      this.notificationsService.pushApplicationNotification(
+        app.citizenId,
+        app.id,
+        'COMPLETED',
+        `🎉 Congratulations! Your application has been approved and your Digital Certificate (${certData.id}) is ready for download.`,
+      );
+    } else {
+      // Advance to next step
+      (app as any).currentStepNumber = nextStep;
+      app.status = AppStatus.PENDING_OFFICER_REVIEW;
+      (app as any).currentStatus = AppStatus.PENDING_OFFICER_REVIEW;
+
+      app.timeline.push({
+        action: `Stage ${currentStep} Approved -> Advanced to Step ${nextStep}`,
+        date: timestamp,
+        actor: actorName,
+        note: remarks || `Stage verified and forwarded to next officer in workflow.`,
+      });
+
+      this.notificationsService.pushApplicationNotification(
+        app.citizenId,
+        app.id,
+        'UNDER_REVIEW',
+        `Your application was approved by ${actorName} and moved to the next review stage.`,
+      );
+    }
+
+    return { application: app, certificate: certData };
+  }
+
+  reject(appId: string, actorUserId: string, reason: string): Application {
+    const app = this.findById(appId);
+
+    if ([AppStatus.REJECTED, AppStatus.COMPLETED].includes(app.status as AppStatus)) {
+      throw new BadRequestException('Application is already finalized.');
+    }
+
+    const timestamp = new Date().toISOString();
+    let officer = db.officers.find(o => o.id === actorUserId);
+    const actorName = officer ? `${officer.name} (${officer.designationTitle})` : (actorUserId || 'Verification Officer');
+
+    app.status = AppStatus.REJECTED;
+    (app as any).currentStatus = AppStatus.REJECTED;
+    (app as any).rejectedBy = actorName;
+    (app as any).rejectionReason = reason;
+    (app as any).rejectionDate = timestamp;
+
+    app.timeline.push({
+      action: 'Application Rejected',
+      date: timestamp,
+      actor: actorName,
+      note: reason || 'Application rejected during officer review.',
+    });
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: 'APPLICATION_REJECTED',
+      actor: actorName,
+      role: 'OFFICER',
+      date: timestamp,
+      details: `Application ${app.id} rejected by ${actorName}. Reason: ${reason}`,
+    });
+
+    this.notificationsService.pushApplicationNotification(
+      app.citizenId,
+      app.id,
+      'REJECTED',
+      `Your application was rejected by ${actorName}. Reason: ${reason}`,
+    );
+
+    return app;
+  }
+
+  raiseQuery(appId: string, actorUserId: string, queryText: string): Application {
+    const app = this.findById(appId);
+
+    if ([AppStatus.REJECTED, AppStatus.COMPLETED].includes(app.status as AppStatus)) {
+      throw new BadRequestException('Cannot raise query on finalized application.');
+    }
+
+    const timestamp = new Date().toISOString();
+    let officer = db.officers.find(o => o.id === actorUserId);
+    const actorName = officer ? `${officer.name} (${officer.designationTitle})` : (actorUserId || 'Verification Officer');
+
+    // Workflow is PAUSED
+    app.status = AppStatus.QUERY_RAISED;
+    (app as any).currentStatus = AppStatus.QUERY_RAISED;
+
+    if (!(app as any).queries) {
+      (app as any).queries = [];
+    }
+
+    const queryEntry = {
+      queryId: `QRY-${Date.now().toString().slice(-6)}`,
+      officerId: actorUserId,
+      officerName: actorName,
+      queryText: queryText.trim(),
+      timestamp,
+      status: 'OPEN',
+    };
+
+    (app as any).queries.push(queryEntry);
+
+    app.timeline.push({
+      action: 'Clarification Query Raised (Workflow Paused)',
+      date: timestamp,
+      actor: actorName,
+      note: queryText,
+    });
+
+    this.notificationsService.pushApplicationNotification(
+      app.citizenId,
+      app.id,
+      'QUERY_RAISED',
+      `Officer ${actorName} raised a query: "${queryText}". Please submit a response to resume review.`,
+    );
+
+    return app;
+  }
+
+  // ── Officer Dashboard Data with Hierarchical Scoping ──
 
   getOfficerQueue(officerId?: string) {
     let apps = db.applications;
-    if (officerId) apps = apps.filter(a => a.officerId === officerId);
+
+    if (officerId) {
+      const officer = db.officers.find((o) => o.id === officerId);
+      if (officer && officer.assignedNodeId) {
+        apps = apps.filter((a) => {
+          const leafNodeId = (a as any).selectedJurisdictionNodeId || a.jurisdiction;
+          return this.geographyService.isNodeWithinScope(leafNodeId, officer.assignedNodeId);
+        });
+      } else {
+        apps = apps.filter((a) => a.officerId === officerId);
+      }
+    }
 
     // Filter out locked applications
     apps = apps.filter(a => {

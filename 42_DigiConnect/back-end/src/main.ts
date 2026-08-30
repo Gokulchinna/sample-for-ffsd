@@ -18,7 +18,17 @@ async function bootstrap() {
   app.enableCors({
     origin: ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-role', 'x-user-id'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'x-role',
+      'x-user-id',
+      'x-state-id',
+      'x-department-id',
+      'x-assigned-node-id',
+      'x-designation-id',
+      'x-user-role',
+    ],
   });
 
   // Security Headers (Helmet) with Cross-Origin Resource Policy for media previews & downloads

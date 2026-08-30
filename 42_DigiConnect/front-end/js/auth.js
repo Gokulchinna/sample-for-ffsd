@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════
 
 import { showToast, generateId, initEventDelegation, togglePassword, checkStrength, checkUsername, formatAadhaar, nextOtp, setupGlobalClickHandlers, closeAllModals, openModal, closeModal } from './utils.js';
-import { getRoleDashboardPath, getLoginRedirectMap, getRoleConfig } from './role-manager.js';
+import { getRoleDashboardPath, getLoginRedirectMap, getRoleConfig, isRoleAllowed } from './role-manager.js';
 import { initPage } from './navigation.js';
 import { renderNotifPanel } from './notifications.js';
 import { apiLogin, apiRegister, apiGetUsers } from './api.js';
@@ -195,8 +195,12 @@ export function requireAuth(requiredRole) {
     window.location.href = getBasePath() + 'login.html';
     return false;
   }
-  if (requiredRole && session.role !== requiredRole && session.actualRole !== 'super_admin') {
-    window.location.href = getBasePath() + 'login.html';
+  if (requiredRole && !isRoleAllowed(session.roleKey || session.role, requiredRole)) {
+    const userDash = getRoleDashboardPath(session.roleKey || session.role);
+    const currentPath = window.location.pathname;
+    if (!currentPath.endsWith(userDash)) {
+      window.location.href = getBasePath() + userDash;
+    }
     return false;
   }
   return true;
@@ -208,7 +212,11 @@ export function requireAuth(requiredRole) {
 export function redirectToDashboard() {
   const session = getSession();
   if (session) {
-    window.location.href = getRoleDashboardPath(session.role);
+    const dest = getRoleDashboardPath(session.roleKey || session.role);
+    const currentPath = window.location.pathname;
+    if (dest && !currentPath.endsWith(dest)) {
+      window.location.href = getBasePath() + dest;
+    }
   }
 }
 
@@ -218,8 +226,8 @@ export function redirectToDashboard() {
  */
 function getBasePath() {
   const path = window.location.pathname;
-  if (path.includes('/Super User/') || path.includes('/Super%20User/') || path.includes('/citizen/') || path.includes('/officer/') ||
-      path.includes('/supervisor/') || path.includes('/grievance/')) {
+  if (path.includes('/central-admin/') || path.includes('/state-admin/') || path.includes('/department-head/') ||
+      path.includes('/citizen/') || path.includes('/officer/') || path.includes('/grievance/')) {
     return '../';
   }
   return '';
@@ -235,9 +243,10 @@ function getBasePath() {
  * Initialize the login page
  */
 export function initLoginPage() {
-  // If already logged in, redirect
+  // If already logged in, redirect ONLY IF not attempting explicit login/logout
   const session = getSession();
-  if (session) {
+  const params = new URLSearchParams(window.location.search);
+  if (session && !params.has('logout') && !params.has('stay')) {
     redirectToDashboard();
     return;
   }
@@ -251,7 +260,14 @@ export function initLoginPage() {
       opt.classList.add('selected');
       const radio = opt.querySelector('input[type="radio"]');
       if (radio) { radio.checked = true; selectedRole = radio.value; }
-      const labels = { citizen: 'Phone / Aadhaar / Username', officer: 'Employee ID / Username', supervisor: 'Employee ID / Username', grievance: 'Officer ID / Username', super_user: 'Super User Username', admin: 'Super User Username' };
+      const labels = {
+        citizen: 'Phone / Aadhaar / Username',
+        officer: 'Officer Email / Employee ID',
+        department_head: 'Dept Head Email / Username',
+        state_admin: 'State Admin Email / Username',
+        central_admin: 'Central Admin Username',
+        grievance: 'Grievance Officer ID / Email'
+      };
       const labelEl = document.getElementById('loginIdLabel');
       if (labelEl) labelEl.textContent = labels[selectedRole] || 'Username';
     });

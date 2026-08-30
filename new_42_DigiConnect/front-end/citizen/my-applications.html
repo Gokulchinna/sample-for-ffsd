@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Applications – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1400px; margin:0 auto; width:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">My Applications Registry</h1>
+                        <p style="color:#64748B; font-size:0.95rem; margin:0;">Track status, statutory SLA timelines, and officer verification notes across all your submissions.</p>
+                    </div>
+                    <a href="apply-service.html" class="btn btn-primary" style="background:#2563EB; color:#FFF; padding:10px 20px; font-weight:700; border-radius:8px; text-decoration:none;">
+                        + New Application
+                    </a>
+                </div>
+
+                <!-- Status Filter Pills -->
+                <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+                    <button class="filter-pill active" onclick="filterStatus('ALL', this)" style="padding:8px 16px; border-radius:20px; border:1px solid #2563EB; background:#2563EB; color:#FFF; font-weight:600; font-size:0.85rem; cursor:pointer;">All Applications</button>
+                    <button class="filter-pill" onclick="filterStatus('UNDER_REVIEW', this)" style="padding:8px 16px; border-radius:20px; border:1px solid #CBD5E1; background:#FFF; color:#475569; font-weight:600; font-size:0.85rem; cursor:pointer;">Under Processing</button>
+                    <button class="filter-pill" onclick="filterStatus('QUERY_RAISED', this)" style="padding:8px 16px; border-radius:20px; border:1px solid #CBD5E1; background:#FFF; color:#475569; font-weight:600; font-size:0.85rem; cursor:pointer;">Action Required (Query)</button>
+                    <button class="filter-pill" onclick="filterStatus('APPROVED', this)" style="padding:8px 16px; border-radius:20px; border:1px solid #CBD5E1; background:#FFF; color:#475569; font-weight:600; font-size:0.85rem; cursor:pointer;">Approved Certificates</button>
+                </div>
+
+                <!-- Applications Table Container -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #F1F5F9; color:#64748B; font-size:0.8rem; text-transform:uppercase;">
+                                    <th style="padding:14px;">App ID</th>
+                                    <th style="padding:14px;">Service Name</th>
+                                    <th style="padding:14px;">Area Type</th>
+                                    <th style="padding:14px;">Submission Date</th>
+                                    <th style="padding:14px;">Active Stage & Designated Post</th>
+                                    <th style="padding:14px;">Status</th>
+                                    <th style="padding:14px;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="applicationsTbody">
+                                <tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">Loading applications...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        let myApps = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['citizen']);
+            if (!user) return;
+
+            Sidebar.render('my-applications');
+            Topbar.render();
+
+            try {
+                myApps = await API.get('/applications/my');
+                renderTable(myApps);
+            } catch (err) {
+                console.error('Failed to load applications:', err);
+            }
+        });
+
+        function filterStatus(status, btn) {
+            document.querySelectorAll('.filter-pill').forEach(p => {
+                p.style.background = '#FFF';
+                p.style.borderColor = '#CBD5E1';
+                p.style.color = '#475569';
+            });
+            btn.style.background = '#2563EB';
+            btn.style.borderColor = '#2563EB';
+            btn.style.color = '#FFF';
+
+            if (status === 'ALL') {
+                renderTable(myApps);
+            } else {
+                renderTable(myApps.filter(a => a.status === status));
+            }
+        }
+
+        function renderTable(apps) {
+            const tbody = document.getElementById('applicationsTbody');
+            if (!apps || apps.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">No applications found for this filter.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = apps.map(app => {
+                const statusBadges = {
+                    'APPROVED': '<span style="background:#ECFDF5; color:#065F46; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem;">✓ APPROVED</span>',
+                    'UNDER_REVIEW': '<span style="background:#EFF6FF; color:#1E40AF; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem;">⏳ UNDER REVIEW</span>',
+                    'QUERY_RAISED': '<span style="background:#FEF3C7; color:#92400E; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem;">⚠️ QUERY RAISED</span>',
+                    'REJECTED': '<span style="background:#FEF2F2; color:#991B1B; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem;">✕ REJECTED</span>',
+                };
+                const badge = statusBadges[app.status] || app.status;
+                const formattedDate = new Date(app.submissionDate).toLocaleDateString('en-IN', {
+                    day: 'numeric', month: 'short', year: 'numeric'
+                });
+
+                return `
+                    <tr style="border-bottom:1px solid #F1F5F9;">
+                        <td style="padding:14px; font-weight:700; color:#2563EB;">${app.applicationId}</td>
+                        <td style="padding:14px; font-weight:600; color:#0F172A;">${app.serviceName}</td>
+                        <td style="padding:14px;"><span style="font-size:0.8rem; background:#F1F5F9; padding:3px 8px; border-radius:4px; font-weight:600;">${app.areaType}</span></td>
+                        <td style="padding:14px; color:#64748B;">${formattedDate}</td>
+                        <td style="padding:14px; color:#334155;">
+                            ${app.status === 'APPROVED' ? 'Finalized' : `Stage ${app.currentStageNumber}: <strong>${app.assignedDesignationName}</strong>`}
+                        </td>
+                        <td style="padding:14px;">${badge}</td>
+                        <td style="padding:14px;">
+                            <a href="track-application.html?id=${app.applicationId}" style="display:inline-block; padding:6px 12px; background:#2563EB; color:#FFF; border-radius:5px; font-weight:600; font-size:0.8rem; text-decoration:none;">Track Stage &rarr;</a>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

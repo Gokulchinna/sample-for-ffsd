@@ -1,0 +1,9 @@
+# Back-end specific ignore
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+*.tsbuildinfo
+*.log
+.env
+.env.*

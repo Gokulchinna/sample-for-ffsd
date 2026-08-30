@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In – DigiConnect Pan-India</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body data-page="login">
+
+    <div class="auth-page">
+        <!-- ── Left Panel ── -->
+        <div class="auth-panel">
+            <div class="auth-panel-grid"></div>
+
+            <div class="auth-panel-brand">
+                <a href="index.html" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="auth-brand-logo">
+                        <div class="auth-brand-icon">
+                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="auth-brand-name">DigiConnect</div>
+                            <div class="auth-brand-tagline">Pan-India Unified Citizen Service Delivery</div>
+                        </div>
+                    </div>
+                </a>
+
+                <div class="auth-panel-heading">
+                    <h1>Sovereign<br />Digital<br /><span>Governance</span><br />Portal</h1>
+                    <p>Federated 3-tier administration across 28 States & 8 UTs with dynamic designation-driven workflows and real-time citizen service tracking.</p>
+                </div>
+            </div>
+
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🛡️</div>
+                    <span class="auth-feature-text">Federated Multi-State Architecture</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">⚡</div>
+                    <span class="auth-feature-text">Dynamic N-Stage Workflow Engine</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🌾</div>
+                    <span class="auth-feature-text">Automated Rural vs. Urban Verification</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🔔</div>
+                    <span class="auth-feature-text">Live In-Site Notifications & Alerts</span>
+                </div>
+            </div>
+
+            <div class="auth-panel-footer">
+                © 2026 DigiConnect – Unified Citizen Service Delivery Platform (UCSDP)
+            </div>
+        </div>
+
+        <!-- ── Form Panel ── -->
+        <div class="auth-form-panel">
+            <div class="auth-form-container">
+
+                <div class="auth-form-header">
+                    <h2 class="auth-form-title">Sign in to DigiConnect</h2>
+                    <p class="auth-form-subtitle">
+                        Don't have an account? <a href="register.html">Register as Citizen</a>
+                    </p>
+                </div>
+
+                <!-- One-Click Quick Login Demo Box -->
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:16px; margin-bottom:24px;">
+                    <div style="font-size:0.82rem; font-weight:700; color:#475569; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>⚡ One-Click Demo Role Switcher</span>
+                        <span style="font-size:0.75rem; color:#64748B; font-weight:normal;">Instant Login</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(135px, 1fr)); gap:8px;">
+                        <button type="button" class="btn btn-sm" onclick="demoLogin('CIT-101')" style="background:#EFF6FF; border:1px solid #BFDBFE; color:#1E40AF; padding:6px 10px; font-size:0.78rem; font-weight:600; border-radius:6px; cursor:pointer; text-align:left;">
+                            👨‍💼 Citizen (Ramesh)
+                        </button>
+                        <button type="button" class="btn btn-sm" onclick="demoLogin('OFF-VRO-01')" style="background:#F0FDF4; border:1px solid #BBF7D0; color:#166534; padding:6px 10px; font-size:0.78rem; font-weight:600; border-radius:6px; cursor:pointer; text-align:left;">
+                            👮 VRO (Field)
+                        </button>
+                        <button type="button" class="btn btn-sm" onclick="demoLogin('OFF-RI-01')" style="background:#F0FDF4; border:1px solid #BBF7D0; color:#166534; padding:6px 10px; font-size:0.78rem; font-weight:600; border-radius:6px; cursor:pointer; text-align:left;">
+                            👮 RI (Scrutiny)
+                        </button>
+                        <button type="button" class="btn btn-sm" onclick="demoLogin('OFF-MRO-01')" style="background:#FAF5FF; border:1px solid #E9D5FF; color:#6B21A8; padding:6px 10px; font-size:0.78rem; font-weight:600; border-radius:6px; cursor:pointer; text-align:left;">
+                            ✍️ Tahsildar (MRO)
+                        </button>
+                        <button type="button" class="btn btn-sm" onclick="demoLogin('OFF-GRIEV-01')" style="background:#FFFBEB; border:1px solid #FDE68A; color:#92400E; padding:6px 10px; font-size:0.78rem; font-weight:600; border-radius:6px; cursor:pointer; text-align:left;">
+                            ⚖️ Grievance Officer
+                        </button>
+                        <button type="button" class="btn btn-sm" onclick="demoLogin('ADM-DEPT-01')" style="background:#FDF2F8; border:1px solid #FBCFE8; color:#9D174D; padding:6px 10px; font-size:0.78rem; font-weight:600; border-radius:6px; cursor:pointer; text-align:left;">
+                            🏢 CCLA Dept Head
+                        </button>
+                        <button type="button" class="btn btn-sm" onclick="demoLogin('ADM-STATE-01')" style="background:#FDF2F8; border:1px solid #FBCFE8; color:#9D174D; padding:6px 10px; font-size:0.78rem; font-weight:600; border-radius:6px; cursor:pointer; text-align:left;">
+                            🏛️ State IT Admin
+                        </button>
+                        <button type="button" class="btn btn-sm" onclick="demoLogin('ADM-CENTRAL-01')" style="background:#F1F5F9; border:1px solid #CBD5E1; color:#0F172A; padding:6px 10px; font-size:0.78rem; font-weight:700; border-radius:6px; cursor:pointer; text-align:left;">
+                            🇮🇳 Central MeitY
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Login Form -->
+                <form id="loginForm" onsubmit="handleManualLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label" for="loginId">User ID / Phone / Email</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="loginId" class="form-input" placeholder="e.g. 9876543210 or vro.ibrahimpatnam@telangana.gov.in" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                            <label class="form-label" for="password" style="margin:0;">Password</label>
+                            <span style="font-size:0.8rem; color:#64748B;">Demo default: password123</span>
+                        </div>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" class="form-input" value="password123" placeholder="Enter password" required />
+                        </div>
+                    </div>
+
+                    <div id="loginErrorMsg" style="display:none; color:#DC2626; font-size:0.85rem; margin-bottom:15px; font-weight:500;"></div>
+
+                    <button type="submit" id="loginBtn" class="btn btn-primary" style="width:100%; padding:12px; font-size:1rem; font-weight:700; background:#2563EB; color:#FFF; border:none; border-radius:8px; cursor:pointer;">
+                        Sign In
+                    </button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/components.js"></script>
+    <script>
+        async function demoLogin(userId) {
+            try {
+                const btn = event.target;
+                const originalText = btn.innerText;
+                btn.innerText = 'Signing in...';
+                await Auth.quickLogin(userId);
+            } catch (err) {
+                alert('Login failed: ' + err.message);
+            }
+        }
+
+        async function handleManualLogin(e) {
+            e.preventDefault();
+            const loginId = document.getElementById('loginId').value.trim();
+            const password = document.getElementById('password').value;
+            const errDiv = document.getElementById('loginErrorMsg');
+            const submitBtn = document.getElementById('loginBtn');
+
+            errDiv.style.display = 'none';
+            submitBtn.innerText = 'Verifying credentials...';
+            submitBtn.disabled = true;
+
+            try {
+                await Auth.login(loginId, password);
+            } catch (err) {
+                errDiv.innerText = err.message || 'Invalid credentials';
+                errDiv.style.display = 'block';
+                submitBtn.innerText = 'Sign In';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // If already logged in, redirect directly to dashboard
+        window.addEventListener('DOMContentLoaded', () => {
+            const user = Auth.getCurrentUser();
+            if (user) {
+                console.log('Active session detected:', user);
+            }
+        });
+    </script>
+</body>
+</html>

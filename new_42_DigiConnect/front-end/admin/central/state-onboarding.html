@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>State Onboarding – DigiConnect Central</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/dashboard.css" />
+    <link rel="stylesheet" href="../../css/forms.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:860px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:24px;">
+                    <a href="dashboard.html" style="color:#64748B; font-size:0.85rem; text-decoration:none; font-weight:600;">&larr; Back to National Dashboard</a>
+                    <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:8px 0 4px 0;">Onboard State / Union Territory</h1>
+                    <p style="color:#64748B; font-size:0.95rem; margin:0;">Federate a new regional state tenant into the DigiConnect sovereign architecture.</p>
+                </div>
+
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:32px;">
+                    <form onsubmit="handleOnboardState(event)">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                            <div>
+                                <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">State Code (2-Letters)</label>
+                                <input type="text" id="stCode" class="form-input" placeholder="e.g. GJ" maxlength="2" required style="text-transform:uppercase; width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">State / Territory Name</label>
+                                <input type="text" id="stName" class="form-input" placeholder="e.g. Gujarat" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                            </div>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+                            <div>
+                                <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">Jurisdiction Type</label>
+                                <select id="stType" class="form-input" style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                    <option value="STATE">State</option>
+                                    <option value="UT">Union Territory</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">Administrative Capital</label>
+                                <input type="text" id="stCapital" class="form-input" placeholder="e.g. Gandhinagar" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:28px;">
+                            <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">Official Portal Domain</label>
+                            <input type="text" id="stDomain" class="form-input" placeholder="e.g. gujarat.digiconnect.gov.in" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                        </div>
+
+                        <button type="submit" id="onboardBtn" class="btn btn-primary" style="width:100%; padding:13px; font-weight:700; background:#2563EB; color:#FFF; border:none; border-radius:6px; cursor:pointer;">
+                            Federate & Onboard State &rarr;
+                        </button>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/sidebar.js"></script>
+    <script src="../../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = Auth.requireAuth(['admin']);
+            if (!user) return;
+
+            Sidebar.render('states');
+            Topbar.render();
+        });
+
+        async function handleOnboardState(e) {
+            e.preventDefault();
+            const btn = document.getElementById('onboardBtn');
+            btn.disabled = true;
+
+            const payload = {
+                stateCode: document.getElementById('stCode').value.trim().toUpperCase(),
+                stateName: document.getElementById('stName').value.trim(),
+                type: document.getElementById('stType').value,
+                capital: document.getElementById('stCapital').value.trim(),
+                portalDomain: document.getElementById('stDomain').value.trim(),
+                isActive: true,
+            };
+
+            try {
+                await API.post('/admin/states', payload);
+                Components.showToast(`State ${payload.stateName} successfully federated!`, 'success');
+                setTimeout(() => window.location.href = 'dashboard.html', 800);
+            } catch (err) {
+                alert('Onboarding failed: ' + err.message);
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

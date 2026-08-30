@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>State Command Center – DigiConnect</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1400px; margin:0 auto; width:100%;">
+                <div style="background:linear-gradient(135deg, #1E3A8A 0%, #2563EB 100%); border-radius:12px; padding:28px 32px; color:#FFF; margin-bottom:28px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                        <div>
+                            <span style="background:rgba(255,255,255,0.2); color:#FFF; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:12px; text-transform:uppercase;">
+                                State Governance Hub (ITE&C)
+                            </span>
+                            <h1 style="font-size:1.6rem; font-weight:800; margin:8px 0 4px 0;" id="stateTitleHeader">State Command Center</h1>
+                            <p style="margin:0; opacity:0.85; font-size:0.9rem;">State-level governance oversight, administrative geography configuration, and revenue settlement.</p>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <a href="geography-config.html" class="btn" style="background:#FFF; color:#1E3A8A; padding:9px 16px; font-weight:700; border-radius:6px; text-decoration:none;">
+                                🗺️ Geography Masters
+                            </a>
+                            <a href="revenue-reports.html" class="btn" style="background:rgba(255,255,255,0.15); color:#FFF; border:1px solid rgba(255,255,255,0.3); padding:9px 16px; font-weight:700; border-radius:6px; text-decoration:none;">
+                                💰 Revenue Splits
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- State Metrics -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:28px;">
+                    <div class="card" style="padding:20px; border-radius:10px; background:#FFF; border:1px solid #E2E8F0;">
+                        <div style="color:#64748B; font-size:0.82rem; font-weight:600; text-transform:uppercase;">Line Departments</div>
+                        <div style="font-size:1.9rem; font-weight:800; color:#0F172A; margin:6px 0;">3 Onboarded</div>
+                        <div style="color:#2563EB; font-size:0.8rem; font-weight:500;">Revenue, MAUD, Civil Supplies</div>
+                    </div>
+                    <div class="card" style="padding:20px; border-radius:10px; background:#FFF; border:1px solid #E2E8F0;">
+                        <div style="color:#64748B; font-size:0.82rem; font-weight:600; text-transform:uppercase;">State Applications</div>
+                        <div style="font-size:1.9rem; font-weight:800; color:#2563EB; margin:6px 0;" id="stMetricApps">...</div>
+                        <div style="color:#64748B; font-size:0.8rem; font-weight:500;">Processed in state mandals & wards</div>
+                    </div>
+                    <div class="card" style="padding:20px; border-radius:10px; background:#FFF; border:1px solid #E2E8F0;">
+                        <div style="color:#64748B; font-size:0.82rem; font-weight:600; text-transform:uppercase;">State Treasury Revenue</div>
+                        <div style="font-size:1.9rem; font-weight:800; color:#10B981; margin:6px 0;" id="stMetricRevenue">...</div>
+                        <div style="color:#10B981; font-size:0.8rem; font-weight:500;">70% Direct treasury settlement</div>
+                    </div>
+                    <div class="card" style="padding:20px; border-radius:10px; background:#FFF; border:1px solid #E2E8F0;">
+                        <div style="color:#64748B; font-size:0.82rem; font-weight:600; text-transform:uppercase;">Statutory Compliance</div>
+                        <div style="font-size:1.9rem; font-weight:800; color:#059669; margin:6px 0;">98.4%</div>
+                        <div style="color:#059669; font-size:0.8rem; font-weight:500;">Within prescribed SLA days</div>
+                    </div>
+                </div>
+
+                <!-- Line Departments Directory -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                    <h2 style="font-size:1.15rem; font-weight:700; color:#0F172A; margin:0 0 16px 0;">Onboarded Line Departments</h2>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:18px;">
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:20px;">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">📜</div>
+                            <h3 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0 0 4px 0;">Revenue & Land Administration (CCLA)</h3>
+                            <p style="font-size:0.85rem; color:#64748B; margin:0 0 12px 0;">Pattadar passbooks, mutation, income & caste certificates.</p>
+                            <span style="font-size:0.75rem; background:#ECFDF5; color:#065F46; padding:3px 8px; border-radius:4px; font-weight:700;">8 Services Active</span>
+                        </div>
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:20px;">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">🏙️</div>
+                            <h3 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0 0 4px 0;">Municipal Administration & Urban Dev (CDMA)</h3>
+                            <p style="font-size:0.85rem; color:#64748B; margin:0 0 12px 0;">Property tax assessments, building permissions, trade licenses.</p>
+                            <span style="font-size:0.75rem; background:#ECFDF5; color:#065F46; padding:3px 8px; border-radius:4px; font-weight:700;">5 Services Active</span>
+                        </div>
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:20px;">
+                            <div style="font-size:1.5rem; margin-bottom:8px;">🌾</div>
+                            <h3 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0 0 4px 0;">Civil Supplies & Consumer Affairs</h3>
+                            <p style="font-size:0.85rem; color:#64748B; margin:0 0 12px 0;">Ration cards, PDS dealer allocations, commodity quota.</p>
+                            <span style="font-size:0.75rem; background:#ECFDF5; color:#065F46; padding:3px 8px; border-radius:4px; font-weight:700;">3 Services Active</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/sidebar.js"></script>
+    <script src="../../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['admin']);
+            if (!user) return;
+
+            Sidebar.render('dashboard');
+            Topbar.render();
+
+            document.getElementById('stateTitleHeader').innerText = `State Command Center (${user.stateCode})`;
+
+            try {
+                const metrics = await API.get('/admin/metrics');
+                document.getElementById('stMetricApps').innerText = metrics.totalApplications;
+                document.getElementById('stMetricRevenue').innerText = `₹ ${metrics.treasuryRevenueTotal.toLocaleString('en-IN')}`;
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    </script>
+</body>
+</html>

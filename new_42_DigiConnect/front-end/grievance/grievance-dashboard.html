@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Grievance Redressal Command Desk – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1400px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:24px;">
+                    <span style="background:#FEF3C7; color:#92400E; font-size:0.78rem; font-weight:800; padding:4px 10px; border-radius:12px; text-transform:uppercase;">
+                        Administrative Redressal Desk
+                    </span>
+                    <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:8px 0 4px 0;">Public Grievance Redressal Command Center</h1>
+                    <p style="color:#64748B; font-size:0.95rem; margin:0;">Investigate delays, address statutory SLA violations, and record binding remediation orders.</p>
+                </div>
+
+                <!-- Grievances Table -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #F1F5F9; color:#64748B; font-size:0.8rem; text-transform:uppercase;">
+                                    <th style="padding:14px;">Grievance ID</th>
+                                    <th style="padding:14px;">Citizen Name</th>
+                                    <th style="padding:14px;">Department</th>
+                                    <th style="padding:14px;">Subject & Description</th>
+                                    <th style="padding:14px;">Priority</th>
+                                    <th style="padding:14px;">Status</th>
+                                    <th style="padding:14px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminGrvTbody">
+                                <tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">Loading grievances...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        let allGrievances = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['officer', 'admin']);
+            if (!user) return;
+
+            Sidebar.render('grievance');
+            Topbar.render();
+
+            try {
+                allGrievances = await API.get('/grievances');
+                renderTable(allGrievances);
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function renderTable(list) {
+            const tbody = document.getElementById('adminGrvTbody');
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">No grievances pending inquiry.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(g => `
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                    <td style="padding:14px; font-weight:700; color:#2563EB;">${g.grievanceId}</td>
+                    <td style="padding:14px; font-weight:600; color:#0F172A;">${g.citizenName}</td>
+                    <td style="padding:14px; color:#334155;">${g.departmentName}</td>
+                    <td style="padding:14px; max-width:350px;">
+                        <div style="font-weight:600; color:#0F172A;">${g.subject}</div>
+                        <div style="font-size:0.8rem; color:#64748B; margin-top:3px; line-height:1.4;">${g.description}</div>
+                    </td>
+                    <td style="padding:14px;">
+                        <span style="font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:4px; ${g.priority === 'HIGH' ? 'background:#FEE2E2; color:#991B1B;' : 'background:#F1F5F9; color:#475569;'}">
+                            ${g.priority}
+                        </span>
+                    </td>
+                    <td style="padding:14px;">
+                        <span style="font-size:0.75rem; font-weight:700; padding:4px 10px; border-radius:12px; ${g.status === 'RESOLVED' ? 'background:#ECFDF5; color:#065F46;' : 'background:#FEF3C7; color:#92400E;'}">
+                            ${g.status}
+                        </span>
+                    </td>
+                    <td style="padding:14px;">
+                        ${g.status !== 'RESOLVED' ? `
+                            <button onclick="resolveGrievancePrompt('${g.grievanceId}')" style="padding:6px 12px; background:#059669; color:#FFF; font-weight:600; font-size:0.8rem; border:none; border-radius:5px; cursor:pointer;">
+                                ✓ Resolve Case
+                            </button>
+                        ` : '<span style="color:#059669; font-size:0.82rem; font-weight:600;">Resolved</span>'}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function resolveGrievancePrompt(id) {
+            const remarks = prompt('Enter official grievance resolution order / remedial action:');
+            if (!remarks || !remarks.trim()) return;
+
+            try {
+                await API.patch(`/grievances/${id}/resolve`, { remarks: remarks.trim() });
+                Components.showToast(`Grievance #${id} marked RESOLVED with binding order.`, 'success');
+                const updated = await API.get('/grievances');
+                renderTable(updated);
+            } catch (err) {
+                alert('Failed to resolve: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

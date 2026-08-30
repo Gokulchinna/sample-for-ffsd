@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Application Queue – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1400px; margin:0 auto; width:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">Designation Queue Desk</h1>
+                        <p style="color:#64748B; font-size:0.95rem; margin:0;" id="queueSubHeading">Showing applications dynamically routed to your post & jurisdiction.</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="queueSearchInput" placeholder="Search applicant, ID, village..." oninput="filterQueue()" style="padding:9px 14px; border:1px solid #CBD5E1; border-radius:6px; font-size:0.88rem; width:260px;">
+                    </div>
+                </div>
+
+                <!-- Queue Table Card -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #F1F5F9; color:#64748B; font-size:0.8rem; text-transform:uppercase;">
+                                    <th style="padding:14px;">App ID</th>
+                                    <th style="padding:14px;">Applicant Name</th>
+                                    <th style="padding:14px;">Service</th>
+                                    <th style="padding:14px;">Area Type</th>
+                                    <th style="padding:14px;">Mandal / Ward</th>
+                                    <th style="padding:14px;">Village / Locality</th>
+                                    <th style="padding:14px;">SLA Due</th>
+                                    <th style="padding:14px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queueTbody">
+                                <tr><td colspan="8" style="text-align:center; padding:32px; color:#94A3B8;">Fetching assigned queue...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        let fullQueue = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['officer']);
+            if (!user) return;
+
+            Sidebar.render('queue');
+            Topbar.render();
+
+            document.getElementById('queueSubHeading').innerText =
+                `Filtered for ${user.designation} (${user.jurisdictionMandalOrWard || 'All Jurisdictions'}, ${user.stateCode})`;
+
+            try {
+                fullQueue = await API.get('/applications/queue');
+                renderTable(fullQueue);
+            } catch (err) {
+                console.error('Failed to load queue:', err);
+            }
+        });
+
+        function filterQueue() {
+            const term = document.getElementById('queueSearchInput').value.toLowerCase().trim();
+            const filtered = fullQueue.filter(a =>
+                a.applicationId.toLowerCase().includes(term) ||
+                a.citizenName.toLowerCase().includes(term) ||
+                a.serviceName.toLowerCase().includes(term) ||
+                a.villageOrLocality.toLowerCase().includes(term)
+            );
+            renderTable(filtered);
+        }
+
+        function renderTable(apps) {
+            const tbody = document.getElementById('queueTbody');
+            if (!apps || apps.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:36px; color:#94A3B8;">✓ All caught up! No applications pending at your designation stage.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = apps.map(app => `
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                    <td style="padding:14px; font-weight:700; color:#2563EB;">${app.applicationId}</td>
+                    <td style="padding:14px; font-weight:600; color:#0F172A;">${app.citizenName}</td>
+                    <td style="padding:14px; font-weight:600; color:#334155;">${app.serviceName}</td>
+                    <td style="padding:14px;"><span style="font-size:0.8rem; background:#F1F5F9; padding:3px 8px; border-radius:4px; font-weight:600;">${app.areaType}</span></td>
+                    <td style="padding:14px; color:#475569;">${app.mandalOrWard}</td>
+                    <td style="padding:14px; color:#475569;">${app.villageOrLocality}</td>
+                    <td style="padding:14px; color:#DC2626; font-weight:700; font-size:0.85rem;">
+                        ${new Date(app.slaDueAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}
+                    </td>
+                    <td style="padding:14px;">
+                        <a href="review-application.html?id=${app.applicationId}" style="display:inline-block; padding:7px 16px; background:#2563EB; color:#FFF; font-weight:700; font-size:0.82rem; border-radius:6px; text-decoration:none;">
+                            Review & Process &rarr;
+                        </a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

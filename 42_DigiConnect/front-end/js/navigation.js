@@ -3,9 +3,10 @@
 // ═══════════════════════════════════════════
 
 import { getSession } from './auth.js';
-import { getRoleConfig, svgIcons } from './role-manager.js';
+import { getRoleConfig, svgIcons, isRoleAllowed, getRoleDashboardPath } from './role-manager.js';
 import { getInitials, toggleSidebar, setupGlobalClickHandlers, initEventDelegation, showToast } from './utils.js';
 import { logout } from './auth.js';
+import { initDemoSwitcher } from './demo-switcher.js';
 
 /**
  * Determine the base path for navigation links based on current page location
@@ -15,8 +16,8 @@ import { logout } from './auth.js';
  */
 function getBasePath() {
   const path = window.location.pathname;
-  if (path.includes('/Super User/') || path.includes('/Super%20User/') || path.includes('/citizen/') || path.includes('/officer/') ||
-      path.includes('/supervisor/') || path.includes('/grievance/')) {
+  if (path.includes('/central-admin/') || path.includes('/state-admin/') || path.includes('/department-head/') ||
+      path.includes('/citizen/') || path.includes('/officer/') || path.includes('/grievance/')) {
     return '../';
   }
   return '';
@@ -243,13 +244,14 @@ export function initPage(options = {}) {
       window.location.href = getBasePath() + 'login.html';
       return null;
     }
-    if (options.requiredRole && session.role !== options.requiredRole) {
-      window.location.href = getBasePath() + 'login.html';
+    if (options.requiredRole && !isRoleAllowed(session.roleKey || session.role, options.requiredRole)) {
+      const userDash = getRoleDashboardPath(session.roleKey || session.role);
+      const currentPath = window.location.pathname;
+      if (!currentPath.endsWith(userDash)) {
+        window.location.href = getBasePath() + userDash;
+      }
       return null;
     }
-
-    // The backend will enforce suspended status by rejecting API requests.
-    // Maintenance mode can also be handled via API interceptors if needed.
   }
 
   document.title = `${options.title || 'Dashboard'} | DigiConnect`;
@@ -267,6 +269,7 @@ export function initPage(options = {}) {
   // Setup global handlers
   setupGlobalClickHandlers();
   initEventDelegation();
+  initDemoSwitcher();
 
   return session;
 }

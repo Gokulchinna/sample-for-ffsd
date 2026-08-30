@@ -3,10 +3,11 @@ import { GrievancesService } from './grievances.service';
 import { GrievancesController } from './grievances.controller';
 import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { CertificatesModule } from '../certificates/certificates.module';
 import { CitizenContextMiddleware, OfficerScopeMiddleware } from '../middlewares/router';
 
 @Module({
-  imports: [UsersModule, NotificationsModule],
+  imports: [UsersModule, NotificationsModule, CertificatesModule],
   controllers: [GrievancesController],
   providers: [GrievancesService],
 })

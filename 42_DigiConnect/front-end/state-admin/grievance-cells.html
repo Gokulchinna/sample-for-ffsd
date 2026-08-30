@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Department Grievance Cells – State Government DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body data-page="state-grievance-cells">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <!-- Topbar -->
+        <header class="topbar"></header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h1 class="page-title">Department Grievance Cells & Multi-Tier Workflows</h1>
+                    <p class="page-subtitle">Master Prompt Section 23-25: Department-Bound Appellate Workflows & Jurisdiction Scopes</p>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openConfigCellModal()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    + Configure Grievance Cell
+                </button>
+            </div>
+
+            <!-- Architecture Info -->
+            <div style="background:#eff6ff;border-left:4px solid #2563eb;padding:12px 16px;border-radius:0 var(--radius-md) var(--radius-md) 0;margin-bottom:var(--space-lg);">
+                <div style="font-size:0.875rem;font-weight:700;color:#1e40af;">Master Prompt Section 25 Rule:</div>
+                <div style="font-size:0.8125rem;color:#1e3a8a;margin-top:2px;">
+                    All services belonging to a department share the same department grievance cell. Grievance officers are scoped to broader jurisdiction nodes (Sub-Division, District, or State) so appeals flow up the hierarchy.
+                </div>
+            </div>
+
+            <!-- Grievance Cells Table -->
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span class="card-title">Configured Department Grievance Cells</span>
+                    <span class="badge badge-success">3 Active Cells</span>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Department</th>
+                                    <th>Cell Name</th>
+                                    <th>Jurisdiction Tier Scope</th>
+                                    <th>Escalation SLA</th>
+                                    <th>Appellate Officers</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="grievanceCellsTable">
+                                <tr>
+                                    <td style="font-weight:700;color:var(--navy-900);">Revenue Department</td>
+                                    <td>Revenue Department Appellate Redressal Cell</td>
+                                    <td><span class="badge badge-neutral">DISTRICT & STATE</span></td>
+                                    <td>7 Days</td>
+                                    <td>Smt. Lakshmi Devi (District Officer)</td>
+                                    <td><span class="badge badge-success">● Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;color:var(--navy-900);">Municipal Administration</td>
+                                    <td>Urban Grievances & Redressal Secretariat</td>
+                                    <td><span class="badge badge-neutral">SUB_DIVISION</span></td>
+                                    <td>5 Days</td>
+                                    <td>Sri K. Mohan (Municipal Appellate)</td>
+                                    <td><span class="badge badge-success">● Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-weight:700;color:var(--navy-900);">Transport Department</td>
+                                    <td>Transport Services Grievance Tribunal</td>
+                                    <td><span class="badge badge-neutral">DISTRICT</span></td>
+                                    <td>7 Days</td>
+                                    <td>RTO Tirupati Appellate</td>
+                                    <td><span class="badge badge-success">● Active</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Configure Grievance Cell Modal -->
+    <div class="modal-overlay" id="configCellModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:540px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+            <div class="card-header" style="background:#f8fafc;display:flex;justify-content:space-between;align-items:center;">
+                <span class="card-title">⚖️ Configure Department Grievance Cell</span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="closeConfigCellModal()">✕</button>
+            </div>
+            <form id="configCellForm" onsubmit="handleConfigCell(event)" style="padding:var(--space-xl);">
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Department *</label>
+                    <select id="cellDeptInput" class="form-input" required>
+                        <option value="dept_rev_ap">Revenue Department</option>
+                        <option value="dept_mun_ap">Municipal Administration Department</option>
+                        <option value="dept_trn_ap">Transport Department</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Grievance Cell Name *</label>
+                    <input type="text" id="cellNameInput" class="form-input" placeholder="e.g. Revenue Appellate Authority" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Jurisdiction Tier Scope *</label>
+                    <select id="cellTierInput" class="form-input" required>
+                        <option value="SUB_DIVISION">Sub-Division Scope</option>
+                        <option value="DISTRICT" selected>District Scope (Covers all child mandals & villages)</option>
+                        <option value="STATE">State Appellate Scope (Statewide)</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-lg);">
+                    <label class="form-label" style="font-weight:700;">Resolution SLA (Days) *</label>
+                    <input type="number" id="cellSlaInput" class="form-input" min="1" max="30" value="7" required />
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeConfigCellModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveCellBtn">Save Grievance Cell</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { initPage } from '../js/navigation.js';
+        import { apiConfigureGrievanceCell } from '../js/api.js';
+        import { showToast } from '../js/utils.js';
+
+        initPage({
+            title: 'Department Grievance Cells',
+            breadcrumbs: [{ label: 'State Government', href: 'state-admin/dashboard.html' }, { label: 'Grievance Cells' }],
+            requiredRole: 'state_admin'
+        });
+
+        window.openConfigCellModal = () => {
+            document.getElementById('configCellModal').style.display = 'flex';
+        };
+
+        window.closeConfigCellModal = () => {
+            document.getElementById('configCellModal').style.display = 'none';
+        };
+
+        window.handleConfigCell = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveCellBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            const payload = {
+                stateId: 'state_ap',
+                departmentId: document.getElementById('cellDeptInput').value,
+                cellName: document.getElementById('cellNameInput').value.trim(),
+                jurisdictionTier: document.getElementById('cellTierInput').value,
+                slaDays: parseInt(document.getElementById('cellSlaInput').value, 10) || 7
+            };
+
+            try {
+                await apiConfigureGrievanceCell(payload);
+                showToast(`Grievance cell "${payload.cellName}" configured successfully!`, 'success');
+                closeConfigCellModal();
+                document.getElementById('configCellForm').reset();
+            } catch (err) {
+                showToast(err.message || 'Failed to configure cell', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Grievance Cell';
+            }
+        };
+    </script>
+</body>
+</html>

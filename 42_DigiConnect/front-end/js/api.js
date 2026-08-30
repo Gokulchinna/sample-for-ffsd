@@ -16,8 +16,12 @@ function getHeaders() {
   } catch (e) { /* ignore */ }
   return {
     'Content-Type': 'application/json',
-    'x-role': session?.role || '',
+    'x-role': session?.backendRole || session?.actualRole || session?.role || '',
     'x-user-id': session?.id || '',
+    'x-state-id': session?.stateId || 'state_ap',
+    'x-department-id': session?.departmentId || 'dept_rev_ap',
+    'x-assigned-node-id': session?.assignedNodeId || '',
+    'x-designation-id': session?.designationId || '',
   };
 }
 
@@ -397,3 +401,157 @@ export async function apiGetWorkflowConfig() {
 export async function apiUpdateWorkflowConfig(data) {
   return apiFetch('/workflow/config', { method: 'PATCH', body: JSON.stringify(data) });
 }
+
+// ──────────────────────────────────────────
+// GEOGRAPHY / DYNAMIC JURISDICTION TREE
+// ──────────────────────────────────────────
+
+export async function apiGetJurisdictionTree(stateId = 'state_ap') {
+  return apiFetch(`/geography/tree?stateId=${stateId}`);
+}
+
+export async function apiGetJurisdictionAncestors(nodeId) {
+  return apiFetch(`/geography/nodes/${nodeId}/ancestors`);
+}
+
+export async function apiCreateJurisdictionNode(data) {
+  return apiFetch('/geography/nodes', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiDeleteJurisdictionNode(nodeId) {
+  return apiFetch(`/geography/nodes/${nodeId}`, { method: 'DELETE' });
+}
+
+// ──────────────────────────────────────────
+// CENTRAL GOVERNMENT (MAIN ADMIN)
+// ──────────────────────────────────────────
+
+export async function apiGetStates() {
+  return apiFetch('/central/states');
+}
+
+export async function apiCreateState(data) {
+  return apiFetch('/central/states', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiGetCentralRevenue() {
+  return apiFetch('/central/revenue');
+}
+
+// ──────────────────────────────────────────
+// STATE GOVERNMENT (STATE ADMIN)
+// ──────────────────────────────────────────
+
+export async function apiGetStateDepartments(stateId = 'state_ap') {
+  return apiFetch(`/state-admin/departments?stateId=${stateId}`);
+}
+
+export async function apiCreateDepartment(data) {
+  return apiFetch('/state-admin/departments', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiConfigureGrievanceCell(data) {
+  return apiFetch('/state-admin/grievance-cells', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiGetStateRevenue(stateId = 'state_ap') {
+  return apiFetch(`/state-admin/revenue?stateId=${stateId}`);
+}
+
+// ──────────────────────────────────────────
+// DEPARTMENT HEAD
+// ──────────────────────────────────────────
+
+export async function apiGetDesignations(deptId = 'dept_rev_ap') {
+  return apiFetch(`/department-head/designations?departmentId=${deptId}`);
+}
+
+export async function apiCreateDesignation(data) {
+  return apiFetch('/department-head/designations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiGetDepartmentOfficers(deptId = 'dept_rev_ap') {
+  return apiFetch(`/department-head/officers?departmentId=${deptId}`);
+}
+
+export async function apiOnboardDepartmentOfficer(data) {
+  return apiFetch('/department-head/officers', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiGetDepartmentServices(deptId = 'dept_rev_ap') {
+  return apiFetch(`/department-head/services?departmentId=${deptId}`);
+}
+
+export async function apiCreateDynamicService(data) {
+  return apiFetch('/department-head/services', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// ──────────────────────────────────────────
+// THE 3 PRIMARY OFFICER ACTIONS (Sections 18-22)
+// ──────────────────────────────────────────
+
+export async function apiOfficerApprove(appId, remarks = '') {
+  return apiFetch(`/applications/${appId}/approve`, {
+    method: 'POST',
+    body: JSON.stringify({ remarks }),
+  });
+}
+
+export async function apiOfficerReject(appId, reason = '') {
+  return apiFetch(`/applications/${appId}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  });
+}
+
+export async function apiOfficerRaiseQuery(appId, queryText = '') {
+  return apiFetch(`/applications/${appId}/raise-query`, {
+    method: 'POST',
+    body: JSON.stringify({ queryText }),
+  });
+}
+
+// ──────────────────────────────────────────
+// CLOSED GRIEVANCE REDRESSAL LOOP (Sections 28-32)
+// ──────────────────────────────────────────
+
+export async function apiResolveGrievance(grievanceId, action, remarks = '') {
+  return apiFetch(`/grievances/${grievanceId}/resolve`, {
+    method: 'POST',
+    body: JSON.stringify({ action, remarks }),
+  });
+}
+
+// ──────────────────────────────────────────
+// DEMO CERTIFICATES
+// ──────────────────────────────────────────
+
+export async function apiGetCertificate(certId) {
+  return apiFetch(`/certificates/${certId}`);
+}
+
+export async function apiGetAppCertificate(appId) {
+  return apiFetch(`/certificates/application/${appId}`);
+}
+

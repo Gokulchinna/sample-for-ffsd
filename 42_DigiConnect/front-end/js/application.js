@@ -32,6 +32,76 @@ export async function initApplyService() {
     renderServiceCards(services);
   }
 
+  // ── Dynamic Jurisdiction Tree Cascading Selector (Master Prompt Section 5) ──
+  window.onAreaTypeChange = (areaType) => {
+    const isRural = areaType === 'RURAL';
+    const subDivLabel = document.getElementById('subDivLabel');
+    const tier4Label = document.getElementById('tier4Label');
+    const tier5Label = document.getElementById('tier5Label');
+
+    if (isRural) {
+      if (subDivLabel) subDivLabel.innerHTML = 'Revenue Sub-Division <span class="required">*</span>';
+      if (tier4Label) tier4Label.innerHTML = 'Mandal <span class="required">*</span>';
+      if (tier5Label) tier5Label.innerHTML = 'Village / Gram Panchayat (Leaf Node) <span class="required">*</span>';
+
+      const sDiv = document.getElementById('jurSubDivSelect');
+      if (sDiv) sDiv.innerHTML = `
+        <option value="node_tpt_sub" selected>Tirupati Revenue Sub-Division</option>
+        <option value="node_ctr_sub">Chittoor Revenue Sub-Division</option>
+      `;
+      const t4 = document.getElementById('jurTier4Select');
+      if (t4) t4.innerHTML = `
+        <option value="node_cg_man" selected>Chandragiri Mandal</option>
+        <option value="node_tpt_man">Tirupati Rural Mandal</option>
+      `;
+      const leaf = document.getElementById('jurLeafSelect');
+      if (leaf) {
+        leaf.innerHTML = `
+          <option value="node_cg_vil" selected>Chandragiri Village</option>
+          <option value="node_pn_vil">Panapakam Village</option>
+          <option value="node_sn_vil">Sanambatla Village</option>
+        `;
+        leaf.onchange = (e) => {
+          const hid = document.getElementById('selectedJurisdictionNodeId');
+          if (hid) hid.value = e.target.value;
+        };
+      }
+      const hid = document.getElementById('selectedJurisdictionNodeId');
+      if (hid) hid.value = 'node_cg_vil';
+    } else {
+      if (subDivLabel) subDivLabel.innerHTML = 'Urban Sub-Division <span class="required">*</span>';
+      if (tier4Label) tier4Label.innerHTML = 'Municipality / Municipal Corporation <span class="required">*</span>';
+      if (tier5Label) tier5Label.innerHTML = 'Ward / Zone (Leaf Node) <span class="required">*</span>';
+
+      const sDiv = document.getElementById('jurSubDivSelect');
+      if (sDiv) sDiv.innerHTML = `
+        <option value="node_tpt_urb_sub" selected>Tirupati Urban Sub-Division</option>
+      `;
+      const t4 = document.getElementById('jurTier4Select');
+      if (t4) t4.innerHTML = `
+        <option value="node_tmc" selected>Tirupati Municipal Corporation (TMC)</option>
+      `;
+      const leaf = document.getElementById('jurLeafSelect');
+      if (leaf) {
+        leaf.innerHTML = `
+          <option value="node_tpt_w14" selected>Ward 14 (Balaji Colony)</option>
+          <option value="node_tpt_w15">Ward 15 (Bhavani Nagar)</option>
+          <option value="node_tpt_w16">Ward 16 (Korlagunta)</option>
+        `;
+        leaf.onchange = (e) => {
+          const hid = document.getElementById('selectedJurisdictionNodeId');
+          if (hid) hid.value = e.target.value;
+        };
+      }
+      const hid = document.getElementById('selectedJurisdictionNodeId');
+      if (hid) hid.value = 'node_tpt_w14';
+    }
+  };
+
+  if (document.getElementById('jurSubDivSelect')) {
+    window.onAreaTypeChange('RURAL');
+  }
+
   // If user just submitted an application and page reloads via file watcher, persist the success screen
   const savedAppStr = sessionStorage.getItem('lastSubmittedApp');
   if (savedAppStr) {
@@ -636,11 +706,14 @@ export async function initApplyService() {
         ...svcFields
       };
 
+      const leafNodeId = document.getElementById('selectedJurisdictionNodeId')?.value || document.getElementById('jurLeafSelect')?.value || 'node_cg_vil';
+
       let payload;
       if (allUploadedFiles.length > 0) {
         const fd = new FormData();
         fd.append('serviceId', selectedService.id);
         fd.append('citizenId', session.id);
+        fd.append('selectedJurisdictionNodeId', leafNodeId);
         fd.append('dept', selectedService.dept);
         fd.append('fee', selectedService.fee || 0);
         if (paymentTxnId) fd.append('paymentTransactionId', paymentTxnId);
@@ -653,6 +726,7 @@ export async function initApplyService() {
         payload = {
           serviceId: selectedService.id,
           citizenId: session.id,
+          selectedJurisdictionNodeId: leafNodeId,
           dept: selectedService.dept,
           fee: selectedService.fee,
           paymentTransactionId: paymentTxnId,
@@ -1139,12 +1213,30 @@ export async function initTrackApplication() {
       }).join('');
     }
 
+    // Rejection Alert & Closed Grievance Redressal CTA (Section 28-32)
+    const rejectionAlert = document.getElementById('rejectionAlert');
+    if (rejectionAlert) {
+      const isRejected = app.status === 'rejected';
+      rejectionAlert.style.display = isRejected ? 'block' : 'none';
+      if (isRejected) {
+        const rejectionEvent = app.timeline?.find((t) => t.action.toLowerCase().includes('reject'));
+        const reason = app.rejectionReason || rejectionEvent?.note || 'Insufficient documentation or verification mismatch.';
+        const officer = app.rejectedBy || rejectionEvent?.actor || app.officerName || 'Verification Officer';
+        setTC('rejectionReasonText', reason);
+        setTC('rejectionOfficerText', officer);
+        const grvBtn = document.getElementById('applyGrievanceBtn');
+        if (grvBtn) {
+          grvBtn.href = `raise-grievance.html?appId=${encodeURIComponent(app.id)}&service=${encodeURIComponent(app.serviceName)}&dept=${encodeURIComponent(app.dept)}&reason=${encodeURIComponent(reason)}`;
+        }
+      }
+    }
+
     // Action alert (query)
     const actionAlert = document.getElementById('actionAlert');
     if (actionAlert) {
-      actionAlert.style.display = app.status === 'query' ? 'block' : 'none';
+      actionAlert.style.display = (app.status === 'query' || app.status === 'QUERY_RAISED') ? 'block' : 'none';
       const qt = document.getElementById('queryText');
-      if (qt && app.status === 'query') {
+      if (qt && (app.status === 'query' || app.status === 'QUERY_RAISED')) {
         const queryNote = app.timeline.find(t => t.action.includes('Query'))?.note || 'Please provide additional details requested by the officer.';
         qt.textContent = `Officer ${app.officerName || 'Assigned'} has raised a query: "${queryNote}"`;
       }
@@ -1227,8 +1319,14 @@ export async function initTrackApplication() {
     // Download cert button
     const certBtn = document.getElementById('downloadCertBtn');
     if (certBtn) {
-      certBtn.style.display = (app.status === 'approved' || app.status === 'completed') ? 'inline-flex' : 'none';
-      certBtn.onclick = () => window.downloadDigitalCertificate(app);
+      certBtn.style.display = (app.status === 'approved' || app.status === 'completed' || app.certificateId) ? 'inline-flex' : 'none';
+      certBtn.onclick = () => {
+        if (app.certificateId) {
+          window.open(`http://localhost:3000/api/v1/certificates/${app.certificateId}`, '_blank');
+        } else {
+          window.downloadDigitalCertificate(app);
+        }
+      };
     }
   }
 
@@ -1764,8 +1862,23 @@ export async function initReviewApplication() {
       };
 
       try {
-          await apiUpdateApplicationStatus(a.id, payload);
-          window.showToast(msgs[currentDecision], currentDecision==='approve'?'success':currentDecision==='reject'?'warning':'info');
+          const { apiOfficerApprove, apiOfficerReject, apiOfficerRaiseQuery, apiUpdateApplicationStatus } = await import('./api.js');
+          let actionResult = null;
+          if (currentDecision === 'approve') {
+              actionResult = await apiOfficerApprove(a.id, document.getElementById('officerRemarks')?.value || 'Stage verified and approved.');
+          } else if (currentDecision === 'reject') {
+              actionResult = await apiOfficerReject(a.id, rejectReason);
+          } else if (currentDecision === 'query') {
+              actionResult = await apiOfficerRaiseQuery(a.id, queryText);
+          } else {
+              actionResult = await apiUpdateApplicationStatus(a.id, payload);
+          }
+
+          const successMsg = (currentDecision === 'approve' && actionResult?.data?.certificate)
+              ? '🎉 Final Approval Complete! Digital Certificate issued.'
+              : msgs[currentDecision];
+
+          window.showToast(successMsg, currentDecision==='approve'?'success':currentDecision==='reject'?'warning':'info');
           
           // Re-fetch queue
           const { apiGetOfficerQueue } = await import('./api.js');

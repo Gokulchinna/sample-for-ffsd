@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Track Application Stage – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1100px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:24px;">
+                    <a href="my-applications.html" style="color:#64748B; font-size:0.85rem; text-decoration:none; font-weight:600;">&larr; Back to My Applications</a>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0;" id="appHeaderTitle">Tracking Application</h1>
+                            <div style="color:#64748B; font-size:0.9rem; margin-top:4px;" id="appSubHeader">Loading timeline...</div>
+                        </div>
+                        <div id="statusBadgeContainer"></div>
+                    </div>
+                </div>
+
+                <!-- Query Raised Alert Banner (If Any) -->
+                <div id="queryAlertBanner" style="display:none; background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:20px; margin-bottom:28px;">
+                    <div style="display:flex; gap:14px; align-items:flex-start;">
+                        <span style="font-size:1.5rem;">⚠️</span>
+                        <div style="flex:1;">
+                            <h3 style="margin:0 0 6px 0; font-size:1rem; font-weight:700; color:#92400E;">Officer Query / Clarification Required</h3>
+                            <p style="margin:0 0 12px 0; font-size:0.9rem; color:#78350F; line-height:1.5;" id="queryTextDisplay"></p>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" id="citizenClarificationInput" placeholder="Type your response/clarification here..." style="flex:1; padding:8px 12px; border:1px solid #CBD5E1; border-radius:6px; font-size:0.9rem;">
+                                <button onclick="submitQueryReply()" style="padding:8px 18px; background:#D97706; color:#FFF; border:none; border-radius:6px; font-weight:700; cursor:pointer;">Submit Reply</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Dynamic Stage Stepper / Timeline -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:32px; margin-bottom:28px; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+                    <h2 style="font-size:1.15rem; font-weight:700; color:#0F172A; margin:0 0 24px 0;">Multi-Stage Verification Pipeline</h2>
+                    <div id="workflowStepperContainer" style="display:flex; flex-direction:column; gap:24px;">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Application Summary & Verified Documents -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+                    <!-- Left: Metadata -->
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                        <h3 style="font-size:1rem; font-weight:700; color:#0F172A; margin:0 0 16px 0;">Application Details</h3>
+                        <div style="display:flex; flex-direction:column; gap:10px; font-size:0.9rem;">
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">Applicant Name:</span><strong id="dtlApplicantName">-</strong></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">Jurisdiction Area:</span><span id="dtlAreaType" style="font-weight:600;">-</span></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">District & Mandal:</span><span id="dtlLocation">-</span></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">Statutory Fee:</span><span id="dtlFee" style="color:#10B981; font-weight:700;">-</span></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">SLA Due Date:</span><span id="dtlSlaDue" style="color:#EF4444; font-weight:600;">-</span></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Attached Documents -->
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                        <h3 style="font-size:1rem; font-weight:700; color:#0F172A; margin:0 0 16px 0;">Attached Verification Documents</h3>
+                        <div id="dtlDocumentsList" style="display:flex; flex-direction:column; gap:8px;">
+                            <!-- Populated -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Certificate Issuance Card (If Approved) -->
+                <div id="certificateDownloadCard" style="display:none; background:linear-gradient(135deg, #065F46 0%, #10B981 100%); border-radius:12px; padding:24px 32px; color:#FFF; margin-top:28px; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h3 style="margin:0 0 4px 0; font-size:1.15rem; font-weight:800;">Official Certificate Approved & Sealed</h3>
+                        <p style="margin:0; opacity:0.9; font-size:0.9rem;" id="certNumberDisplay"></p>
+                    </div>
+                    <a href="certificates.html" class="btn" style="background:#FFF; color:#065F46; padding:10px 22px; font-weight:700; border-radius:8px; text-decoration:none; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                        View & Print Certificate &rarr;
+                    </a>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        let currentApp = null;
+        let serviceWorkflow = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['citizen']);
+            if (!user) return;
+
+            Sidebar.render('track');
+            Topbar.render();
+
+            const params = new URLSearchParams(window.location.search);
+            const appId = params.get('id') || 'APP-2026-1042';
+
+            try {
+                currentApp = await API.get(`/applications/${appId}`);
+                serviceWorkflow = await API.get(`/workflow/service/${currentApp.serviceId}`);
+                renderTrackingView();
+            } catch (err) {
+                alert('Could not load application details: ' + err.message);
+            }
+        });
+
+        function renderTrackingView() {
+            document.getElementById('appHeaderTitle').innerText = `${currentApp.serviceName} (#${currentApp.applicationId})`;
+            document.getElementById('appSubHeader').innerText = `Submitted on ${new Date(currentApp.submissionDate).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}`;
+
+            const statusBadges = {
+                'APPROVED': '<span style="background:#ECFDF5; color:#065F46; padding:6px 14px; border-radius:20px; font-weight:700; font-size:0.85rem;">✓ APPROVED & ISSUED</span>',
+                'UNDER_REVIEW': '<span style="background:#EFF6FF; color:#1E40AF; padding:6px 14px; border-radius:20px; font-weight:700; font-size:0.85rem;">⏳ PROCESSING</span>',
+                'QUERY_RAISED': '<span style="background:#FEF3C7; color:#92400E; padding:6px 14px; border-radius:20px; font-weight:700; font-size:0.85rem;">⚠️ CLARIFICATION REQUIRED</span>',
+                'REJECTED': '<span style="background:#FEF2F2; color:#991B1B; padding:6px 14px; border-radius:20px; font-weight:700; font-size:0.85rem;">✕ REJECTED</span>',
+            };
+            document.getElementById('statusBadgeContainer').innerHTML = statusBadges[currentApp.status] || currentApp.status;
+
+            // Details card
+            document.getElementById('dtlApplicantName').innerText = currentApp.citizenName;
+            document.getElementById('dtlAreaType').innerText = `${currentApp.areaType} Jurisdiction`;
+            document.getElementById('dtlLocation').innerText = `${currentApp.district}, ${currentApp.mandalOrWard}`;
+            document.getElementById('dtlFee').innerText = `₹ ${currentApp.feePaid} (Paid)`;
+            document.getElementById('dtlSlaDue').innerText = new Date(currentApp.slaDueAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+
+            // Document list
+            document.getElementById('dtlDocumentsList').innerHTML = currentApp.documents.map(d => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border:1px solid #E2E8F0; padding:8px 12px; border-radius:6px; font-size:0.85rem;">
+                    <span style="color:#1E293B; font-weight:600;">📎 ${d.docName}</span>
+                    <span style="color:#10B981; font-size:0.75rem; font-weight:700;">ATTACHED (${d.fileSize})</span>
+                </div>
+            `).join('');
+
+            // Query alert
+            if (currentApp.status === 'QUERY_RAISED' && currentApp.queryDetails) {
+                document.getElementById('queryAlertBanner').style.display = 'block';
+                document.getElementById('queryTextDisplay').innerText = `"${currentApp.queryDetails.queryText}" — Raised by ${currentApp.queryDetails.queryRaisedBy}`;
+            }
+
+            // Certificate Banner
+            if (currentApp.status === 'APPROVED') {
+                document.getElementById('certificateDownloadCard').style.display = 'flex';
+                document.getElementById('certNumberDisplay').innerText = `Certificate No: ${currentApp.certificateNumber} | Issued: ${new Date(currentApp.certificateIssuedDate || currentApp.slaDueAt).toLocaleDateString('en-IN')}`;
+            }
+
+            renderWorkflowStepper();
+        }
+
+        function renderWorkflowStepper() {
+            const container = document.getElementById('workflowStepperContainer');
+            if (!serviceWorkflow || !serviceWorkflow.stages) return;
+
+            const stages = serviceWorkflow.stages;
+            const currentStageNum = currentApp.currentStageNumber;
+            const isApproved = currentApp.status === 'APPROVED';
+
+            container.innerHTML = stages.map((stg, idx) => {
+                let statusIcon = '⏳';
+                let circleBg = '#E2E8F0';
+                let circleColor = '#64748B';
+                let statusLabel = 'Upcoming';
+                let borderColor = '#E2E8F0';
+
+                // Check if stage is completed
+                const historyMatch = currentApp.stageHistory.find(h => h.stageNumber === stg.stageNumber);
+
+                if (isApproved || stg.stageNumber < currentStageNum || (stg.stageNumber === currentStageNum && isApproved)) {
+                    statusIcon = '✓';
+                    circleBg = '#10B981';
+                    circleColor = '#FFF';
+                    statusLabel = 'Completed';
+                    borderColor = '#10B981';
+                } else if (stg.stageNumber === currentStageNum) {
+                    statusIcon = '🔄';
+                    circleBg = '#2563EB';
+                    circleColor = '#FFF';
+                    statusLabel = 'Active Under Review';
+                    borderColor = '#2563EB';
+                }
+
+                return `
+                    <div style="display:flex; gap:18px; position:relative;">
+                        <!-- Circle icon -->
+                        <div style="width:40px; height:40px; border-radius:50%; background:${circleBg}; color:${circleColor}; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1.1rem; flex-shrink:0; z-index:2; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                            ${statusIcon}
+                        </div>
+
+                        <!-- Content box -->
+                        <div style="flex:1; background:#F8FAFC; border:1px solid ${borderColor}; border-radius:10px; padding:18px 22px;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                                <div>
+                                    <div style="font-size:0.75rem; font-weight:700; color:#2563EB; text-transform:uppercase; letter-spacing:0.5px;">Stage ${stg.stageNumber}</div>
+                                    <h3 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:2px 0 4px 0;">${stg.stageName}</h3>
+                                    <div style="font-size:0.85rem; color:#475569;">Designated Officer: <strong>${stg.assignedDesignationName}</strong> (${stg.slaDays} Days SLA)</div>
+                                </div>
+                                <span style="font-size:0.78rem; font-weight:700; padding:4px 10px; border-radius:12px; background:${circleBg}; color:${circleColor};">
+                                    ${statusLabel}
+                                </span>
+                            </div>
+
+                            ${historyMatch ? `
+                                <div style="margin-top:12px; padding-top:12px; border-top:1px solid #E2E8F0; font-size:0.85rem; color:#334155; line-height:1.5;">
+                                    <span style="font-weight:600;">Officer Remarks:</span> "${historyMatch.remarks}"
+                                    <div style="font-size:0.75rem; color:#94A3B8; margin-top:4px;">Actioned by ${historyMatch.actedByOfficerName} on ${new Date(historyMatch.timestamp).toLocaleString('en-IN')}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function submitQueryReply() {
+            const reply = document.getElementById('citizenClarificationInput').value.trim();
+            if (!reply) {
+                alert('Please type a response before submitting.');
+                return;
+            }
+            Components.showToast('Response submitted to officer. Status updated.', 'success');
+            document.getElementById('queryAlertBanner').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>State Departments & Heads – State Government DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body data-page="state-departments">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <!-- Topbar -->
+        <header class="topbar"></header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h1 class="page-title">State Departments & Appointed Department Heads</h1>
+                    <p class="page-subtitle">Government of Andhra Pradesh · Executive Departmental Secretariat</p>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openCreateDeptModal()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    + Create Department
+                </button>
+            </div>
+
+            <!-- Departments Table Card -->
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span class="card-title">Active State Departments Directory</span>
+                    <span class="badge badge-purple" id="deptCountBadge">Loading...</span>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Department ID</th>
+                                    <th>Department Name</th>
+                                    <th>Code</th>
+                                    <th>Appointed Department Head</th>
+                                    <th>Official Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="departmentsTableBody">
+                                <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--slate-400);">Loading departments...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Department Modal -->
+    <div class="modal-overlay" id="createDeptModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:540px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+            <div class="card-header" style="background:#f8fafc;display:flex;justify-content:space-between;align-items:center;">
+                <span class="card-title">🏢 Create State Department & Head</span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="closeCreateDeptModal()">✕</button>
+            </div>
+            <form id="createDeptForm" onsubmit="handleCreateDept(event)" style="padding:var(--space-xl);">
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Department Name *</label>
+                    <input type="text" id="deptNameInput" class="form-input" placeholder="e.g. Education Department, Forest Department" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Department Code *</label>
+                    <input type="text" id="deptCodeInput" class="form-input" placeholder="e.g. DEPT_EDU, DEPT_FOR" style="text-transform:uppercase;" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Department Head Full Name *</label>
+                    <input type="text" id="deptHeadNameInput" class="form-input" placeholder="e.g. Dr. S. Suresh Kumar IAS" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-lg);">
+                    <label class="form-label" style="font-weight:700;">Department Head Official Email *</label>
+                    <input type="email" id="deptHeadEmailInput" class="form-input" placeholder="e.g. head.edu@ap.gov.in" required />
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeCreateDeptModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveDeptBtn">Create Department</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { initPage } from '../js/navigation.js';
+        import { apiGetStateDepartments, apiCreateDepartment } from '../js/api.js';
+        import { showToast } from '../js/utils.js';
+
+        initPage({
+            title: 'Manage Departments & Heads',
+            breadcrumbs: [{ label: 'State Government', href: 'state-admin/dashboard.html' }, { label: 'Departments & Heads' }],
+            requiredRole: 'state_admin'
+        });
+
+        window.openCreateDeptModal = () => {
+            document.getElementById('createDeptModal').style.display = 'flex';
+        };
+
+        window.closeCreateDeptModal = () => {
+            document.getElementById('createDeptModal').style.display = 'none';
+        };
+
+        async function loadDepartments() {
+            try {
+                const res = await apiGetStateDepartments();
+                const depts = res.data || [];
+                document.getElementById('deptCountBadge').textContent = `${depts.length} Departments`;
+
+                const tbody = document.getElementById('departmentsTableBody');
+                if (depts.length > 0) {
+                    tbody.innerHTML = depts.map(d => `
+                        <tr>
+                            <td><code>${d.id}</code></td>
+                            <td style="font-weight:700;color:var(--navy-900);">🏢 ${d.name}</td>
+                            <td><span class="badge badge-neutral">${d.code}</span></td>
+                            <td>
+                                <div style="font-weight:700;color:#1e3a8a;">${d.headName || 'Appointed Head IAS'}</div>
+                            </td>
+                            <td><span style="font-size:0.8125rem;color:var(--slate-600);">${d.headEmail || 'head@ap.gov.in'}</span></td>
+                            <td>
+                                <div style="display:flex;gap:6px;">
+                                    <button class="btn btn-ghost btn-sm" onclick="showToast('Department details inspection', 'info')">Inspect</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--slate-500);">No departments registered.</td></tr>`;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        window.handleCreateDept = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveDeptBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+
+            const payload = {
+                stateId: 'state_ap',
+                name: document.getElementById('deptNameInput').value.trim(),
+                code: document.getElementById('deptCodeInput').value.trim().toUpperCase(),
+                headName: document.getElementById('deptHeadNameInput').value.trim(),
+                headEmail: document.getElementById('deptHeadEmailInput').value.trim()
+            };
+
+            try {
+                await apiCreateDepartment(payload);
+                showToast(`Department "${payload.name}" and appointed Head created!`, 'success');
+                closeCreateDeptModal();
+                document.getElementById('createDeptForm').reset();
+                loadDepartments();
+            } catch (err) {
+                showToast(err.message || 'Failed to create department', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Department';
+            }
+        };
+
+        loadDepartments();
+    </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Department Services – Department Head DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body data-page="dept-services">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <!-- Topbar -->
+        <header class="topbar"></header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h1 class="page-title">Department Services Catalog</h1>
+                    <p class="page-subtitle">Configure Dynamic Form Schemas, Required Proofs, Fees & Designation Routing</p>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="window.location.href='service-builder.html'">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    + Build New Service
+                </button>
+            </div>
+
+            <!-- Services Table -->
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span class="card-title">Services Offered by Revenue Department</span>
+                    <span class="badge badge-purple" id="servicesCountBadge">Loading...</span>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Service Code</th>
+                                    <th>Service Name</th>
+                                    <th>Fee Breakdown</th>
+                                    <th>Workflow Sequence</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deptServicesTable">
+                                <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--slate-400);">Loading services...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { initPage } from '../js/navigation.js';
+        import { apiGetServices } from '../js/api.js';
+
+        initPage({
+            title: 'Department Services',
+            breadcrumbs: [{ label: 'Department Head', href: 'department-head/dashboard.html' }, { label: 'Services' }],
+            requiredRole: 'department_head'
+        });
+
+        async function loadServices() {
+            try {
+                const res = await apiGetServices();
+                const services = res.data || [];
+                document.getElementById('servicesCountBadge').textContent = `${services.length} Services`;
+
+                const tbody = document.getElementById('deptServicesTable');
+                if (services.length > 0) {
+                    tbody.innerHTML = services.map(s => `
+                        <tr>
+                            <td><span class="badge badge-neutral">${s.code || s.id}</span></td>
+                            <td style="font-weight:700;color:var(--navy-900);">📜 ${s.name}</td>
+                            <td>₹${(s.serviceFee || s.fee || 35) + (s.platformFee || 15)} <span style="font-size:0.75rem;color:var(--slate-500);">(₹${s.serviceFee || s.fee || 35} + ₹${s.platformFee || 15})</span></td>
+                            <td><span class="badge badge-purple">VRO → MRO → Tahsildar</span></td>
+                            <td><span class="badge badge-success">● Active</span></td>
+                            <td>
+                                <a href="service-builder.html?id=${s.id}" class="btn btn-ghost btn-sm">Configure</a>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--slate-500);">No services configured.</td></tr>`;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        loadServices();
+    </script>
+</body>
+</html>

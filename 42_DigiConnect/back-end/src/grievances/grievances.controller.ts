@@ -111,12 +111,37 @@ export class GrievancesController {
   addReply(
     @Param('id') id: string,
     @Body('reply') reply: string,
-    @Headers('x-user-id') userId: string
+    @Headers('x-user-id') userId: string,
   ) {
     return {
       success: true,
       data: this.grievancesService.addReply(id, reply, userId),
-      message: 'OK'
+      message: 'OK',
+    };
+  }
+
+  @Post(':id/resolve')
+  @UseGuards(RolesGuard)
+  @Roles(Role.GRIEVANCE_OFFICER, Role.GRIEVANCE, Role.SUPERVISOR, Role.STATE_ADMIN)
+  @ApiOperation({ summary: 'Explicit Grievance Resolution Action (Sections 28-31)' })
+  @ApiHeader({ name: 'x-role', description: 'GRIEVANCE_OFFICER' })
+  @ApiHeader({ name: 'x-user-id', description: 'ID of the grievance officer' })
+  resolve(
+    @Param('id') id: string,
+    @Body('action') action: any,
+    @Body('remarks') remarks: string,
+    @Headers('x-user-id') userId: string,
+  ) {
+    const result = this.grievancesService.resolve(
+      id,
+      action,
+      remarks || '',
+      userId || 'Grievance Officer',
+    );
+    return {
+      success: true,
+      message: `Grievance resolved with action: ${action}`,
+      data: result,
     };
   }
 }

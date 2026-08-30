@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Citizen Queries Desk – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1400px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:24px;">
+                    <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">Citizen Query Clarification Desk</h1>
+                    <p style="color:#64748B; font-size:0.95rem; margin:0;">Track applications where document clarifications or field queries were sent to citizens.</p>
+                </div>
+
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #F1F5F9; color:#64748B; font-size:0.8rem; text-transform:uppercase;">
+                                    <th style="padding:14px;">App ID</th>
+                                    <th style="padding:14px;">Applicant Name</th>
+                                    <th style="padding:14px;">Service</th>
+                                    <th style="padding:14px;">Query Raised Details</th>
+                                    <th style="padding:14px;">Query Status</th>
+                                    <th style="padding:14px;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queriesTbody">
+                                <tr><td colspan="6" style="text-align:center; padding:32px; color:#94A3B8;">Loading query cases...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['officer']);
+            if (!user) return;
+
+            Sidebar.render('queries');
+            Topbar.render();
+
+            try {
+                const allApps = await API.get('/applications/all');
+                const queryApps = allApps.filter(a => a.status === 'QUERY_RAISED' || a.queryDetails);
+                renderQueries(queryApps);
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        function renderQueries(apps) {
+            const tbody = document.getElementById('queriesTbody');
+            if (!apps || apps.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:32px; color:#94A3B8;">No active query clarifications pending.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = apps.map(a => `
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                    <td style="padding:14px; font-weight:700; color:#2563EB;">${a.applicationId}</td>
+                    <td style="padding:14px; font-weight:600; color:#0F172A;">${a.citizenName}</td>
+                    <td style="padding:14px; color:#334155;">${a.serviceName}</td>
+                    <td style="padding:14px; color:#475569; font-size:0.85rem;">
+                        <div>"${a.queryDetails?.queryText || 'Query raised'}"</div>
+                        <div style="font-size:0.75rem; color:#94A3B8; margin-top:2px;">Raised on ${new Date(a.queryDetails?.queryDate || a.submissionDate).toLocaleDateString('en-IN')}</div>
+                    </td>
+                    <td style="padding:14px;">
+                        <span style="background:#FEF3C7; color:#92400E; font-size:0.75rem; font-weight:700; padding:4px 10px; border-radius:12px;">
+                            AWAITING REPLY
+                        </span>
+                    </td>
+                    <td style="padding:14px;">
+                        <a href="review-application.html?id=${a.applicationId}" style="padding:6px 12px; background:#2563EB; color:#FFF; font-weight:600; font-size:0.8rem; border-radius:5px; text-decoration:none;">View Review Desk &rarr;</a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

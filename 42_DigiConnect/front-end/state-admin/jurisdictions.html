@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dynamic Jurisdiction Tree – State Government DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <style>
+        .tree-node {
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: var(--radius-md);
+            background: #fff;
+            border: 1px solid var(--slate-200);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .tree-node:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .tree-children {
+            margin-left: 24px;
+            padding-left: 12px;
+            border-left: 2px dashed #cbd5e1;
+        }
+        .tier-badge {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            text-transform: uppercase;
+        }
+        .tier-rural { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .tier-urban { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        .tier-common { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+    </style>
+</head>
+<body data-page="state-jurisdictions">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <!-- Topbar -->
+        <header class="topbar"></header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h1 class="page-title">Dynamic Jurisdiction Tree Engine</h1>
+                    <p class="page-subtitle">Adjacency List Hierarchy (<code>parentId → jurisdiction_nodes.id</code>) · Zero Hardcoded Columns</p>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn btn-sm" style="background:#16a34a;color:#fff;font-weight:700;" onclick="openAddNodeModal('RURAL')">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        + Add Rural Jurisdiction
+                    </button>
+                    <button class="btn btn-sm" style="background:#2563eb;color:#fff;font-weight:700;" onclick="openAddNodeModal('URBAN')">
+                        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        + Add Urban Jurisdiction
+                    </button>
+                </div>
+            </div>
+
+            <!-- Architecture Note -->
+            <div style="background:#f8fafc;border-left:4px solid #3b82f6;padding:12px 16px;border-radius:0 var(--radius-md) var(--radius-md) 0;margin-bottom:var(--space-lg);">
+                <div style="font-size:0.875rem;font-weight:700;color:#1e3a8a;">Master Prompt Section 2 & 4 Compliance:</div>
+                <div style="font-size:0.8125rem;color:#475569;margin-top:2px;">
+                    Administrative units are stored as dynamic nodes. The State root has <code>parentId = null</code>. Officers cover child nodes via recursive tree traversal (<code>isNodeWithinScope()</code>), avoiding NULL-heavy fixed table schemas.
+                </div>
+            </div>
+
+            <!-- Tree View Container -->
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span class="card-title">Andhra Pradesh Administrative Tree</span>
+                    <button class="btn btn-ghost btn-sm" onclick="loadTree()">⟳ Refresh Hierarchy</button>
+                </div>
+                <div class="card-body" id="treeContainer" style="padding:var(--space-lg);background:#fafafa;min-height:300px;">
+                    <div style="text-align:center;padding:48px;color:var(--slate-400);">Loading dynamic jurisdiction tree...</div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Jurisdiction Node Modal -->
+    <div class="modal-overlay" id="addNodeModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:540px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+            <div class="card-header" style="background:#f8fafc;display:flex;justify-content:space-between;align-items:center;">
+                <span class="card-title" id="modalTitle">Add Jurisdiction Node</span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="closeAddNodeModal()">✕</button>
+            </div>
+            <form id="addNodeForm" onsubmit="handleCreateNode(event)" style="padding:var(--space-xl);">
+                <input type="hidden" id="nodeGovTypeInput" value="RURAL" />
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Governance Type</label>
+                    <div style="display:flex;gap:12px;">
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                            <input type="radio" name="govTypeRadio" value="RURAL" id="govRadioRural" onchange="updateTierOptions('RURAL')" checked /> Rural Branch
+                        </label>
+                        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
+                            <input type="radio" name="govTypeRadio" value="URBAN" id="govRadioUrban" onchange="updateTierOptions('URBAN')" /> Urban Branch
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Administrative Tier Level *</label>
+                    <select id="nodeTierInput" class="form-input" required>
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Parent Jurisdiction Node *</label>
+                    <select id="nodeParentInput" class="form-input" required>
+                        <option value="">Select Parent Unit...</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-lg);">
+                    <label class="form-label" style="font-weight:700;">Jurisdiction Unit Name *</label>
+                    <input type="text" id="nodeNameInput" class="form-input" placeholder="e.g. Tirupati Revenue Sub-Division, Ward 14" required />
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeAddNodeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveNodeBtn">Add Node to Tree</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { initPage } from '../js/navigation.js';
+        import { apiGetJurisdictionTree, apiCreateJurisdictionNode } from '../js/api.js';
+        import { showToast } from '../js/utils.js';
+
+        initPage({
+            title: 'Dynamic Jurisdiction Tree',
+            breadcrumbs: [{ label: 'State Government', href: 'state-admin/dashboard.html' }, { label: 'Jurisdiction Tree' }],
+            requiredRole: 'state_admin'
+        });
+
+        let flatNodes = [];
+
+        window.openAddNodeModal = (type) => {
+            document.getElementById('modalTitle').textContent = type === 'RURAL' ? '🌾 Add Rural Jurisdiction Node' : '🏙️ Add Urban Jurisdiction Node';
+            if (type === 'RURAL') {
+                document.getElementById('govRadioRural').checked = true;
+            } else {
+                document.getElementById('govRadioUrban').checked = true;
+            }
+            updateTierOptions(type);
+            document.getElementById('addNodeModal').style.display = 'flex';
+        };
+
+        window.closeAddNodeModal = () => {
+            document.getElementById('addNodeModal').style.display = 'none';
+        };
+
+        window.updateTierOptions = (type) => {
+            const select = document.getElementById('nodeTierInput');
+            if (type === 'RURAL') {
+                select.innerHTML = `
+                    <option value="DISTRICT">District</option>
+                    <option value="SUB_DIVISION">Revenue Sub-Division</option>
+                    <option value="MANDAL" selected>Mandal</option>
+                    <option value="VILLAGE">Village / Gram Panchayat</option>
+                `;
+            } else {
+                select.innerHTML = `
+                    <option value="DISTRICT">District</option>
+                    <option value="SUB_DIVISION">Urban Sub-Division</option>
+                    <option value="MUNICIPALITY" selected>Municipality / Municipal Corporation</option>
+                    <option value="WARD">Ward / Zone</option>
+                `;
+            }
+        };
+
+        function renderTreeNode(node) {
+            const badgeCls = node.governanceType === 'RURAL' ? 'tier-rural' : node.governanceType === 'URBAN' ? 'tier-urban' : 'tier-common';
+            const icon = node.tierLevel === 'STATE' ? '🏛️' : node.tierLevel === 'DISTRICT' ? '🏢' : node.governanceType === 'RURAL' ? '🌾' : '🏙️';
+
+            const childrenHtml = (node.children && node.children.length > 0)
+                ? `<div class="tree-children">${node.children.map(c => renderTreeNode(c)).join('')}</div>`
+                : '';
+
+            return `
+                <div style="margin-bottom:4px;">
+                    <div class="tree-node">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <span>${icon}</span>
+                            <strong style="color:var(--navy-900);font-size:0.9375rem;">${node.name}</strong>
+                            <span class="tier-badge ${badgeCls}">${node.governanceType}</span>
+                            <span class="badge badge-neutral" style="font-size:0.6875rem;">${node.tierLevel}</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px;">
+                            <code style="font-size:0.75rem;color:var(--slate-500);background:#f1f5f9;padding:2px 6px;border-radius:4px;">${node.id}</code>
+                            <button class="btn btn-ghost btn-sm" onclick="quickAddChild('${node.id}', '${node.name}')">+ Child</button>
+                        </div>
+                    </div>
+                    ${childrenHtml}
+                </div>
+            `;
+        }
+
+        function flattenTree(node, list = []) {
+            list.push({ id: node.id, name: node.name, tierLevel: node.tierLevel, governanceType: node.governanceType });
+            if (node.children) {
+                node.children.forEach(c => flattenTree(c, list));
+            }
+            return list;
+        }
+
+        window.quickAddChild = (parentId, parentName) => {
+            const p = flatNodes.find(n => n.id === parentId);
+            const govType = p ? p.governanceType : 'RURAL';
+            openAddNodeModal(govType);
+            const sel = document.getElementById('nodeParentInput');
+            sel.value = parentId;
+        };
+
+        window.loadTree = async () => {
+            const container = document.getElementById('treeContainer');
+            try {
+                const res = await apiGetJurisdictionTree('state_ap');
+                const root = res.data;
+                if (!root) {
+                    container.innerHTML = `<div style="text-align:center;padding:24px;">No jurisdiction nodes found.</div>`;
+                    return;
+                }
+
+                flatNodes = flattenTree(root);
+                container.innerHTML = renderTreeNode(root);
+
+                // Populate parent dropdown
+                const parentSel = document.getElementById('nodeParentInput');
+                parentSel.innerHTML = flatNodes.map(n => `<option value="${n.id}">${n.name} (${n.tierLevel})</option>`).join('');
+            } catch (e) {
+                container.innerHTML = `<div style="color:#ef4444;text-align:center;padding:24px;">Failed to load tree: ${e.message}</div>`;
+            }
+        };
+
+        window.handleCreateNode = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveNodeBtn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            const govType = document.querySelector('input[name="govTypeRadio"]:checked')?.value || 'RURAL';
+            const payload = {
+                stateId: 'state_ap',
+                parentId: document.getElementById('nodeParentInput').value,
+                name: document.getElementById('nodeNameInput').value.trim(),
+                governanceType: govType,
+                tierLevel: document.getElementById('nodeTierInput').value
+            };
+
+            try {
+                await apiCreateJurisdictionNode(payload);
+                showToast(`Jurisdiction node "${payload.name}" created!`, 'success');
+                closeAddNodeModal();
+                document.getElementById('addNodeForm').reset();
+                loadTree();
+            } catch (err) {
+                showToast(err.message || 'Failed to create node', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Add Node to Tree';
+            }
+        };
+
+        loadTree();
+    </script>
+</body>
+</html>

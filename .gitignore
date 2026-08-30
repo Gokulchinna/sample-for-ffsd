@@ -1,0 +1,39 @@
+# Root Git Ignore for sample-for-ffsd
+
+# Dependencies (Crucial to prevent 10k+ changes in Git/VS Code)
+node_modules/
+**/node_modules/
+**/node_modules/**
+
+# Build outputs
+dist/
+**/dist/
+**/dist/**
+build/
+**/build/
+out/
+.next/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Local configurations
+.env
+.env.*
+!.env.example
+
+# OS Generated
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE & Editor caches
+.idea/
+.vscode/
+*.tsbuildinfo
+.eslintcache

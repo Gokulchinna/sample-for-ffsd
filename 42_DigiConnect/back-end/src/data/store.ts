@@ -4,6 +4,16 @@ import { Grievance } from '../models/grievance.model';
 import { GovtService } from '../models/service.model';
 import { Notification } from '../models/notification.model';
 import { Role, AppStatus, GrievanceStatus } from '../models/enums';
+import { JurisdictionNode } from '../models/jurisdiction.model';
+import { StateGovernment } from '../models/state.model';
+import { Department, Designation, OfficerUser } from '../models/department.model';
+import {
+  MASTER_STATES,
+  MASTER_JURISDICTION_NODES,
+  MASTER_DEPARTMENTS,
+  MASTER_DESIGNATIONS,
+  MASTER_OFFICERS,
+} from './jurisdiction.data';
 
 export interface SystemSettings {
   [key: string]: any;
@@ -1992,11 +2002,40 @@ export const db: {
   superEscGrievanceCases: any[];
   superPendingApps: any[];
   workflowConfig: any[];
+  states: StateGovernment[];
+  jurisdictionNodes: JurisdictionNode[];
+  departments: Department[];
+  designations: Designation[];
+  officers: OfficerUser[];
 } = {
   users: MOCK_USERS as User[],
   applications: MOCK_APPLICATIONS as Application[],
   grievances: MOCK_GRIEVANCES as Grievance[],
-  services: MOCK_SERVICES as GovtService[],
+  services: [
+    ...MOCK_SERVICES as GovtService[],
+    {
+      id: 'srv_caste_income_ap',
+      name: 'Integrated Community, Nativity & Date of Birth Certificate',
+      dept: 'Revenue Department',
+      description: 'Official statutory certificate verifying caste, nativity, and parental ancestry.',
+      fee: 50,
+      status: 'Active',
+      category: 'Certificate',
+      slaDays: 7,
+      requirements: ['Aadhaar Card Proof', 'Address / Residence Proof', 'Photograph'],
+    } as any,
+    {
+      id: 'srv_trade_license_ap',
+      name: 'Municipal Trade & Commercial License',
+      dept: 'Municipal Administration Department',
+      description: 'Establishment permission for retail, service, or commercial operations in urban areas.',
+      fee: 175,
+      status: 'Active',
+      category: 'Permission',
+      slaDays: 14,
+      requirements: ['Property Tax Receipt / Rental Agreement', 'Fire Safety Self-Declaration'],
+    } as any,
+  ],
   notifications: MOCK_NOTIFICATIONS as Notification[],
   auditLogs: MOCK_AUDIT_LOGS as AuditLog[],
   officerQueue: OFFICER_QUEUE as OfficerQueueItem[],
@@ -2014,4 +2053,9 @@ export const db: {
   superEscGrievanceCases: SUPER_ESC_GRIEVANCE_CASES,
   superPendingApps: SUPER_PENDING_APPS,
   workflowConfig: MOCK_WORKFLOW_CONFIG,
+  states: [...MASTER_STATES],
+  jurisdictionNodes: [...MASTER_JURISDICTION_NODES],
+  departments: [...MASTER_DEPARTMENTS],
+  designations: [...MASTER_DESIGNATIONS],
+  officers: [...MASTER_OFFICERS],
 };

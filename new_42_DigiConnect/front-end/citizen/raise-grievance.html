@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Raise Grievance – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link rel="stylesheet" href="../css/forms.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:860px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:24px;">
+                    <a href="citizen-dashboard.html" style="color:#64748B; font-size:0.85rem; text-decoration:none; font-weight:600;">&larr; Back to Dashboard</a>
+                    <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:8px 0 4px 0;">Public Grievance Redressal (CPGRAMS / Spandana)</h1>
+                    <p style="color:#64748B; font-size:0.95rem; margin:0;">File an official complaint regarding processing delays, officer misconduct, or unlawful rejections.</p>
+                </div>
+
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:32px;">
+                    <form onsubmit="handleGrievanceSubmit(event)">
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">Line Department</label>
+                            <select id="grvDept" class="form-input" style="width:100%; padding:10px 12px; border:1px solid #CBD5E1; border-radius:6px;" required>
+                                <option value="DEPT-REV">Revenue & Land Administration</option>
+                                <option value="DEPT-MAUD">Municipal Administration & Urban Development</option>
+                                <option value="DEPT-CIVIL">Civil Supplies & Rationing</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">Related Application Number (Optional)</label>
+                            <input type="text" id="grvAppNo" class="form-input" placeholder="e.g. APP-2026-1042" style="width:100%; padding:10px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                        </div>
+
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">Subject / Issue Summary</label>
+                            <input type="text" id="grvSubject" class="form-input" placeholder="e.g. Delay in field inspection inquiry beyond statutory SLA" required style="width:100%; padding:10px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                        </div>
+
+                        <div style="margin-bottom:20px;">
+                            <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">Detailed Description & Timeline</label>
+                            <textarea id="grvDesc" rows="5" class="form-input" placeholder="Provide complete facts including date of application, mandal name, and officer interaction details..." required style="width:100%; padding:10px 12px; border:1px solid #CBD5E1; border-radius:6px; line-height:1.5;"></textarea>
+                        </div>
+
+                        <div style="margin-bottom:28px;">
+                            <label style="display:block; font-weight:700; color:#334155; margin-bottom:6px;">Priority Level</label>
+                            <div style="display:flex; gap:16px;">
+                                <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="radio" name="priority" value="NORMAL" checked> Normal</label>
+                                <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="radio" name="priority" value="HIGH"> High (Exam / Job Deadline)</label>
+                                <label style="display:flex; align-items:center; gap:6px; font-size:0.9rem; cursor:pointer;"><input type="radio" name="priority" value="URGENT"> Urgent (Statutory Breach)</label>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn btn-primary" style="width:100%; padding:14px; font-size:1rem; font-weight:700; background:#2563EB; color:#FFF; border:none; border-radius:8px; cursor:pointer;">
+                            Submit Official Grievance &rarr;
+                        </button>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = Auth.requireAuth(['citizen']);
+            if (!user) return;
+
+            Sidebar.render('raise-grievance');
+            Topbar.render();
+
+            const params = new URLSearchParams(window.location.search);
+            const appId = params.get('appId');
+            if (appId) {
+                document.getElementById('grvAppNo').value = appId;
+                document.getElementById('grvSubject').value = `Delay in processing application #${appId}`;
+            }
+        });
+
+        async function handleGrievanceSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = 'Lodging Grievance...';
+
+            const payload = {
+                departmentId: document.getElementById('grvDept').value,
+                departmentName: document.getElementById('grvDept').selectedOptions[0].text,
+                applicationNumber: document.getElementById('grvAppNo').value.trim() || undefined,
+                subject: document.getElementById('grvSubject').value.trim(),
+                description: document.getElementById('grvDesc').value.trim(),
+                priority: document.querySelector('input[name="priority"]:checked').value,
+            };
+
+            try {
+                const res = await API.post('/grievances', payload);
+                Components.showToast(`Grievance #${res.grievanceId} lodged successfully!`, 'success');
+                setTimeout(() => {
+                    window.location.href = 'my-grievances.html';
+                }, 800);
+            } catch (err) {
+                alert('Submission failed: ' + err.message);
+                btn.disabled = false;
+                btn.innerText = 'Submit Official Grievance \u2192';
+            }
+        }
+    </script>
+</body>
+</html>

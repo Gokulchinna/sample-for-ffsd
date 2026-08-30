@@ -88,11 +88,11 @@ export async function renderNotifPanel() {
       el.classList.remove('unread');
       if (link && link !== '#') {
         const cleanLink = link.replace(/^\/+/, '');
-        const inSubdir = window.location.pathname.includes('/Super User/') ||
-          window.location.pathname.includes('/Super%20User/') ||
+        const inSubdir = window.location.pathname.includes('/central-admin/') ||
+          window.location.pathname.includes('/state-admin/') ||
+          window.location.pathname.includes('/department-head/') ||
           window.location.pathname.includes('/citizen/') ||
           window.location.pathname.includes('/officer/') ||
-          window.location.pathname.includes('/supervisor/') ||
           window.location.pathname.includes('/grievance/');
         const basePath = inSubdir ? '../' : '';
         window.location.href = basePath + cleanLink;

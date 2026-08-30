@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Apply for Service – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+    <link rel="stylesheet" href="../css/forms.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:960px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:24px;">
+                    <a href="citizen-dashboard.html" style="color:#64748B; font-size:0.85rem; text-decoration:none; font-weight:600;">&larr; Back to Dashboard</a>
+                    <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:8px 0 4px 0;">New Service Application</h1>
+                    <p style="color:#64748B; font-size:0.95rem; margin:0;">Complete the form and attach required proofs based on your area applicability.</p>
+                </div>
+
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:32px; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+                    <form id="serviceApplyForm" onsubmit="handleApplicationSubmit(event)">
+                        <!-- Step 1: Service Selection -->
+                        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid #F1F5F9;">
+                            <label style="display:block; font-weight:700; color:#0F172A; margin-bottom:8px; font-size:0.95rem;">Select Public Service</label>
+                            <select id="serviceSelect" class="form-input" style="width:100%; padding:10px 14px; border-radius:6px; border:1px solid #CBD5E1; font-size:0.95rem;" onchange="onServiceChange()" required>
+                                <option value="">-- Choose a Service --</option>
+                            </select>
+                            <div id="serviceDescBox" style="margin-top:10px; font-size:0.85rem; color:#64748B; line-height:1.5;"></div>
+                        </div>
+
+                        <!-- Step 2: Rural vs Urban Toggle -->
+                        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid #F1F5F9;">
+                            <label style="display:block; font-weight:700; color:#0F172A; margin-bottom:8px; font-size:0.95rem;">Select Area Type (Constitutional Jurisdiction)</label>
+                            <div style="display:flex; gap:16px; align-items:center;">
+                                <label style="display:flex; align-items:center; gap:8px; padding:12px 20px; border:2px solid #2563EB; background:#EFF6FF; border-radius:8px; cursor:pointer; font-weight:700; color:#1E40AF; flex:1;" id="ruralLabel">
+                                    <input type="radio" name="areaType" value="RURAL" checked onchange="onAreaTypeChange('RURAL')">
+                                    <span>🌾 Rural (Gram Panchayat / Village)</span>
+                                </label>
+                                <label style="display:flex; align-items:center; gap:8px; padding:12px 20px; border:2px solid #E2E8F0; background:#FFF; border-radius:8px; cursor:pointer; font-weight:700; color:#475569; flex:1;" id="urbanLabel">
+                                    <input type="radio" name="areaType" value="URBAN" onchange="onAreaTypeChange('URBAN')">
+                                    <span>🏙️ Urban (Municipality / Ward)</span>
+                                </label>
+                            </div>
+                            <div style="margin-top:8px; font-size:0.82rem; color:#64748B;">
+                                * Note: Selecting Rural routes to Village Revenue Officer (VRO). Selecting Urban routes to Ward Administrative Officer.
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Jurisdiction Inputs -->
+                        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid #F1F5F9;">
+                            <h3 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0 0 16px 0;">Jurisdiction & Location Details</h3>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">District</label>
+                                    <input type="text" id="appDistrict" class="form-input" value="Ranga Reddy" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                </div>
+                                <div>
+                                    <label id="mandalLabel" style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Mandal / Tehsil</label>
+                                    <input type="text" id="appMandal" class="form-input" value="Ibrahimpatnam" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                </div>
+                                <div style="grid-column:span 2;">
+                                    <label id="villageLabel" style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Village / Locality / Door No</label>
+                                    <input type="text" id="appVillage" class="form-input" value="Pocharam Village, H.No 3-45" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Specific Application Form Data -->
+                        <div style="margin-bottom:28px; padding-bottom:20px; border-bottom:1px solid #F1F5F9;">
+                            <h3 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0 0 16px 0;">Applicant Information</h3>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Applicant Full Name</label>
+                                    <input type="text" id="applicantName" class="form-input" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Father / Husband Name</label>
+                                    <input type="text" id="fatherName" class="form-input" value="Late K. Venkataiah" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Annual Family Income (Declared)</label>
+                                    <input type="text" id="annualIncome" class="form-input" value="₹ 85,000" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                </div>
+                                <div>
+                                    <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Source of Livelihood</label>
+                                    <input type="text" id="incomeSource" class="form-input" value="Agriculture & Dairy" required style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 5: DYNAMIC DOCUMENT CHECKLIST (Bifurcated by Rural vs Urban) -->
+                        <div style="margin-bottom:28px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <h3 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0;">
+                                    Required Verification Documents (<span id="areaDocTitle" style="color:#2563EB;">Rural Checklist</span>)
+                                </h3>
+                                <span style="font-size:0.8rem; background:#FEF3C7; color:#92400E; padding:3px 8px; border-radius:4px; font-weight:600;">All Required</span>
+                            </div>
+                            <div id="dynamicDocumentsContainer" style="display:flex; flex-direction:column; gap:12px;">
+                                <!-- Dynamically generated by onAreaTypeChange() -->
+                            </div>
+                        </div>
+
+                        <!-- Step 6: Payment & Settlement Summary -->
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:18px; margin-bottom:24px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <span style="font-weight:700; color:#0F172A;">Statutory Application Fee:</span>
+                                <span style="font-weight:800; font-size:1.15rem; color:#10B981;" id="feeDisplay">₹ 50</span>
+                            </div>
+                            <div style="font-size:0.8rem; color:#64748B; display:flex; justify-content:space-between;">
+                                <span>Automated Split: Treasury (70%) + Kiosk Facilitation (20%) + Ops (10%)</span>
+                                <span style="color:#2563EB; font-weight:600;">Statutory SLA: 7 Days</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitBtn" class="btn btn-primary" style="width:100%; padding:14px; font-size:1.05rem; font-weight:700; background:#2563EB; color:#FFF; border:none; border-radius:8px; cursor:pointer;">
+                            Submit Application & Pay ₹50 &rarr;
+                        </button>
+                    </form>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        let allServices = [];
+        let currentSelectedService = null;
+        let currentAreaType = 'RURAL';
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['citizen']);
+            if (!user) return;
+
+            Sidebar.render('apply');
+            Topbar.render();
+
+            document.getElementById('applicantName').value = user.fullName;
+
+            try {
+                allServices = await API.get('/services');
+                populateServiceDropdown();
+
+                // Check URL params
+                const params = new URLSearchParams(window.location.search);
+                const srvId = params.get('serviceId');
+                if (srvId) {
+                    document.getElementById('serviceSelect').value = srvId;
+                } else if (allServices.length > 0) {
+                    document.getElementById('serviceSelect').value = allServices[0].serviceId;
+                }
+                onServiceChange();
+            } catch (e) {
+                console.error('Failed to load services:', e);
+            }
+        });
+
+        function populateServiceDropdown() {
+            const sel = document.getElementById('serviceSelect');
+            sel.innerHTML = allServices.map(s => `
+                <option value="${s.serviceId}">${s.serviceName} (${s.departmentName})</option>
+            `).join('');
+        }
+
+        function onServiceChange() {
+            const srvId = document.getElementById('serviceSelect').value;
+            currentSelectedService = allServices.find(s => s.serviceId === srvId);
+            if (!currentSelectedService) return;
+
+            document.getElementById('serviceDescBox').innerText = currentSelectedService.description;
+            document.getElementById('feeDisplay').innerText = `₹ ${currentSelectedService.feeAmount}`;
+            document.getElementById('submitBtn').innerText = `Submit Application & Pay ₹${currentSelectedService.feeAmount} \u2192`;
+
+            renderDocumentChecklist();
+        }
+
+        function onAreaTypeChange(type) {
+            currentAreaType = type;
+            const ruralLabel = document.getElementById('ruralLabel');
+            const urbanLabel = document.getElementById('urbanLabel');
+
+            if (type === 'RURAL') {
+                ruralLabel.style.borderColor = '#2563EB';
+                ruralLabel.style.background = '#EFF6FF';
+                ruralLabel.style.color = '#1E40AF';
+                urbanLabel.style.borderColor = '#E2E8F0';
+                urbanLabel.style.background = '#FFF';
+                urbanLabel.style.color = '#475569';
+
+                document.getElementById('mandalLabel').innerText = 'Mandal / Block / Tehsil';
+                document.getElementById('villageLabel').innerText = 'Gram Panchayat / Village Name';
+                document.getElementById('appMandal').value = 'Ibrahimpatnam';
+                document.getElementById('appVillage').value = 'Pocharam Village, Sy No 45';
+                document.getElementById('areaDocTitle').innerText = 'Rural Checklist';
+            } else {
+                urbanLabel.style.borderColor = '#2563EB';
+                urbanLabel.style.background = '#EFF6FF';
+                urbanLabel.style.color = '#1E40AF';
+                ruralLabel.style.borderColor = '#E2E8F0';
+                ruralLabel.style.background = '#FFF';
+                ruralLabel.style.color = '#475569';
+
+                document.getElementById('mandalLabel').innerText = 'Municipal Corporation / Zone';
+                document.getElementById('villageLabel').innerText = 'Ward No / Locality / Door No';
+                document.getElementById('appMandal').value = 'GHMC Khairatabad';
+                document.getElementById('appVillage').value = 'Ward 93, Banjara Hills Road No 12';
+                document.getElementById('areaDocTitle').innerText = 'Urban Checklist';
+            }
+
+            renderDocumentChecklist();
+        }
+
+        function renderDocumentChecklist() {
+            const container = document.getElementById('dynamicDocumentsContainer');
+            if (!currentSelectedService) return;
+
+            const docs = currentAreaType === 'RURAL'
+                ? currentSelectedService.requiredDocuments.rural
+                : currentSelectedService.requiredDocuments.urban;
+
+            container.innerHTML = docs.map((docName, idx) => `
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:600; font-size:0.9rem; color:#1E293B;">${docName}</div>
+                        <div style="font-size:0.75rem; color:#64748B;">Format: PDF, JPG (Max 5MB)</div>
+                    </div>
+                    <div>
+                        <input type="file" id="fileDoc_${idx}" style="display:none;" onchange="updateFileStatus(${idx}, this)">
+                        <button type="button" onclick="document.getElementById('fileDoc_${idx}').click()" style="padding:6px 12px; font-size:0.8rem; background:#FFF; border:1px solid #CBD5E1; border-radius:5px; cursor:pointer; font-weight:600; color:#2563EB;">
+                            📎 Attach Document
+                        </button>
+                        <span id="fileBadge_${idx}" style="display:inline-block; font-size:0.75rem; color:#10B981; margin-left:8px; font-weight:600;">Default Attached (Demo)</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateFileStatus(idx, input) {
+            const badge = document.getElementById(`fileBadge_${idx}`);
+            if (input.files && input.files[0]) {
+                badge.innerText = `✓ ${input.files[0].name}`;
+                badge.style.color = '#10B981';
+            }
+        }
+
+        async function handleApplicationSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerText = 'Submitting & Routing to Field Officer...';
+
+            const user = Auth.getCurrentUser();
+            const docs = currentAreaType === 'RURAL'
+                ? currentSelectedService.requiredDocuments.rural
+                : currentSelectedService.requiredDocuments.urban;
+
+            const payload = {
+                serviceId: currentSelectedService.serviceId,
+                areaType: currentAreaType,
+                district: document.getElementById('appDistrict').value.trim(),
+                mandalOrWard: document.getElementById('appMandal').value.trim(),
+                villageOrLocality: document.getElementById('appVillage').value.trim(),
+                formData: {
+                    applicantName: document.getElementById('applicantName').value.trim(),
+                    fatherName: document.getElementById('fatherName').value.trim(),
+                    annualIncome: document.getElementById('annualIncome').value.trim(),
+                    incomeSource: document.getElementById('incomeSource').value.trim(),
+                },
+                documents: docs.map(d => ({
+                    docName: d,
+                    fileName: `${d.toLowerCase().replace(/[^a-z0-9]/g, '_')}_signed.pdf`,
+                    fileSize: '1.4 MB',
+                    status: 'ATTACHED',
+                })),
+            };
+
+            try {
+                const res = await API.post('/applications/submit', payload);
+                Components.showToast(`Application #${res.applicationId} submitted successfully!`, 'success');
+                setTimeout(() => {
+                    window.location.href = `track-application.html?id=${res.applicationId}`;
+                }, 800);
+            } catch (err) {
+                alert('Submission failed: ' + err.message);
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Submit Application &rarr;';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -140,6 +140,25 @@ export function initRaiseGrievance() {
     currentStep = step;
   };
 
+  // ── Master Prompt Section 22: One-Click Grievance Appeal Pre-fill ──
+  const prefillAppId = getQueryParam('appId');
+  const prefillService = getQueryParam('service');
+  const prefillReason = getQueryParam('reason');
+
+  if (prefillAppId) {
+    const rejCard = document.querySelector('.grievance-cat-card[data-cat="rejection"]');
+    if (rejCard) window.selectGrievCat(rejCard);
+    setTimeout(() => {
+      window.gNextStep(2);
+      const appInp = document.getElementById('gAppId');
+      if (appInp) appInp.value = prefillAppId;
+      const titleInp = document.getElementById('gTitle');
+      if (titleInp) titleInp.value = `Appeal Against Rejection of ${prefillService || prefillAppId}`;
+      const descInp = document.getElementById('gDesc');
+      if (descInp) descInp.value = `My application ${prefillAppId} for ${prefillService || 'statutory service'} was rejected with the following reason: "${prefillReason || 'Documentation mismatch'}". I request an appeal and review under the Grievance Redressal Cell.`;
+    }, 120);
+  }
+
   let _selectedEvidenceFiles = [];
 
   window.addEvidenceFile = () => {

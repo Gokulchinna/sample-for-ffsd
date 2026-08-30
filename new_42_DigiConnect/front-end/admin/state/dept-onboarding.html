@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Line Departments – DigiConnect State</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/dashboard.css" />
+    <link rel="stylesheet" href="../../css/forms.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1100px; margin:0 auto; width:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">State Line Departments</h1>
+                        <p style="color:#64748B; font-size:0.95rem; margin:0;">Configure administrative secretariats, line departments, and nodal officers.</p>
+                    </div>
+                </div>
+
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:28px;">
+                    <div style="display:flex; flex-direction:column; gap:18px;">
+                        <div style="border:1px solid #E2E8F0; border-radius:8px; padding:18px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <h3 style="margin:0 0 4px 0; font-size:1.05rem; font-weight:700; color:#0F172A;">Revenue & Land Administration (CCLA)</h3>
+                                <div style="color:#64748B; font-size:0.85rem;">Department ID: DEPT-REV | Head: Chief Commissioner of Land Administration</div>
+                            </div>
+                            <span style="background:#ECFDF5; color:#065F46; font-size:0.75rem; font-weight:700; padding:4px 10px; border-radius:12px;">ACTIVE & INTEGRATED</span>
+                        </div>
+                        <div style="border:1px solid #E2E8F0; border-radius:8px; padding:18px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <h3 style="margin:0 0 4px 0; font-size:1.05rem; font-weight:700; color:#0F172A;">Municipal Administration & Urban Development (CDMA)</h3>
+                                <div style="color:#64748B; font-size:0.85rem;">Department ID: DEPT-MAUD | Head: Commissioner & Director of Municipal Admin</div>
+                            </div>
+                            <span style="background:#ECFDF5; color:#065F46; font-size:0.75rem; font-weight:700; padding:4px 10px; border-radius:12px;">ACTIVE & INTEGRATED</span>
+                        </div>
+                        <div style="border:1px solid #E2E8F0; border-radius:8px; padding:18px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <h3 style="margin:0 0 4px 0; font-size:1.05rem; font-weight:700; color:#0F172A;">Civil Supplies & Consumer Affairs</h3>
+                                <div style="color:#64748B; font-size:0.85rem;">Department ID: DEPT-CIVIL | Head: Commissioner of Civil Supplies</div>
+                            </div>
+                            <span style="background:#ECFDF5; color:#065F46; font-size:0.75rem; font-weight:700; padding:4px 10px; border-radius:12px;">ACTIVE & INTEGRATED</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/sidebar.js"></script>
+    <script src="../../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = Auth.requireAuth(['admin']);
+            if (!user) return;
+
+            Sidebar.render('departments');
+            Topbar.render();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Officer Onboarding – DigiConnect Department</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1300px; margin:0 auto; width:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">Field Officer Directory & Onboarding</h1>
+                        <p style="color:#64748B; font-size:0.95rem; margin:0;">Active field staff mapped to territorial mandals and municipal wards.</p>
+                    </div>
+                </div>
+
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #F1F5F9; color:#64748B; font-size:0.8rem; text-transform:uppercase;">
+                                    <th style="padding:14px;">Officer ID</th>
+                                    <th style="padding:14px;">Officer Full Name</th>
+                                    <th style="padding:14px;">Designation</th>
+                                    <th style="padding:14px;">Department</th>
+                                    <th style="padding:14px;">Assigned Jurisdiction</th>
+                                    <th style="padding:14px;">Contact</th>
+                                    <th style="padding:14px;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officersTbody">
+                                <tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">Loading officers...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/sidebar.js"></script>
+    <script src="../../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['admin']);
+            if (!user) return;
+
+            Sidebar.render('officers');
+            Topbar.render();
+
+            try {
+                const officers = await API.get('/users/officers');
+                renderOfficers(officers);
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function renderOfficers(list) {
+            const tbody = document.getElementById('officersTbody');
+            tbody.innerHTML = list.map(o => `
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                    <td style="padding:14px; font-weight:700; color:#2563EB;">${o.userId}</td>
+                    <td style="padding:14px; font-weight:600; color:#0F172A;">${o.fullName}</td>
+                    <td style="padding:14px;">
+                        <span style="background:#EFF6FF; color:#1E40AF; font-size:0.8rem; font-weight:700; padding:3px 10px; border-radius:12px;">
+                            ${o.designation}
+                        </span>
+                    </td>
+                    <td style="padding:14px; color:#475569;">${o.departmentName || 'Revenue'}</td>
+                    <td style="padding:14px; font-weight:600; color:#334155;">
+                        📍 ${o.jurisdictionMandalOrWard || 'All Mandals'}, ${o.jurisdictionDistrict || ''}
+                    </td>
+                    <td style="padding:14px; color:#64748B; font-size:0.85rem;">${o.phone}</td>
+                    <td style="padding:14px;">
+                        <span style="background:#ECFDF5; color:#065F46; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:10px;">ACTIVE</span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

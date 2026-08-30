@@ -8,9 +8,12 @@ import { ApplicationsModule } from './applications/applications.module';
 import { GrievancesModule } from './grievances/grievances.module';
 import { ServicesModule } from './services/services.module';
 import { WorkflowModule } from './workflow/workflow.module';
-import { SupervisorModule } from './supervisor/supervisor.module';
-import { SuperUserModule } from './super-user/super-user.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { GeographyModule } from './geography/geography.module';
+import { CentralModule } from './central/central.module';
+import { StateAdminModule } from './state-admin/state-admin.module';
+import { DepartmentHeadModule } from './department-head/department-head.module';
+import { CertificatesModule } from './certificates/certificates.module';
 import { LoggingMiddleware } from './middlewares/logging.middleware';
 import { SanitizationMiddleware } from './middlewares/sanitization.middleware';
 import { LogManagementService } from './tasks/log-management.service';
@@ -28,9 +31,12 @@ import { AppService } from './app.service';
     GrievancesModule,
     ServicesModule,
     WorkflowModule,
-    SupervisorModule,
-    SuperUserModule,
     NotificationsModule,
+    GeographyModule,
+    CentralModule,
+    StateAdminModule,
+    DepartmentHeadModule,
+    CertificatesModule,
   ],
   controllers: [AppController],
   providers: [

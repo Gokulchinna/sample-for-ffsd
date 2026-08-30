@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile – DigiConnect</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/forms.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1100px; margin:0 auto; width:100%;">
+                <!-- Profile Header Card -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; overflow:hidden; margin-bottom:28px; box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+                    <div style="height:110px; background:linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);"></div>
+                    <div style="padding:0 28px 24px 28px; position:relative;">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+                            <div style="display:flex; align-items:flex-end; gap:20px;">
+                                <div id="profileAvatarBig" style="width:84px; height:84px; border-radius:50%; background:#0F172A; color:#FFF; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:800; border:4px solid #FFF; margin-top:-42px; box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+                                    ?
+                                </div>
+                                <div>
+                                    <h1 style="font-size:1.4rem; font-weight:800; color:#0F172A; margin:0;" id="profileFullName">Loading...</h1>
+                                    <div style="display:flex; gap:8px; align-items:center; margin-top:4px;">
+                                        <span id="profileRoleBadge" style="background:#EFF6FF; color:#1E40AF; font-size:0.75rem; font-weight:700; padding:2px 10px; border-radius:12px; text-transform:uppercase;">Citizen</span>
+                                        <span id="profileJurisdictionBadge" style="font-size:0.8rem; color:#64748B;">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <button onclick="saveProfileChanges()" class="btn btn-primary" style="background:#2563EB; color:#FFF; padding:8px 18px; font-weight:700; border-radius:6px; border:none; cursor:pointer;">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information Grid -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:28px;">
+                    <h2 style="font-size:1.15rem; font-weight:700; color:#0F172A; margin:0 0 20px 0;">Account & Demographic Information</h2>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Full Name</label>
+                            <input type="text" id="pfNameInput" class="form-input" style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Registered Mobile</label>
+                            <input type="text" id="pfPhoneInput" class="form-input" style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Email Address</label>
+                            <input type="text" id="pfEmailInput" class="form-input" style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Aadhaar Virtual ID (Masked)</label>
+                            <input type="text" value="XXXX-XXXX-4819" readonly class="form-input" style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px; background:#F8FAFC; cursor:not-allowed;">
+                        </div>
+                        <div style="grid-column:span 2;">
+                            <label style="display:block; font-size:0.85rem; font-weight:600; color:#334155; margin-bottom:6px;">Permanent Residential Address</label>
+                            <input type="text" id="pfAddressInput" class="form-input" style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/sidebar.js"></script>
+    <script src="js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = Auth.requireAuth();
+            if (!user) return;
+
+            Sidebar.render('profile');
+            Topbar.render();
+
+            document.getElementById('profileFullName').innerText = user.fullName;
+            document.getElementById('profileAvatarBig').innerText = user.fullName.charAt(0);
+            document.getElementById('profileRoleBadge').innerText = user.designation || user.role;
+            document.getElementById('profileJurisdictionBadge').innerText = `📍 ${user.jurisdictionMandalOrWard || 'All Jurisdictions'}, ${user.stateCode}`;
+
+            document.getElementById('pfNameInput').value = user.fullName;
+            document.getElementById('pfPhoneInput').value = user.phone || '9876543210';
+            document.getElementById('pfEmailInput').value = user.email || 'citizen@telangana.gov.in';
+            document.getElementById('pfAddressInput').value = user.address || 'H.No 4-12, Pocharam Village, Ibrahimpatnam Mandal, Ranga Reddy District';
+        });
+
+        function saveProfileChanges() {
+            Components.showToast('Profile information updated successfully!', 'success');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Designation Action Matrix – DigiConnect Department</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1300px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:24px;">
+                    <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">Designation Action Button Matrix</h1>
+                    <p style="color:#64748B; font-size:0.95rem; margin:0;">Dynamically configure which decision action buttons appear on the officer review desk based on post.</p>
+                </div>
+
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #F1F5F9; color:#64748B; font-size:0.8rem; text-transform:uppercase;">
+                                    <th style="padding:14px;">Designation Post</th>
+                                    <th style="padding:14px;">Jurisdiction Scope</th>
+                                    <th style="padding:14px;">Department</th>
+                                    <th style="padding:14px;">Enabled Decision Action Buttons</th>
+                                </tr>
+                            </thead>
+                            <tbody id="desigMatrixTbody">
+                                <tr><td colspan="4" style="text-align:center; padding:32px; color:#94A3B8;">Loading designation matrix...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/sidebar.js"></script>
+    <script src="../../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['admin']);
+            if (!user) return;
+
+            Sidebar.render('designations');
+            Topbar.render();
+
+            try {
+                const designations = await API.get('/workflow/designations');
+                const actionButtons = await API.get('/workflow/action-buttons');
+                renderMatrix(designations, actionButtons);
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function renderMatrix(designations, actionButtons) {
+            const tbody = document.getElementById('desigMatrixTbody');
+            tbody.innerHTML = designations.map(d => `
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                    <td style="padding:14px;">
+                        <div style="font-weight:700; color:#0F172A;">${d.designationName}</div>
+                        <div style="font-family:monospace; font-size:0.75rem; color:#64748B;">${d.designationId}</div>
+                    </td>
+                    <td style="padding:14px;">
+                        <span style="font-size:0.8rem; background:#F1F5F9; color:#334155; font-weight:600; padding:3px 8px; border-radius:4px;">
+                            ${d.jurisdictionScope}
+                        </span>
+                    </td>
+                    <td style="padding:14px; color:#475569;">${d.departmentName}</td>
+                    <td style="padding:14px;">
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            ${d.allowedActions.map(actKey => {
+                                const btnDef = actionButtons[actKey] || { label: actKey, buttonClass: 'btn-primary' };
+                                let bg = '#EFF6FF';
+                                let color = '#1E40AF';
+                                if (btnDef.buttonClass === 'btn-success') { bg = '#ECFDF5'; color = '#065F46'; }
+                                if (btnDef.buttonClass === 'btn-warning') { bg = '#FFFBEB'; color = '#92400E'; }
+                                if (btnDef.buttonClass === 'btn-danger') { bg = '#FEF2F2'; color = '#991B1B'; }
+                                return `
+                                    <span style="background:${bg}; color:${color}; font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:4px; border:1px solid rgba(0,0,0,0.06);">
+                                        ${btnDef.icon || '✓'} ${btnDef.label}
+                                    </span>
+                                `;
+                            }).join('')}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

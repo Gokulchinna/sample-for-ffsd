@@ -28,9 +28,77 @@ export const svgIcons = {
 };
 
 /**
- * Navigation configuration per role
+ * Navigation configuration per role (Strict 6 Master Architecture Actors)
  */
 export const roleConfig = {
+  central_admin: {
+    portalLabel: 'Central Government Portal',
+    roleLabel: 'Central Admin',
+    badge: 'badge-danger',
+    dashboardHref: 'central-admin/dashboard.html',
+    items: [
+      { type: 'label', label: 'National Overview' },
+      { type: 'link', icon: 'grid', label: 'National Dashboard', href: 'central-admin/dashboard.html' },
+      { type: 'label', label: 'Federation Management' },
+      { type: 'link', icon: 'manage-users', label: 'State Governments', href: 'central-admin/manage-states.html' },
+    ],
+  },
+  state_admin: {
+    portalLabel: 'State Government Portal',
+    roleLabel: 'State Admin',
+    badge: 'badge-orange',
+    dashboardHref: 'state-admin/dashboard.html',
+    items: [
+      { type: 'label', label: 'State Overview' },
+      { type: 'link', icon: 'grid', label: 'State Dashboard', href: 'state-admin/dashboard.html' },
+      { type: 'label', label: 'Administration' },
+      { type: 'link', icon: 'workflow', label: 'Dynamic Jurisdiction Tree', href: 'state-admin/jurisdictions.html' },
+      { type: 'link', icon: 'settings', label: 'Departments & Heads', href: 'state-admin/departments.html' },
+      { type: 'link', icon: 'alert-triangle', label: 'Department Grievance Cells', href: 'state-admin/grievance-cells.html' },
+    ],
+  },
+  department_head: {
+    portalLabel: 'Department Head Portal',
+    roleLabel: 'Department Head',
+    badge: 'badge-purple',
+    dashboardHref: 'department-head/dashboard.html',
+    items: [
+      { type: 'label', label: 'Department Overview' },
+      { type: 'link', icon: 'grid', label: 'Department Dashboard', href: 'department-head/dashboard.html' },
+      { type: 'label', label: 'Role Designations' },
+      { type: 'link', icon: 'users', label: 'Manage Designations', href: 'department-head/designations.html' },
+      { type: 'label', label: 'Services & Workflows' },
+      { type: 'link', icon: 'settings', label: 'Department Services', href: 'department-head/services.html' },
+      { type: 'link', icon: 'plus-circle', label: 'Service & Workflow Builder', href: 'department-head/service-builder.html' },
+      { type: 'label', label: 'Field Administration' },
+      { type: 'link', icon: 'users-swap', label: 'Onboard Officers', href: 'department-head/officers.html' },
+    ],
+  },
+  officer: {
+    portalLabel: 'Officer Portal',
+    roleLabel: 'Department Officer',
+    badge: 'badge-purple',
+    dashboardHref: 'officer/officer-dashboard.html',
+    items: [
+      { type: 'label', label: 'Overview' },
+      { type: 'link', icon: 'grid', label: 'Dashboard', href: 'officer/officer-dashboard.html' },
+      { type: 'label', label: 'Work Queue' },
+      { type: 'link', icon: 'check-circle', label: 'Review Application', href: 'officer/review-application.html' },
+    ],
+  },
+  grievance: {
+    portalLabel: 'Grievance Redressal Portal',
+    roleLabel: 'Grievance Officer',
+    badge: 'badge-warning',
+    dashboardHref: 'grievance/grievance-dashboard.html',
+    items: [
+      { type: 'label', label: 'Overview' },
+      { type: 'link', icon: 'grid', label: 'Dashboard', href: 'grievance/grievance-dashboard.html' },
+      { type: 'label', label: 'Grievances' },
+      { type: 'link', icon: 'file-text', label: 'Grievance Detail & Resolution', href: 'grievance/grievance-detail.html' },
+      { type: 'link', icon: 'file', label: 'Grievance History', href: 'grievance/grievance-history.html' },
+    ],
+  },
   citizen: {
     portalLabel: 'Citizen Portal',
     roleLabel: 'Citizen',
@@ -48,64 +116,192 @@ export const roleConfig = {
       { type: 'link', icon: 'message-square', label: 'My Grievances', href: 'citizen/my-grievances.html' },
     ],
   },
-  officer: {
-    portalLabel: 'Officer Portal',
-    roleLabel: 'Department Officer',
-    badge: 'badge-purple',
-    dashboardHref: 'officer/officer-dashboard.html',
-    items: [
-      { type: 'label', label: 'Overview' },
-      { type: 'link', icon: 'grid', label: 'Dashboard', href: 'officer/officer-dashboard.html' },
-      { type: 'label', label: 'Work Queue' },
-      { type: 'link', icon: 'check-circle', label: 'Review Application', href: 'officer/review-application.html' },
-    ],
-  },
-  supervisor: {
-    portalLabel: 'Supervisor Portal',
-    roleLabel: 'Department Supervisor',
-    badge: 'badge-orange',
-    dashboardHref: 'supervisor/supervisor-dashboard.html',
-    items: [
-      { type: 'label', label: 'Overview' },
-      { type: 'link', icon: 'grid', label: 'Dashboard', href: 'supervisor/supervisor-dashboard.html' },
-      { type: 'label', label: 'Management' },
-      { type: 'link', icon: 'alert-triangle', label: 'Escalated Cases', href: 'supervisor/escalated-cases.html' },
-      { type: 'link', icon: 'edit-2', label: 'Override & Review', href: 'supervisor/supervisor-review.html' },
-      { type: 'link', icon: 'users-swap', label: 'Workload Management', href: 'supervisor/workload-management.html' },
-    ],
-  },
-  super_user: {
-    portalLabel: 'Super User Portal',
-    roleLabel: 'Super User',
-    badge: 'badge-danger',
-    dashboardHref: 'Super User/dashboard.html',
-    items: [
-      { type: 'label', label: 'Overview' },
-      { type: 'link', icon: 'grid', label: 'Dashboard', href: 'Super User/dashboard.html' },
-      { type: 'label', label: 'Management' },
-      { type: 'link', icon: 'manage-users', label: 'Manage Users', href: 'Super User/manage-users.html' },
-      { type: 'link', icon: 'settings', label: 'Manage Services', href: 'Super User/manage-services.html' },
-      { type: 'link', icon: 'workflow', label: 'Workflow Config', href: 'Super User/workflow-config.html' },
-      { type: 'link', icon: 'users', label: 'Officer Onboarding', href: 'Super User/officer-onboarding.html' },
-      { type: 'link', icon: 'file', label: 'Audit Logs', href: 'Super User/audit-logs.html' },
-      { type: 'label', label: 'System' },
-      { type: 'link', icon: 'system-settings', label: 'System Settings', href: 'Super User/system-settings.html' },
-    ],
-  },
-  grievance: {
-    portalLabel: 'Grievance Portal',
-    roleLabel: 'Grievance Officer',
-    badge: 'badge-warning',
-    dashboardHref: 'grievance/grievance-dashboard.html',
-    items: [
-      { type: 'label', label: 'Overview' },
-      { type: 'link', icon: 'grid', label: 'Dashboard', href: 'grievance/grievance-dashboard.html' },
-      { type: 'label', label: 'Grievances' },
-      { type: 'link', icon: 'file-text', label: 'Grievance Detail', href: 'grievance/grievance-detail.html' },
-      { type: 'link', icon: 'file', label: 'Grievance History', href: 'grievance/grievance-history.html' },
-    ],
-  },
 };
+
+/**
+ * Pre-configured college demo personas for instantaneous 1-click role testing
+ */
+export const DEMO_PERSONAS = [
+  {
+    id: 'central_admin_1',
+    name: 'N. Chandrasekhar',
+    title: 'Central Government Admin',
+    role: 'CENTRAL_ADMIN',
+    roleKey: 'central_admin',
+    stateId: '',
+    departmentId: '',
+    assignedNodeId: '',
+    dashboardUrl: 'central-admin/dashboard.html',
+    description: 'Manages States, enforces 1 State Admin per State, National Revenue',
+  },
+  {
+    id: 'state_admin_ap',
+    name: 'K. Vijayanand IAS',
+    title: 'Special Chief Secretary (State Admin - AP)',
+    role: 'STATE_ADMIN',
+    roleKey: 'state_admin',
+    stateId: 'state_ap',
+    departmentId: '',
+    assignedNodeId: 'node_ap',
+    dashboardUrl: 'state-admin/dashboard.html',
+    description: 'Manages Dynamic Jurisdiction Tree, Departments, Grievance Cells',
+  },
+  {
+    id: 'dept_head_rev_ap',
+    name: 'Dr. B. R. Ambedkar IAS',
+    title: 'Director / Head of Revenue (AP)',
+    role: 'DEPARTMENT_HEAD',
+    roleKey: 'department_head',
+    stateId: 'state_ap',
+    departmentId: 'dept_rev_ap',
+    assignedNodeId: 'node_ap',
+    dashboardUrl: 'department-head/dashboard.html',
+    description: 'Creates Designations, Dynamic Services, Form Schemas & Workflows',
+  },
+  {
+    id: 'OFF-VRO-01',
+    name: 'R. Somasekhar',
+    title: 'Village Revenue Officer (Chandragiri)',
+    role: 'OFFICER',
+    roleKey: 'officer',
+    stateId: 'state_ap',
+    departmentId: 'dept_rev_ap',
+    assignedNodeId: 'node_cg_vil',
+    designationId: 'desig_vro',
+    dashboardUrl: 'officer/officer-dashboard.html',
+    description: 'Village Scope: Reviews applications, executes Approve/Reject/Query',
+  },
+  {
+    id: 'OFF-TAH-01',
+    name: 'P. Subba Rao',
+    title: 'Tahsildar (Tirupati Division)',
+    role: 'OFFICER',
+    roleKey: 'officer',
+    stateId: 'state_ap',
+    departmentId: 'dept_rev_ap',
+    assignedNodeId: 'node_tpt',
+    designationId: 'desig_tahsildar',
+    dashboardUrl: 'officer/officer-dashboard.html',
+    description: 'District Scope: Final Approval & Digital Certificate generation',
+  },
+  {
+    id: 'GO-DIST-01',
+    name: 'Smt. Lakshmi Devi',
+    title: 'District Grievance Redressal Officer',
+    role: 'GRIEVANCE_OFFICER',
+    roleKey: 'grievance',
+    stateId: 'state_ap',
+    departmentId: 'dept_rev_ap',
+    assignedNodeId: 'node_tpt',
+    dashboardUrl: 'grievance/grievance-dashboard.html',
+    description: 'Closed Resolution: Uphold / Direct Re-verification / Overrule & Issue',
+  },
+  {
+    id: 'CIT-1001',
+    name: 'G. Rajesh Kumar',
+    title: 'Citizen Applicant (Chandragiri Village)',
+    role: 'CITIZEN',
+    roleKey: 'citizen',
+    stateId: 'state_ap',
+    departmentId: '',
+    assignedNodeId: 'node_cg_vil',
+    dashboardUrl: 'citizen/citizen-dashboard.html',
+    description: '5-step Wizard, Document Uploads, Mock Pay, Track, Grievance Appeal',
+  },
+];
+
+/**
+ * Switch active role session immediately and redirect to corresponding dashboard
+ */
+export function switchDemoPersona(personaId) {
+  const persona = DEMO_PERSONAS.find((p) => p.id === personaId) || DEMO_PERSONAS[0];
+  const sessionData = {
+    id: persona.id,
+    name: persona.name,
+    role: persona.roleKey,
+    roleKey: persona.roleKey,
+    backendRole: persona.role,
+    actualRole: persona.role,
+    stateId: persona.stateId,
+    departmentId: persona.departmentId,
+    assignedNodeId: persona.assignedNodeId,
+    designationId: persona.designationId || '',
+    title: persona.title,
+    email: `${persona.id.toLowerCase()}@digiconnect.gov.in`,
+    token: `demo-token-${persona.id}`,
+  };
+
+  localStorage.setItem('DigiConnect_session', JSON.stringify(sessionData));
+  localStorage.setItem('active_role', persona.roleKey);
+  localStorage.setItem('current_user', JSON.stringify(sessionData));
+
+  // Determine relative path based on current nesting
+  const path = window.location.pathname;
+  const inSubDir = path.includes('/central-admin/') ||
+                   path.includes('/state-admin/') ||
+                   path.includes('/department-head/') ||
+                   path.includes('/citizen/') ||
+                   path.includes('/officer/') ||
+                   path.includes('/grievance/');
+
+  const target = inSubDir ? `../${persona.dashboardUrl}` : persona.dashboardUrl;
+
+  const currentFile = path.split('/').pop() || 'index.html';
+  const targetFile = persona.dashboardUrl.split('/').pop();
+  const currentDir = decodeURIComponent(path.split('/').slice(-2, -1)[0] || '');
+  const targetDir = persona.dashboardUrl.split('/')[0];
+
+  if (currentFile === targetFile && currentDir === targetDir) {
+    window.location.reload();
+  } else {
+    window.location.href = target;
+  }
+}
+
+/**
+ * Validates if the user's role satisfies the required page role
+ */
+export function isRoleAllowed(userRole, requiredRole) {
+  if (!requiredRole || requiredRole === false) return true;
+  if (!userRole) return false;
+
+  const u = String(userRole).toLowerCase().replace(/[\s-]+/g, '_');
+  const r = String(requiredRole).toLowerCase().replace(/[\s-]+/g, '_');
+
+  if (u === r) return true;
+
+  // Central Government Admin
+  if (['central_admin', 'super_user', 'super_admin', 'admin'].includes(u)) {
+    if (['super_user', 'central_admin', 'admin', 'supervisor'].includes(r)) return true;
+  }
+
+  // State Government Admin
+  if (['state_admin', 'supervisor'].includes(u)) {
+    if (['state_admin', 'supervisor'].includes(r)) return true;
+  }
+
+  // Department Head
+  if (['department_head', 'super_user'].includes(u)) {
+    if (['department_head', 'super_user', 'supervisor'].includes(r)) return true;
+  }
+
+  // Officer / Verification Officer
+  if (['officer', 'verification_officer'].includes(u)) {
+    if (['officer', 'verification_officer'].includes(r)) return true;
+  }
+
+  // Grievance Redressal Officer
+  if (['grievance', 'grievance_officer'].includes(u)) {
+    if (['grievance', 'grievance_officer'].includes(r)) return true;
+  }
+
+  // Citizen
+  if (['citizen'].includes(u)) {
+    if (['citizen'].includes(r)) return true;
+  }
+
+  return false;
+}
 
 /**
  * Get role config for a given role
@@ -113,7 +309,8 @@ export const roleConfig = {
  * @returns {object}
  */
 export function getRoleConfig(role) {
-  return roleConfig[role] || roleConfig['citizen'];
+  const norm = String(role).toLowerCase();
+  return roleConfig[norm] || roleConfig['citizen'];
 }
 
 /**
@@ -132,11 +329,12 @@ export function getRoleDashboardPath(role) {
  */
 export function getLoginRedirectMap() {
   return {
-    citizen: 'citizen/citizen-dashboard.html',
+    central_admin: 'central-admin/dashboard.html',
+    state_admin: 'state-admin/dashboard.html',
+    department_head: 'department-head/dashboard.html',
     officer: 'officer/officer-dashboard.html',
-    supervisor: 'supervisor/supervisor-dashboard.html',
+    citizen: 'citizen/citizen-dashboard.html',
     grievance: 'grievance/grievance-dashboard.html',
-    super_user: 'Super User/dashboard.html',
   };
 }
 
@@ -147,15 +345,19 @@ export function getLoginRedirectMap() {
  * @returns {boolean}
  */
 export function hasPermission(role, action) {
+  const r = String(role).toLowerCase();
   const permissions = {
-    citizen: ['view_own_applications', 'create_application', 'track_application', 'raise_grievance', 'view_own_grievances', 'update_profile', 'make_payment'],
+    central_admin: ['manage_states', 'view_national_revenue', 'view_audit_logs', 'system_settings'],
+    state_admin: ['manage_jurisdiction_tree', 'manage_departments', 'configure_grievance_cells', 'view_state_revenue'],
+    department_head: ['manage_designations', 'onboard_officers', 'manage_dynamic_services', 'configure_workflows'],
+    citizen: ['view_own_applications', 'create_application', 'track_application', 'raise_grievance', 'view_own_grievances', 'update_profile', 'make_payment', 'respond_to_query'],
     officer: ['view_assigned_applications', 'review_application', 'approve_application', 'reject_application', 'raise_query', 'view_own_profile'],
     supervisor: ['view_all_applications', 'override_decision', 'reassign_application', 'view_escalations', 'manage_workload'],
     super_user: ['manage_users', 'manage_services', 'manage_workflows', 'view_audit_logs', 'system_settings', 'onboard_officers'],
-    grievance: ['view_all_grievances', 'investigate_grievance', 'resolve_grievance', 'escalate_grievance'],
+    grievance: ['view_all_grievances', 'investigate_grievance', 'resolve_grievance', 'escalate_grievance', 'uphold_rejection', 'direct_reverification', 'overrule_and_issue'],
   };
 
-  const rolePerms = permissions[role] || [];
+  const rolePerms = permissions[r] || [];
   return rolePerms.includes(action);
 }
 

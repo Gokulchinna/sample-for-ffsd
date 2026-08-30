@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Department Admin – DigiConnect</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1400px; margin:0 auto; width:100%;">
+                <div style="background:linear-gradient(135deg, #4C1D95 0%, #7C3AED 100%); border-radius:12px; padding:28px 32px; color:#FFF; margin-bottom:28px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                        <div>
+                            <span style="background:rgba(255,255,255,0.2); color:#FFF; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:12px; text-transform:uppercase;">
+                                Line Department Administration (CCLA)
+                            </span>
+                            <h1 style="font-size:1.6rem; font-weight:800; margin:8px 0 4px 0;">Department Operations Control</h1>
+                            <p style="margin:0; opacity:0.85; font-size:0.9rem;">Configure public service catalogs, N-stage verification pipelines, and designation matrices.</p>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <a href="manage-services.html" class="btn" style="background:#FFF; color:#4C1D95; padding:9px 16px; font-weight:700; border-radius:6px; text-decoration:none;">
+                                📋 Manage Services
+                            </a>
+                            <a href="workflow-config.html" class="btn" style="background:rgba(255,255,255,0.2); color:#FFF; border:1px solid rgba(255,255,255,0.3); padding:9px 16px; font-weight:700; border-radius:6px; text-decoration:none;">
+                                🔄 Workflow Pipelines
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Department Metrics -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:28px;">
+                    <div class="card" style="padding:20px; border-radius:10px; background:#FFF; border:1px solid #E2E8F0;">
+                        <div style="color:#64748B; font-size:0.82rem; font-weight:600; text-transform:uppercase;">Configured Services</div>
+                        <div style="font-size:1.9rem; font-weight:800; color:#4C1D95; margin:6px 0;" id="deptMetricServices">...</div>
+                        <div style="color:#64748B; font-size:0.8rem;">With rural & urban bifurcation</div>
+                    </div>
+                    <div class="card" style="padding:20px; border-radius:10px; background:#FFF; border:1px solid #E2E8F0;">
+                        <div style="color:#64748B; font-size:0.82rem; font-weight:600; text-transform:uppercase;">Active Field Officers</div>
+                        <div style="font-size:1.9rem; font-weight:800; color:#2563EB; margin:6px 0;" id="deptMetricOfficers">...</div>
+                        <div style="color:#64748B; font-size:0.8rem;">VROs, RIs, Tahsildars, Grievance</div>
+                    </div>
+                    <div class="card" style="padding:20px; border-radius:10px; background:#FFF; border:1px solid #E2E8F0;">
+                        <div style="color:#64748B; font-size:0.82rem; font-weight:600; text-transform:uppercase;">Applications in Flight</div>
+                        <div style="font-size:1.9rem; font-weight:800; color:#D97706; margin:6px 0;" id="deptMetricApps">...</div>
+                        <div style="color:#64748B; font-size:0.8rem;">Under field verification & scrutiny</div>
+                    </div>
+                    <div class="card" style="padding:20px; border-radius:10px; background:#FFF; border:1px solid #E2E8F0;">
+                        <div style="color:#64748B; font-size:0.82rem; font-weight:600; text-transform:uppercase;">SLA Adherence</div>
+                        <div style="font-size:1.9rem; font-weight:800; color:#10B981; margin:6px 0;">99.1%</div>
+                        <div style="color:#10B981; font-size:0.8rem;">Average turnaround: 3.8 days</div>
+                    </div>
+                </div>
+
+                <!-- Admin Quick Actions Grid -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:10px; padding:24px;">
+                        <div style="font-size:1.8rem; margin-bottom:10px;">📋</div>
+                        <h3 style="margin:0 0 6px 0; font-size:1.1rem; font-weight:700; color:#0F172A;">Public Service Catalog</h3>
+                        <p style="color:#64748B; font-size:0.85rem; line-height:1.5; margin:0 0 16px 0;">Define application fees, statutory SLA timelines, and customize separate rural vs urban verification document lists.</p>
+                        <a href="manage-services.html" style="color:#2563EB; font-weight:700; font-size:0.9rem; text-decoration:none;">Open Services &rarr;</a>
+                    </div>
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:10px; padding:24px;">
+                        <div style="font-size:1.8rem; margin-bottom:10px;">🔄</div>
+                        <h3 style="margin:0 0 6px 0; font-size:1.1rem; font-weight:700; color:#0F172A;">Multi-Stage Workflow Pipelines</h3>
+                        <p style="color:#64748B; font-size:0.85rem; line-height:1.5; margin:0 0 16px 0;">Construct stage pipelines ($1 \dots N$), assign designated posts to stages, and establish individual stage SLA targets.</p>
+                        <a href="workflow-config.html" style="color:#2563EB; font-weight:700; font-size:0.9rem; text-decoration:none;">Build Pipelines &rarr;</a>
+                    </div>
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:10px; padding:24px;">
+                        <div style="font-size:1.8rem; margin-bottom:10px;">👮</div>
+                        <h3 style="margin:0 0 6px 0; font-size:1.1rem; font-weight:700; color:#0F172A;">Designation Action Matrix</h3>
+                        <p style="color:#64748B; font-size:0.85rem; line-height:1.5; margin:0 0 16px 0;">Dynamically grant action buttons to designations: Verify & Forward, Recommend, Digital Sign, Revert, Reject.</p>
+                        <a href="designation-matrix.html" style="color:#2563EB; font-weight:700; font-size:0.9rem; text-decoration:none;">Configure Matrix &rarr;</a>
+                    </div>
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:10px; padding:24px;">
+                        <div style="font-size:1.8rem; margin-bottom:10px;">👥</div>
+                        <h3 style="margin:0 0 6px 0; font-size:1.1rem; font-weight:700; color:#0F172A;">Officer Onboarding</h3>
+                        <p style="color:#64748B; font-size:0.85rem; line-height:1.5; margin:0 0 16px 0;">Onboard field officers, assign designations, and map them to their local territorial mandal or ward.</p>
+                        <a href="officer-onboarding.html" style="color:#2563EB; font-weight:700; font-size:0.9rem; text-decoration:none;">Manage Officers &rarr;</a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/sidebar.js"></script>
+    <script src="../../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['admin']);
+            if (!user) return;
+
+            Sidebar.render('dashboard');
+            Topbar.render();
+
+            try {
+                const srvs = await API.get('/services');
+                const officers = await API.get('/users/officers');
+                const apps = await API.get('/applications/all');
+
+                document.getElementById('deptMetricServices').innerText = srvs.length;
+                document.getElementById('deptMetricOfficers').innerText = officers.length;
+                document.getElementById('deptMetricApps').innerText = apps.filter(a => a.status === 'UNDER_REVIEW').length;
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>

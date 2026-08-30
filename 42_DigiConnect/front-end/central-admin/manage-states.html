@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage State Governments – Central Government DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body data-page="central-manage-states">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <!-- Topbar -->
+        <header class="topbar"></header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h1 class="page-title">State Governments Management</h1>
+                    <p class="page-subtitle">Central Government controls state creation and enforces strictly 1 State Admin per State Government</p>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openCreateStateModal()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    + Create State Government
+                </button>
+            </div>
+
+            <!-- States Card -->
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span class="card-title">Federated State Governments Directory</span>
+                    <span class="badge badge-info" id="statesCountBadge">Loading...</span>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>State ID</th>
+                                    <th>State Name</th>
+                                    <th>Code</th>
+                                    <th>Designated State Admin (Strict 1:1)</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statesListTable">
+                                <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--slate-400);">Loading states...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create State Government Modal -->
+    <div class="modal-overlay" id="createStateModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:540px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+            <div class="card-header" style="background:#f8fafc;display:flex;justify-content:space-between;align-items:center;">
+                <span class="card-title" style="font-size:1.125rem;">🏛️ Create New State Government</span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="closeCreateStateModal()">✕</button>
+            </div>
+            <form id="createStateForm" onsubmit="handleCreateState(event)" style="padding:var(--space-xl);">
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">State Name *</label>
+                    <input type="text" id="stateNameInput" class="form-input" placeholder="e.g. Karnataka, Kerala, Tamil Nadu" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">State Code (2-3 chars) *</label>
+                    <input type="text" id="stateCodeInput" class="form-input" placeholder="e.g. KA, KL, TN" maxlength="4" style="text-transform:uppercase;" required />
+                </div>
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:var(--radius-md);padding:12px;margin-bottom:var(--space-md);">
+                    <div style="font-size:0.8125rem;font-weight:700;color:#1e40af;margin-bottom:4px;">Rule: Exactly 1 State Admin per State</div>
+                    <div style="font-size:0.75rem;color:#1e3a8a;">Every state must have a designated State Admin who receives exclusive authority over the state's jurisdictions, departments, and grievance cells.</div>
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">State Admin Full Name *</label>
+                    <input type="text" id="stateAdminNameInput" class="form-input" placeholder="e.g. Dr. Shalini Rajneesh IAS" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-lg);">
+                    <label class="form-label" style="font-weight:700;">State Admin Official Email *</label>
+                    <input type="email" id="stateAdminEmailInput" class="form-input" placeholder="e.g. cs@state.gov.in" required />
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeCreateStateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitStateBtn">Create State Government</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { initPage } from '../js/navigation.js';
+        import { apiGetStates, apiCreateState, apiDeleteState } from '../js/api.js';
+        import { showToast } from '../js/utils.js';
+
+        initPage({
+            title: 'Manage State Governments',
+            breadcrumbs: [{ label: 'Central Government', href: 'central-admin/dashboard.html' }, { label: 'State Governments' }],
+            requiredRole: 'central_admin'
+        });
+
+        window.openCreateStateModal = () => {
+            document.getElementById('createStateModal').style.display = 'flex';
+        };
+
+        window.closeCreateStateModal = () => {
+            document.getElementById('createStateModal').style.display = 'none';
+        };
+
+        async function loadStates() {
+            try {
+                const res = await apiGetStates();
+                const states = res.data || [];
+                document.getElementById('statesCountBadge').textContent = `${states.length} States Configured`;
+
+                const tbody = document.getElementById('statesListTable');
+                if (states.length > 0) {
+                    tbody.innerHTML = states.map(s => `
+                        <tr>
+                            <td><code>${s.id}</code></td>
+                            <td style="font-weight:700;color:var(--navy-900);">🏛️ ${s.name}</td>
+                            <td><span class="badge badge-neutral">${s.code}</span></td>
+                            <td>
+                                <div style="font-weight:700;color:#1e3a8a;">${s.stateAdminName || 'K. Vijayanand IAS'}</div>
+                                <div style="font-size:0.75rem;color:var(--slate-500);">${s.stateAdminEmail || 'admin@' + s.code.toLowerCase() + '.gov.in'}</div>
+                            </td>
+                            <td><span class="badge badge-success">● Active</span></td>
+                            <td>
+                                <div style="display:flex;gap:6px;">
+                                    <button class="btn btn-ghost btn-sm" onclick="showToast('State details inspection', 'info')">View</button>
+                                    <button class="btn btn-outline btn-sm" style="color:#ef4444;" onclick="deleteState('${s.id}', '${s.name}')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--slate-500);">No states created yet.</td></tr>`;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        window.handleCreateState = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitStateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating...';
+
+            const payload = {
+                name: document.getElementById('stateNameInput').value.trim(),
+                code: document.getElementById('stateCodeInput').value.trim().toUpperCase(),
+                stateAdminName: document.getElementById('stateAdminNameInput').value.trim(),
+                stateAdminEmail: document.getElementById('stateAdminEmailInput').value.trim()
+            };
+
+            try {
+                await apiCreateState(payload);
+                showToast(`State Government "${payload.name}" created with designated State Admin!`, 'success');
+                closeCreateStateModal();
+                document.getElementById('createStateForm').reset();
+                loadStates();
+            } catch (err) {
+                showToast(err.message || 'Failed to create state', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create State Government';
+            }
+        };
+
+        window.deleteState = async (id, name) => {
+            if (!confirm(`Are you sure you want to delete State Government "${name}"?`)) return;
+            try {
+                await apiDeleteState(id);
+                showToast(`State Government "${name}" deleted.`, 'info');
+                loadStates();
+            } catch (err) {
+                showToast(err.message || 'Failed to delete state', 'error');
+            }
+        };
+
+        loadStates();
+    </script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Officer Onboarding & Jurisdiction Node Scoping – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body data-page="dept-officers">
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar"></aside>
+
+        <!-- Topbar -->
+        <header class="topbar"></header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <h1 class="page-title">Officer Onboarding & Jurisdiction Scoping</h1>
+                    <p class="page-subtitle">Master Prompt Section 6 & 35: Bind Officers to Exact Jurisdiction Nodes (Village, Mandal, District)</p>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openOnboardOfficerModal()">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    + Onboard Field Officer
+                </button>
+            </div>
+
+            <!-- Architecture Info -->
+            <div style="background:#eff6ff;border-left:4px solid #2563eb;padding:12px 16px;border-radius:0 var(--radius-md) var(--radius-md) 0;margin-bottom:var(--space-lg);">
+                <div style="font-size:0.875rem;font-weight:700;color:#1e40af;">Hierarchical Officer Scoping Rule:</div>
+                <div style="font-size:0.8125rem;color:#1e3a8a;margin-top:2px;">
+                    "Every officer is assigned to an exact <code>assignedNodeId</code> in the tree. An officer assigned to a Mandal automatically covers all child villages; a District officer covers all descendant nodes. Applications are routed using <code>isNodeWithinScope(leafNodeId, assignedNodeId)</code>."
+                </div>
+            </div>
+
+            <!-- Officers Table Card -->
+            <div class="card">
+                <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                    <span class="card-title">Onboarded Department Field Officers</span>
+                    <span class="badge badge-info" id="officersCountBadge">Loading...</span>
+                </div>
+                <div class="card-body" style="padding:0;">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Officer ID</th>
+                                    <th>Officer Name</th>
+                                    <th>Designation</th>
+                                    <th>Assigned Jurisdiction Node</th>
+                                    <th>Hierarchy Coverage Scope</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officersTableBody">
+                                <tr>
+                                    <td><code>OFF-VRO-01</code></td>
+                                    <td style="font-weight:700;color:var(--navy-900);">R. Somasekhar</td>
+                                    <td><span class="badge badge-neutral">Village Revenue Officer (VRO)</span></td>
+                                    <td><strong style="color:#166534;">🌾 Chandragiri Village (node_cg_vil)</strong></td>
+                                    <td>Village Leaf Node Only</td>
+                                    <td><span class="badge badge-success">● Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>OFF-MRO-01</code></td>
+                                    <td style="font-weight:700;color:var(--navy-900);">K. Venkateswarlu</td>
+                                    <td><span class="badge badge-neutral">Mandal Revenue Officer (MRO)</span></td>
+                                    <td><strong style="color:#1e40af;">🏛️ Chandragiri Mandal (node_cg_man)</strong></td>
+                                    <td>Covers Chandragiri Village & All Child Villages</td>
+                                    <td><span class="badge badge-success">● Active</span></td>
+                                </tr>
+                                <tr>
+                                    <td><code>OFF-TAH-01</code></td>
+                                    <td style="font-weight:700;color:var(--navy-900);">P. Subba Rao</td>
+                                    <td><span class="badge badge-purple">Tahsildar (Tirupati Division)</span></td>
+                                    <td><strong style="color:#1e3a8a;">🏢 Tirupati District (node_tpt)</strong></td>
+                                    <td>Covers Entire Tirupati District (Rural & Urban)</td>
+                                    <td><span class="badge badge-success">● Active</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Onboard Officer Modal -->
+    <div class="modal-overlay" id="onboardOfficerModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:9999;align-items:center;justify-content:center;">
+        <div class="card" style="width:100%;max-width:540px;background:#fff;border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 20px 40px rgba(0,0,0,0.3);">
+            <div class="card-header" style="background:#f8fafc;display:flex;justify-content:space-between;align-items:center;">
+                <span class="card-title">👮 Onboard New Field Officer</span>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="closeOnboardOfficerModal()">✕</button>
+            </div>
+            <form id="onboardOfficerForm" onsubmit="handleOnboardOfficer(event)" style="padding:var(--space-xl);">
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Officer Full Name *</label>
+                    <input type="text" id="offName" class="form-input" placeholder="e.g. GOKUL RAO" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Official Email Address *</label>
+                    <input type="email" id="offEmail" class="form-input" placeholder="e.g. gokul.vro@digiconnect.gov.in" required />
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-md);">
+                    <label class="form-label" style="font-weight:700;">Assigned Role Designation *</label>
+                    <select id="offDesig" class="form-input" required>
+                        <option value="desig_vro">Village Revenue Officer (VRO)</option>
+                        <option value="desig_mro">Mandal Revenue Officer (MRO)</option>
+                        <option value="desig_tahsildar">Tahsildar</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:var(--space-lg);">
+                    <label class="form-label" style="font-weight:700;">Assigned Jurisdiction Node (Coverage Anchor) *</label>
+                    <select id="offNode" class="form-input" required>
+                        <option value="node_cg_vil">🌾 Chandragiri Village (node_cg_vil - Rural Leaf)</option>
+                        <option value="node_cg_man">🏛️ Chandragiri Mandal (node_cg_man - Mandal Scope)</option>
+                        <option value="node_tpt_sub">🏢 Tirupati Revenue Sub-Division (node_tpt_sub)</option>
+                        <option value="node_tpt">🏢 Tirupati District (node_tpt - District Scope)</option>
+                        <option value="node_tpt_w14">🏙️ Ward 14 (node_tpt_w14 - Urban Leaf)</option>
+                    </select>
+                </div>
+                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                    <button type="button" class="btn btn-outline" onclick="closeOnboardOfficerModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="saveOfficerBtn">Onboard Officer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script type="module">
+        import { initPage } from '../js/navigation.js';
+        import { apiOnboardOfficer } from '../js/api.js';
+        import { showToast } from '../js/utils.js';
+
+        initPage({
+            title: 'Officer Onboarding',
+            breadcrumbs: [{ label: 'Department Head', href: 'department-head/dashboard.html' }, { label: 'Officers' }],
+            requiredRole: 'department_head'
+        });
+
+        window.openOnboardOfficerModal = () => {
+            document.getElementById('onboardOfficerModal').style.display = 'flex';
+        };
+
+        window.closeOnboardOfficerModal = () => {
+            document.getElementById('onboardOfficerModal').style.display = 'none';
+        };
+
+        window.handleOnboardOfficer = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveOfficerBtn');
+            btn.disabled = true;
+            btn.textContent = 'Onboarding...';
+
+            const payload = {
+                departmentId: 'dept_rev_ap',
+                name: document.getElementById('offName').value.trim(),
+                email: document.getElementById('offEmail').value.trim(),
+                designationId: document.getElementById('offDesig').value,
+                assignedNodeId: document.getElementById('offNode').value
+            };
+
+            try {
+                await apiOnboardOfficer(payload);
+                showToast(`Officer "${payload.name}" onboarded and bound to node "${payload.assignedNodeId}"!`, 'success');
+                closeOnboardOfficerModal();
+                document.getElementById('onboardOfficerForm').reset();
+            } catch (err) {
+                showToast(err.message || 'Failed to onboard officer', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Onboard Officer';
+            }
+        };
+    </script>
+</body>
+</html>

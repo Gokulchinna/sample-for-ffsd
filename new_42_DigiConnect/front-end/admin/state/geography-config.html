@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Geography Masters – DigiConnect State</title>
+    <link rel="stylesheet" href="../../css/style.css" />
+    <link rel="stylesheet" href="../../css/dashboard.css" />
+    <link rel="stylesheet" href="../../css/forms.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1300px; margin:0 auto; width:100%;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:16px;">
+                    <div>
+                        <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0 0 4px 0;">State Administrative Geography Masters</h1>
+                        <p style="color:#64748B; font-size:0.95rem; margin:0;">Configure constitutional rural (Panchayat) and urban (Municipal) jurisdiction hierarchy.</p>
+                    </div>
+                </div>
+
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                    <div style="overflow-x:auto;">
+                        <table style="width:100%; border-collapse:collapse; text-align:left; font-size:0.9rem;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #F1F5F9; color:#64748B; font-size:0.8rem; text-transform:uppercase;">
+                                    <th style="padding:14px;">District</th>
+                                    <th style="padding:14px;">Area Type</th>
+                                    <th style="padding:14px;">Sub-Division / Mandal / Zone</th>
+                                    <th style="padding:14px;">Local Unit (Panchayat / Ward)</th>
+                                    <th style="padding:14px;">Jurisdiction Unit ID</th>
+                                </tr>
+                            </thead>
+                            <tbody id="geoTbody">
+                                <tr><td colspan="5" style="text-align:center; padding:32px; color:#94A3B8;">Loading geography master hierarchy...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../../js/api.js"></script>
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/components.js"></script>
+    <script src="../../js/notifications.js"></script>
+    <script src="../../js/sidebar.js"></script>
+    <script src="../../js/topbar.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = Auth.requireAuth(['admin']);
+            if (!user) return;
+
+            Sidebar.render('geography');
+            Topbar.render();
+
+            try {
+                const geo = await API.get(`/admin/geography?stateCode=${user.stateCode || 'TS'}`);
+                renderGeoTable(geo);
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function renderGeoTable(list) {
+            const tbody = document.getElementById('geoTbody');
+            if (!list || list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:32px; color:#94A3B8;">No geography units configured for this state.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(g => `
+                <tr style="border-bottom:1px solid #F1F5F9;">
+                    <td style="padding:14px; font-weight:700; color:#0F172A;">${g.districtName}</td>
+                    <td style="padding:14px;">
+                        <span style="font-size:0.75rem; font-weight:700; padding:3px 8px; border-radius:4px; ${g.areaType === 'RURAL' ? 'background:#ECFDF5; color:#065F46;' : 'background:#EFF6FF; color:#1E40AF;'}">
+                            ${g.areaType}
+                        </span>
+                    </td>
+                    <td style="padding:14px; color:#334155; font-weight:600;">${g.mandalOrTehsilOrMunicipality}</td>
+                    <td style="padding:14px; color:#475569;">${g.panchayatOrWardName}</td>
+                    <td style="padding:14px; color:#64748B; font-family:monospace; font-size:0.85rem;">${g.unitId}</td>
+                </tr>
+            `).join('');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Application Review Desk – DigiConnect</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/dashboard.css" />
+</head>
+<body>
+    <div class="dashboard-layout" style="display:flex; min-height:100vh; background:#F8FAFC;">
+        <!-- Dynamic Sidebar -->
+        <aside id="sidebarNavContainer" style="width:260px; background:#0F172A; min-height:100vh; flex-shrink:0;"></aside>
+
+        <!-- Main Content -->
+        <div style="flex:1; display:flex; flex-direction:column; min-width:0;">
+            <header id="topbarContainer"></header>
+
+            <main style="padding:28px 32px; max-width:1200px; margin:0 auto; width:100%;">
+                <div style="margin-bottom:24px;">
+                    <a href="queue.html" style="color:#64748B; font-size:0.85rem; text-decoration:none; font-weight:600;">&larr; Back to Active Queue</a>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h1 style="font-size:1.6rem; font-weight:800; color:#0F172A; margin:0;" id="appTitleHeader">Review Desk</h1>
+                            <p style="color:#64748B; font-size:0.9rem; margin:4px 0 0 0;" id="appSubtitleHeader">Loading application details...</p>
+                        </div>
+                        <div id="currentStageBadge"></div>
+                    </div>
+                </div>
+
+                <!-- Two-Column Review Layout -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:28px;">
+                    <!-- Left: Citizen Form Data & Location -->
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                        <h2 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0 0 16px 0; border-bottom:1px solid #F1F5F9; padding-bottom:10px;">
+                            Applicant Declared Information
+                        </h2>
+                        <div style="display:flex; flex-direction:column; gap:12px; font-size:0.9rem;">
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">Applicant Name:</span><strong id="rvApplicantName">-</strong></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">Contact Phone:</span><strong id="rvApplicantPhone">-</strong></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">Area Jurisdiction:</span><span id="rvAreaType" style="font-weight:700;">-</span></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">District & Mandal:</span><span id="rvLocation">-</span></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:#64748B;">Village / Locality:</span><span id="rvVillage">-</span></div>
+                            <div style="border-top:1px dashed #E2E8F0; margin:6px 0;"></div>
+                            <div id="rvFormDataContainer" style="display:flex; flex-direction:column; gap:8px;">
+                                <!-- Dynamic form fields -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Attached Documents Checklist -->
+                    <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px;">
+                        <h2 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0 0 16px 0; border-bottom:1px solid #F1F5F9; padding-bottom:10px;">
+                            Verification Documents Attached
+                        </h2>
+                        <div id="rvDocumentsList" style="display:flex; flex-direction:column; gap:12px;">
+                            <!-- Dynamic Document Cards -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Previous Stage Officer Remarks / Audit Trail -->
+                <div style="background:#FFF; border:1px solid #E2E8F0; border-radius:12px; padding:24px; margin-bottom:28px;">
+                    <h2 style="font-size:1.05rem; font-weight:700; color:#0F172A; margin:0 0 16px 0; border-bottom:1px solid #F1F5F9; padding-bottom:10px;">
+                        Previous Stage Verification Trail
+                    </h2>
+                    <div id="rvStageHistoryContainer" style="display:flex; flex-direction:column; gap:14px;">
+                        <!-- Stage history -->
+                    </div>
+                </div>
+
+                <!-- DYNAMIC ACTION BUTTON DESK (Rendered based on logged-in designation matrix!) -->
+                <div style="background:#FFF; border:2px solid #2563EB; border-radius:12px; padding:24px 28px; box-shadow:0 10px 15px -3px rgba(37,99,235,0.08);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;">
+                        <div>
+                            <span style="font-size:0.75rem; font-weight:800; color:#2563EB; text-transform:uppercase; letter-spacing:0.5px;">Authorized Decision Desk</span>
+                            <h2 style="font-size:1.15rem; font-weight:800; color:#0F172A; margin:2px 0 0 0;" id="actionDeskTitle">Dynamic Actions for Officer</h2>
+                        </div>
+                        <span style="font-size:0.8rem; color:#64748B;" id="actionDeskJurisdiction"></span>
+                    </div>
+
+                    <!-- Inspection Remarks Input -->
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block; font-size:0.88rem; font-weight:700; color:#334155; margin-bottom:6px;">
+                            Official Inspection & Verification Remarks <span style="color:#DC2626;">*</span>
+                        </label>
+                        <textarea id="officerRemarksInput" rows="3" class="form-input" placeholder="Enter inquiry findings, field verification notes, or reasons for recommendation/reversion..." style="width:100%; padding:10px 14px; border:1px solid #CBD5E1; border-radius:8px; font-size:0.9rem; line-height:1.5;"></textarea>
+                    </div>
+
+                    <!-- Action Buttons Injected Dynamically -->
+                    <div id="dynamicActionButtonsContainer" style="display:flex; gap:14px; flex-wrap:wrap; justify-content:flex-end;">
+                        <!-- Buttons rendered dynamically -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/components.js"></script>
+    <script src="../js/notifications.js"></script>
+    <script src="../js/sidebar.js"></script>
+    <script src="../js/topbar.js"></script>
+    <script>
+        let currentApp = null;
+        let loggedInOfficer = null;
+        let actionButtonsDict = {};
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            loggedInOfficer = Auth.requireAuth(['officer']);
+            if (!loggedInOfficer) return;
+
+            Sidebar.render('queue');
+            Topbar.render();
+
+            const params = new URLSearchParams(window.location.search);
+            const appId = params.get('id') || 'APP-2026-1042';
+
+            try {
+                currentApp = await API.get(`/applications/${appId}`);
+                actionButtonsDict = await API.get('/workflow/action-buttons');
+                const designations = await API.get('/workflow/designations');
+
+                renderApplication();
+                renderDynamicActionButtons(designations);
+            } catch (err) {
+                alert('Could not load application: ' + err.message);
+            }
+        });
+
+        function renderApplication() {
+            document.getElementById('appTitleHeader').innerText = `${currentApp.serviceName} (#${currentApp.applicationId})`;
+            document.getElementById('appSubtitleHeader').innerText = `Submitted on ${new Date(currentApp.submissionDate).toLocaleDateString('en-IN')}`;
+            document.getElementById('currentStageBadge').innerHTML = `
+                <span style="background:#EFF6FF; color:#1E40AF; font-weight:700; font-size:0.85rem; padding:6px 14px; border-radius:20px;">
+                    Stage ${currentApp.currentStageNumber}: ${currentApp.assignedDesignationName}
+                </span>
+            `;
+
+            // Left column
+            document.getElementById('rvApplicantName').innerText = currentApp.citizenName;
+            document.getElementById('rvApplicantPhone').innerText = currentApp.citizenPhone;
+            document.getElementById('rvAreaType').innerText = `${currentApp.areaType} Jurisdiction`;
+            document.getElementById('rvLocation').innerText = `${currentApp.district}, ${currentApp.mandalOrWard}`;
+            document.getElementById('rvVillage').innerText = currentApp.villageOrLocality;
+
+            // Form data items
+            const formContainer = document.getElementById('rvFormDataContainer');
+            formContainer.innerHTML = Object.entries(currentApp.formData || {}).map(([key, val]) => `
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:#64748B; text-transform:capitalize;">${key.replace(/([A-Z])/g, ' $1')}:</span>
+                    <strong style="color:#0F172A;">${val}</strong>
+                </div>
+            `).join('');
+
+            // Right column: Documents
+            const docsContainer = document.getElementById('rvDocumentsList');
+            docsContainer.innerHTML = currentApp.documents.map((d, i) => `
+                <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-weight:700; font-size:0.88rem; color:#1E293B;">📎 ${d.docName}</div>
+                        <div style="font-size:0.75rem; color:#64748B;">File: ${d.fileName} (${d.fileSize})</div>
+                    </div>
+                    <button onclick="previewDoc('${d.fileName}')" style="padding:5px 12px; background:#FFF; border:1px solid #CBD5E1; border-radius:5px; font-size:0.8rem; font-weight:600; color:#2563EB; cursor:pointer;">
+                        👁️ Preview
+                    </button>
+                </div>
+            `).join('');
+
+            // Stage History
+            const histContainer = document.getElementById('rvStageHistoryContainer');
+            if (currentApp.stageHistory.length === 0) {
+                histContainer.innerHTML = `<div style="color:#94A3B8; font-size:0.85rem;">No previous stage actions recorded.</div>`;
+            } else {
+                histContainer.innerHTML = currentApp.stageHistory.map(h => `
+                    <div style="background:#F8FAFC; border-left:3px solid #2563EB; padding:10px 14px; border-radius:0 6px 6px 0; font-size:0.88rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <strong>${h.actedByOfficerName} (${h.actedByDesignation})</strong>
+                            <span style="font-size:0.75rem; color:#94A3B8;">${new Date(h.timestamp).toLocaleString('en-IN')}</span>
+                        </div>
+                        <div style="color:#334155; font-style:italic;">"${h.remarks}"</div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderDynamicActionButtons(designations) {
+            const container = document.getElementById('dynamicActionButtonsContainer');
+            document.getElementById('actionDeskTitle').innerText = `Dynamic Action Desk: ${loggedInOfficer.designation}`;
+            document.getElementById('actionDeskJurisdiction').innerText = `Active Post: ${loggedInOfficer.designationId}`;
+
+            // Find current officer's designation configuration
+            const desigConfig = designations.find(d => d.designationId === loggedInOfficer.designationId) || {
+                allowedActions: ['VERIFY_FORWARD', 'QUERY_CITIZEN', 'REJECT']
+            };
+
+            const actions = desigConfig.allowedActions;
+
+            container.innerHTML = actions.map(actKey => {
+                const btnDef = actionButtonsDict[actKey] || {
+                    label: actKey,
+                    buttonClass: 'btn-primary',
+                    icon: '✓',
+                };
+
+                let bg = '#2563EB';
+                let color = '#FFF';
+                if (btnDef.buttonClass === 'btn-success') bg = '#059669';
+                if (btnDef.buttonClass === 'btn-warning') bg = '#D97706';
+                if (btnDef.buttonClass === 'btn-danger') bg = '#DC2626';
+
+                return `
+                    <button type="button" onclick="executeDecision('${actKey}', '${btnDef.label}')" style="padding:10px 20px; font-weight:700; font-size:0.9rem; background:${bg}; color:${color}; border:none; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 2px 4px rgba(0,0,0,0.1);">
+                        <span>${btnDef.icon}</span>
+                        <span>${btnDef.label}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function previewDoc(fileName) {
+            Components.showToast(`Simulated viewing: ${fileName}`, 'info');
+        }
+
+        async function executeDecision(actionKey, actionLabel) {
+            const remarks = document.getElementById('officerRemarksInput').value.trim();
+            if (!remarks) {
+                alert('Please enter your official inspection/verification remarks before proceeding.');
+                document.getElementById('officerRemarksInput').focus();
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to execute [${actionLabel}] on application #${currentApp.applicationId}?`)) {
+                return;
+            }
+
+            try {
+                const res = await API.post(`/applications/${currentApp.applicationId}/action`, {
+                    actionKey,
+                    remarks,
+                });
+                Components.showToast(`Action executed: ${actionLabel}!`, 'success');
+                setTimeout(() => {
+                    window.location.href = 'queue.html';
+                }, 900);
+            } catch (err) {
+                alert('Action failed: ' + err.message);
+            }
+        }
+    </script>
+</body>
+</html>

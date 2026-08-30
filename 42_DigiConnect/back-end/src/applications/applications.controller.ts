@@ -209,6 +209,82 @@ export class ApplicationsController {
     };
   }
 
+  // ─── THE 3 PRIMARY OFFICER ACTIONS (Sections 18-22) ───
+
+  @Post(':id/approve')
+  @UseGuards(RolesGuard)
+  @Roles(Role.OFFICER, Role.SUPERVISOR, Role.DEPARTMENT_HEAD)
+  @ApiOperation({ summary: 'Officer Action 1: APPROVE application stage' })
+  @ApiHeader({ name: 'x-role', description: 'OFFICER' })
+  @ApiHeader({ name: 'x-user-id', description: 'Officer ID' })
+  approve(
+    @Param('id') id: string,
+    @Body('remarks') remarks: string,
+    @Headers('x-user-id') userId: string,
+  ) {
+    const result = this.applicationsService.approve(id, userId || 'Officer', remarks);
+    return {
+      success: true,
+      message: result.certificate ? 'Application fully approved & certificate generated!' : 'Application stage approved.',
+      data: result,
+    };
+  }
+
+  @Post(':id/reject')
+  @UseGuards(RolesGuard)
+  @Roles(Role.OFFICER, Role.SUPERVISOR, Role.DEPARTMENT_HEAD)
+  @ApiOperation({ summary: 'Officer Action 2: REJECT application' })
+  @ApiHeader({ name: 'x-role', description: 'OFFICER' })
+  @ApiHeader({ name: 'x-user-id', description: 'Officer ID' })
+  reject(
+    @Param('id') id: string,
+    @Body('reason') reason: string,
+    @Headers('x-user-id') userId: string,
+  ) {
+    const app = this.applicationsService.reject(id, userId || 'Officer', reason || 'Rejection during verification.');
+    return {
+      success: true,
+      message: 'Application rejected.',
+      data: app,
+    };
+  }
+
+  @Post(':id/raise-query')
+  @UseGuards(RolesGuard)
+  @Roles(Role.OFFICER, Role.SUPERVISOR, Role.DEPARTMENT_HEAD)
+  @ApiOperation({ summary: 'Officer Action 3: RAISE QUERY (workflow paused)' })
+  @ApiHeader({ name: 'x-role', description: 'OFFICER' })
+  @ApiHeader({ name: 'x-user-id', description: 'Officer ID' })
+  raiseQuery(
+    @Param('id') id: string,
+    @Body('queryText') queryText: string,
+    @Headers('x-user-id') userId: string,
+  ) {
+    const app = this.applicationsService.raiseQuery(id, userId || 'Officer', queryText || 'Clarification required.');
+    return {
+      success: true,
+      message: 'Query raised and workflow paused.',
+      data: app,
+    };
+  }
+
+  @Get(':id/certificate')
+  @ApiOperation({ summary: 'Get digital certificate metadata and download link' })
+  getCertificate(@Param('id') id: string) {
+    const app = this.applicationsService.findById(id);
+    const certId = (app as any).certificateId;
+    return {
+      success: true,
+      data: {
+        applicationId: app.id,
+        certificateId: certId || null,
+        isIssued: !!certId,
+        downloadUrl: certId ? `/uploads/certificates/${certId}.html` : null,
+        viewUrl: certId ? `/api/v1/certificates/${certId}` : null,
+      },
+    };
+  }
+
   @Post(':id/request-verification')
   @UseGuards(RolesGuard)
   @Roles(Role.OFFICER)

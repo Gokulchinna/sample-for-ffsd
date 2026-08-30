@@ -1381,8 +1381,6 @@ export async function initAdminDashboard() {
     switch (page) {
       case 'citizen-dashboard': initCitizenDashboard(); break;
       case 'officer-dashboard': initOfficerDashboard(); break;
-      case 'supervisor-dashboard': initSupervisorDashboard(); break;
-      case 'admin-dashboard': initAdminDashboard(); break;
       case 'grievance-dashboard': initGrievanceDashboard(); break;
     }
   });

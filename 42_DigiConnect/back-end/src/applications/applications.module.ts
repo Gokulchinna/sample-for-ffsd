@@ -3,12 +3,15 @@ import { ApplicationsService } from './applications.service';
 import { ApplicationsController } from './applications.controller';
 import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { GeographyModule } from '../geography/geography.module';
+import { CertificatesModule } from '../certificates/certificates.module';
 import { CitizenContextMiddleware, OfficerScopeMiddleware } from '../middlewares/router';
 
 @Module({
-  imports: [UsersModule, NotificationsModule],
+  imports: [UsersModule, NotificationsModule, GeographyModule, CertificatesModule],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],
+  exports: [ApplicationsService],
 })
 export class ApplicationsModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

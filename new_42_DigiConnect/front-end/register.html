@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Citizen Registration – DigiConnect</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body>
+    <div class="auth-page">
+        <!-- ── Left Panel ── -->
+        <div class="auth-panel">
+            <div class="auth-panel-grid"></div>
+
+            <div class="auth-panel-brand">
+                <a href="index.html" style="text-decoration: none; color: inherit; display: block;">
+                    <div class="auth-brand-logo">
+                        <div class="auth-brand-icon">
+                            <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div class="auth-brand-name">DigiConnect</div>
+                            <div class="auth-brand-tagline">Pan-India Unified Citizen Service Delivery</div>
+                        </div>
+                    </div>
+                </a>
+
+                <div class="auth-panel-heading">
+                    <h1>Register as<br /><span>Digital</span><br />Citizen</h1>
+                    <p>Access online state certificates, welfare disbursements, and land record title mutations with instant tracking.</p>
+                </div>
+            </div>
+
+            <div class="auth-features">
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">🛡️</div>
+                    <span class="auth-feature-text">Sovereign Citizen Portal</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">⚡</div>
+                    <span class="auth-feature-text">Dynamic Multi-Stage Tracking</span>
+                </div>
+                <div class="auth-feature">
+                    <div class="auth-feature-icon">📜</div>
+                    <span class="auth-feature-text">Digital Certificates with QR Seals</span>
+                </div>
+            </div>
+
+            <div class="auth-panel-footer">
+                © 2026 DigiConnect – Unified Citizen Service Delivery Platform
+            </div>
+        </div>
+
+        <!-- ── Form Panel ── -->
+        <div class="auth-form-panel">
+            <div class="auth-form-container">
+                <div class="auth-form-header">
+                    <h2 class="auth-form-title">Create Citizen Account</h2>
+                    <p class="auth-form-subtitle">
+                        Already have an account? <a href="login.html">Sign In</a>
+                    </p>
+                </div>
+
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="regName" class="form-input" placeholder="e.g. Ramesh Kumar" required />
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label class="form-label">Mobile Number</label>
+                        <input type="tel" id="regPhone" class="form-input" placeholder="e.g. 9876543210" maxlength="10" required />
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:16px;">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="regEmail" class="form-input" placeholder="e.g. ramesh@example.com" required />
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:16px;">
+                        <div>
+                            <label class="form-label">State</label>
+                            <select id="regState" class="form-input" style="width:100%; padding:9px 12px; border:1px solid #CBD5E1; border-radius:6px;">
+                                <option value="TS" selected>Telangana (TS)</option>
+                                <option value="AP">Andhra Pradesh (AP)</option>
+                                <option value="MH">Maharashtra (MH)</option>
+                                <option value="KA">Karnataka (KA)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">District</label>
+                            <input type="text" id="regDistrict" class="form-input" value="Ranga Reddy" required />
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:20px;">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="regPassword" class="form-input" placeholder="Min 6 characters" required />
+                    </div>
+
+                    <button type="submit" id="regBtn" class="btn btn-primary" style="width:100%; padding:12px; font-size:1rem; font-weight:700; background:#2563EB; color:#FFF; border:none; border-radius:8px; cursor:pointer;">
+                        Complete Registration &rarr;
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/components.js"></script>
+    <script>
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById('regBtn');
+            btn.disabled = true;
+            btn.innerText = 'Creating account...';
+
+            const payload = {
+                fullName: document.getElementById('regName').value.trim(),
+                phone: document.getElementById('regPhone').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                stateCode: document.getElementById('regState').value,
+                jurisdictionDistrict: document.getElementById('regDistrict').value.trim(),
+                role: 'citizen',
+                passwordHash: document.getElementById('regPassword').value,
+            };
+
+            try {
+                const res = await API.post('/auth/register', payload);
+                Auth.setCurrentUser(res.user);
+                Components.showToast('Registration successful! Welcome to DigiConnect.', 'success');
+                setTimeout(() => {
+                    window.location.href = 'citizen/citizen-dashboard.html';
+                }, 800);
+            } catch (err) {
+                alert('Registration failed: ' + err.message);
+                btn.disabled = false;
+                btn.innerText = 'Complete Registration \u2192';
+            }
+        }
+    </script>
+</body>
+</html>
