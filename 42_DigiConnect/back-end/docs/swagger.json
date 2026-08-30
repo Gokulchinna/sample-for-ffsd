@@ -2381,6 +2381,36 @@
           "central"
         ]
       },
+      "patch": {
+        "operationId": "CentralController_updateState",
+        "parameters": [
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "Must be CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update State Government metadata",
+        "tags": [
+          "central"
+        ]
+      },
       "delete": {
         "operationId": "CentralController_deleteState",
         "parameters": [
@@ -2407,6 +2437,134 @@
           }
         },
         "summary": "Deactivate State Government",
+        "tags": [
+          "central"
+        ]
+      }
+    },
+    "/api/v1/central/states/{id}/details": {
+      "get": {
+        "operationId": "CentralController_getStateDetails",
+        "parameters": [
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "Must be CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get full State Government monitoring details",
+        "tags": [
+          "central"
+        ]
+      }
+    },
+    "/api/v1/central/states/{id}/status": {
+      "patch": {
+        "operationId": "CentralController_setStateStatus",
+        "parameters": [
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "Must be CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Activate or Deactivate State Government",
+        "tags": [
+          "central"
+        ]
+      }
+    },
+    "/api/v1/central/states/{id}/admin/status": {
+      "patch": {
+        "operationId": "CentralController_setStateAdminStatus",
+        "parameters": [
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "Must be CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Activate or Deactivate State Admin Account",
+        "tags": [
+          "central"
+        ]
+      }
+    },
+    "/api/v1/central/states/{id}/admin/reset-password": {
+      "post": {
+        "operationId": "CentralController_resetStateAdminPassword",
+        "parameters": [
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "Must be CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Reset State Admin temporary credentials",
         "tags": [
           "central"
         ]

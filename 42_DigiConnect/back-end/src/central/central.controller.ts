@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
   Delete,
   Param,
   Body,
@@ -40,6 +41,15 @@ export class CentralController {
     };
   }
 
+  @Get('states/:id/details')
+  @ApiOperation({ summary: 'Get full State Government monitoring details' })
+  getStateDetails(@Param('id') id: string) {
+    return {
+      success: true,
+      data: this.centralService.getStateDetails(id),
+    };
+  }
+
   @Post('states')
   @ApiOperation({ summary: 'Create new State Government (1 State Admin enforced)' })
   createState(@Body() dto: CreateStateDto) {
@@ -49,6 +59,34 @@ export class CentralController {
       message: `State Government '${created.name}' (${created.code}) created successfully.`,
       data: created,
     };
+  }
+
+  @Patch('states/:id')
+  @ApiOperation({ summary: 'Update State Government metadata' })
+  updateState(@Param('id') id: string, @Body() dto: any) {
+    return {
+      success: true,
+      message: 'State Government updated successfully.',
+      data: this.centralService.updateState(id, dto),
+    };
+  }
+
+  @Patch('states/:id/status')
+  @ApiOperation({ summary: 'Activate or Deactivate State Government' })
+  setStateStatus(@Param('id') id: string, @Body() dto: { status: 'ACTIVE' | 'INACTIVE' }) {
+    return this.centralService.setStateStatus(id, dto.status);
+  }
+
+  @Patch('states/:id/admin/status')
+  @ApiOperation({ summary: 'Activate or Deactivate State Admin Account' })
+  setStateAdminStatus(@Param('id') id: string, @Body() dto: { status: 'Active' | 'Inactive' }) {
+    return this.centralService.setStateAdminStatus(id, dto.status);
+  }
+
+  @Post('states/:id/admin/reset-password')
+  @ApiOperation({ summary: 'Reset State Admin temporary credentials' })
+  resetStateAdminPassword(@Param('id') id: string) {
+    return this.centralService.resetStateAdminPassword(id);
   }
 
   @Delete('states/:id')
@@ -75,3 +113,4 @@ export class CentralController {
     };
   }
 }
+

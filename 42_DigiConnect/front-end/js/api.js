@@ -446,6 +446,37 @@ export async function apiDeleteState(id) {
   });
 }
 
+export async function apiGetStateDetails(id) {
+  return apiFetch(`/central/states/${id}/details`);
+}
+
+export async function apiUpdateState(id, data) {
+  return apiFetch(`/central/states/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiSetStateStatus(id, status) {
+  return apiFetch(`/central/states/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function apiSetStateAdminStatus(id, status) {
+  return apiFetch(`/central/states/${id}/admin/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function apiResetStateAdminPassword(id) {
+  return apiFetch(`/central/states/${id}/admin/reset-password`, {
+    method: 'POST',
+  });
+}
+
 export async function apiGetCentralRevenue() {
   return apiFetch('/central/analytics/revenue');
 }
@@ -453,6 +484,7 @@ export async function apiGetCentralRevenue() {
 export async function apiGetCentralMetrics() {
   return apiFetch('/central/analytics/metrics');
 }
+
 
 
 // ──────────────────────────────────────────

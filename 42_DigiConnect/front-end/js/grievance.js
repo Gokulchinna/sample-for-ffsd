@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════
 
 import { getSession } from './auth.js';
-import { apiGetMyGrievances, apiGetAllGrievances, apiGetGrievanceById, apiRaiseGrievance, apiUpdateGrievanceStatus, apiReplyGrievance, apiGetUsers, apiGetAllApplications } from './api.js';
+import { apiGetMyGrievances, apiGetAllGrievances, apiGetGrievanceById, apiRaiseGrievance, apiUpdateGrievanceStatus, apiReplyGrievance, apiGetUsers, apiGetAllApplications, apiResolveGrievance } from './api.js';
 import { initPage } from './navigation.js';
 import { showToast, generateId, formatDate, formatDateTime, getQueryParam, openModal, closeModal } from './utils.js';
 import { renderNotifPanel } from './notifications.js';
@@ -1199,6 +1199,10 @@ export async function initGrievanceDetail() {
     });
     
     try {
+      const apiAction = selectedResType === 'resolve'
+        ? (grievance.category === 'rejection' ? 'OVERRULE_AND_ISSUE_CERTIFICATE' : 'DIRECT_RE_VERIFICATION')
+        : (selectedResType === 'reject' ? 'UPHOLD_REJECTION' : 'DIRECT_RE_VERIFICATION');
+      await apiResolveGrievance(grievance.id, apiAction, resNote).catch(() => {});
       await apiUpdateGrievanceStatus(grievance.id, { status: newStatus, remarks: resNote });
     } catch(e) {}
 
