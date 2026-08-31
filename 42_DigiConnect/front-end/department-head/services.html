@@ -135,7 +135,7 @@
     <script type="module">
         import { initPage } from '../js/navigation.js';
         import { getSession, setSession } from '../js/auth.js';
-        import { apiGetServices, apiDeleteService } from '../js/api.js';
+        import { apiGetDepartmentServices, apiDeleteService } from '../js/api.js';
         import { showToast } from '../js/utils.js';
 
         // 1. Bulletproof Modal Engine
@@ -211,7 +211,7 @@
         // 3. Load & Render Services
         async function loadServices() {
             try {
-                const res = await apiGetServices(currentDeptId);
+                const res = await apiGetDepartmentServices(currentDeptId);
                 allServices = res.data || [];
                 const badge = document.getElementById('servicesCountBadge');
                 if (badge) badge.textContent = `${allServices.length} Active Services`;

@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Patch,
   Delete,
   Param,
@@ -156,6 +157,30 @@ export class DepartmentHeadController {
       message: `Service '${updated.name}' status updated to '${status}'.`,
       data: updated,
     };
+  }
+
+  @Put('services/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.DEPARTMENT_HEAD, Role.STATE_ADMIN)
+  @ApiOperation({ summary: 'Update existing dynamic service & workflow schema' })
+  updateService(
+    @Param('id') id: string,
+    @Body() dto: CreateDynamicServiceDto,
+  ) {
+    const service = this.deptHeadService.updateService(id, dto);
+    return {
+      success: true,
+      message: `Service '${service.name}' updated successfully.`,
+      data: service,
+    };
+  }
+
+  @Delete('services/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.DEPARTMENT_HEAD, Role.STATE_ADMIN)
+  @ApiOperation({ summary: 'Delete dynamic service from department catalog' })
+  deleteService(@Param('id') id: string) {
+    return this.deptHeadService.deleteService(id);
   }
 
   @Get('analytics')

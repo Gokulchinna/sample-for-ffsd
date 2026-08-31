@@ -496,6 +496,80 @@ export class DepartmentHeadService {
     return service;
   }
 
+  updateService(id: string, dto: CreateDynamicServiceDto): ExtendedDynamicService {
+    const service = this.getServiceById(id);
+
+    // Validate workflow designations exist
+    if (dto.workflowSteps) {
+      for (const step of dto.workflowSteps) {
+        const desig = db.designations.find((d) => d.id === step.requiredDesignationId);
+        if (!desig) {
+          throw new BadRequestException(
+            `Workflow step ${step.stepNumber} references non-existent designation '${step.requiredDesignationId}'.`,
+          );
+        }
+      }
+    }
+
+    if (dto.name) service.name = dto.name.trim();
+    if (dto.code) service.code = dto.code.trim().toUpperCase();
+    if (dto.description !== undefined) service.description = dto.description;
+    const sFee = dto.serviceFee !== undefined ? Number(dto.serviceFee) || 0 : service.serviceFee;
+    const pFee = dto.platformFee !== undefined ? Number(dto.platformFee) || 0 : service.platformFee;
+    service.serviceFee = sFee;
+    service.platformFee = pFee;
+    service.totalFee = sFee + pFee;
+    if (dto.termsAndConditions !== undefined) service.termsAndConditions = dto.termsAndConditions;
+    if (dto.fields) service.fields = dto.fields;
+    if (dto.documentRequirements) service.documentRequirements = dto.documentRequirements;
+    if (dto.workflowSteps) service.workflowSteps = dto.workflowSteps;
+    service.updatedAt = new Date().toISOString();
+
+    // Mirror update in db.services
+    const dbSrv = db.services.find((s) => s.id === id) as any;
+    if (dbSrv) {
+      dbSrv.name = service.name;
+      dbSrv.fee = service.totalFee;
+      dbSrv.description = service.description;
+      dbSrv.requirements = service.documentRequirements.map((d) => d.name);
+    }
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: 'SERVICE_UPDATED',
+      actor: 'Department Head',
+      role: 'DEPARTMENT_HEAD',
+      date: new Date().toISOString(),
+      details: `Updated service '${service.name}' (${service.code}).`,
+    });
+
+    return service;
+  }
+
+  deleteService(id: string): { success: boolean; message: string } {
+    const idx = this.dynamicServices.findIndex((s) => s.id === id);
+    if (idx === -1) {
+      throw new NotFoundException(`Service '${id}' not found.`);
+    }
+    const [removed] = this.dynamicServices.splice(idx, 1);
+
+    const dbIdx = db.services.findIndex((s) => s.id === id);
+    if (dbIdx >= 0) {
+      db.services.splice(dbIdx, 1);
+    }
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: 'SERVICE_DELETED',
+      actor: 'Department Head',
+      role: 'DEPARTMENT_HEAD',
+      date: new Date().toISOString(),
+      details: `Deleted service '${removed.name}' (${removed.code}).`,
+    });
+
+    return { success: true, message: `Service '${removed.name}' deleted successfully.` };
+  }
+
   getDepartmentAnalytics(deptId: string) {
     const dept = db.departments.find((d) => d.id === deptId);
     const services = this.dynamicServices.filter((s) => s.departmentId === deptId);

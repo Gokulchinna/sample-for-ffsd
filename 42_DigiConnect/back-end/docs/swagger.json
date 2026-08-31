@@ -3524,6 +3524,60 @@
         "tags": [
           "department-head"
         ]
+      },
+      "put": {
+        "operationId": "DepartmentHeadController_updateService",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDynamicServiceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update existing dynamic service & workflow schema",
+        "tags": [
+          "department-head"
+        ]
+      },
+      "delete": {
+        "operationId": "DepartmentHeadController_deleteService",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Delete dynamic service from department catalog",
+        "tags": [
+          "department-head"
+        ]
       }
     },
     "/api/v1/department-head/services/{id}/status": {

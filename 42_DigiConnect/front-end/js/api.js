@@ -436,8 +436,12 @@ export async function apiUpdateService(id, data) {
   return { success: true, data };
 }
 
-/** Delete a service: DELETE /services/:id */
+/** Delete a service: DELETE /services/:id or /department-head/services/:id */
 export async function apiDeleteService(id) {
+  try {
+    const res = await apiFetch(`/department-head/services/${id}`, { method: 'DELETE' });
+    if (res && res.success) return res;
+  } catch (e) {}
   try {
     await apiFetch(`/services/${id}`, { method: 'DELETE' });
   } catch (e) {}
@@ -1306,10 +1310,28 @@ export async function apiGetDepartmentServices(deptId = 'dept_rev_ap') {
   };
 }
 
+export async function apiGetDepartmentServiceById(id) {
+  return apiFetch(`/department-head/services/${id}`);
+}
+
 export async function apiCreateDynamicService(data) {
   return apiFetch('/department-head/services', {
     method: 'POST',
     body: JSON.stringify(data),
+  });
+}
+
+export async function apiUpdateDynamicService(id, data) {
+  return apiFetch(`/department-head/services/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiUpdateServiceStatus(id, status) {
+  return apiFetch(`/department-head/services/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
   });
 }
 
