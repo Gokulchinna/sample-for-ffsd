@@ -922,553 +922,308 @@ const MOCK_WORKFLOW_CONFIG = [
     stages: 2,
   },
 ];
+// Helper: ISO dates relative to now (recalculated on each server restart)
+function daysAgo(n: number): string { return new Date(Date.now() - n * 86400000).toISOString(); }
+function daysFromNow(n: number): string { return new Date(Date.now() + n * 86400000).toISOString(); }
 
 const MOCK_APPLICATIONS = [
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 1: PENDING AT VRO (Village Revenue Officer — OFF-VRO-01)
+  // ═══════════════════════════════════════════════════════════════
   {
-    "id": "APP-1001",
-    "serviceId": "SVC-001",
-    "serviceName": "Income Certificate",
-    "serviceType": "certificate",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "jurisdiction": "node_cg_vil",
-    "selectedJurisdictionNodeId": "node_cg_vil",
-    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village",
-    "officerId": "OFF-VRO-01",
-    "officerName": "Gokul Rao (VRO)",
-    "dept": "Revenue, Registration & Stamps Department",
-    "status": "completed",
-    "remarks": "All verified.",
-    "fee": 50,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Aadhaar Card.pdf",
-        "type": "Identity Proof",
-        "date": "2026-04-20T09:00:00.000Z",
-        "status": "verified"
-      }
+    id: 'APP-2001', serviceId: 'srv_caste_income_ap',
+    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'pending', remarks: '', fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831001A',
+    currentStepNumber: 1, totalWorkflowSteps: 3, queries: [] as any[],
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(2), status: 'uploaded' },
+      { name: 'Ration_Card.pdf', type: 'Address Proof', date: daysAgo(2), status: 'uploaded' },
+      { name: 'School_Leaving_Certificate.pdf', type: 'DOB Proof', date: daysAgo(2), status: 'uploaded' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-04-20T09:00:00.000Z",
-        "actor": "Ravi Kumar",
-        "note": ""
-      },
-      {
-        "action": "Status updated to approved",
-        "date": "2026-04-22T09:00:00.000Z",
-        "actor": "Gokul Rao",
-        "note": "Approved"
-      },
-      {
-        "action": "Supervisor Final Approval",
-        "date": "2026-04-23T09:00:00.000Z",
-        "actor": "K. V. Reddy",
-        "note": "Certificate Generated"
-      },
-      {
-        "action": "Certificate Generated",
-        "date": "2026-04-23T09:00:00.000Z",
-        "actor": "System",
-        "note": ""
-      }
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(2), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(2), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-7831001A' },
     ],
-    "submittedDate": "2026-04-20T09:00:00.000Z",
-    "slaDate": "2026-04-27T09:00:00.000Z"
+    submittedDate: daysAgo(2), slaDate: daysFromNow(5),
   },
   {
-    "id": "APP-1002",
-    "serviceId": "SVC-005",
-    "serviceName": "Scholarship Application",
-    "serviceType": "welfare",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "jurisdiction": "node_cg_vil",
-    "selectedJurisdictionNodeId": "node_cg_vil",
-    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village",
-    "officerId": "OFF-VRO-01",
-    "officerName": "Gokul Rao (VRO)",
-    "dept": "Revenue, Registration & Stamps Department",
-    "status": "rejected",
-    "remarks": "Income exceeds limit for scholarship.",
-    "fee": 0,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Income Cert.pdf",
-        "type": "Income Proof",
-        "date": "2026-04-22T09:00:00.000Z",
-        "status": "verified"
-      }
+    id: 'APP-2002', serviceId: 'srv_income_ap',
+    serviceName: 'Income & Asset Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1002', citizenName: 'Sunita Verma',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'pending', remarks: '', fee: 35, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831002B',
+    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(3), status: 'uploaded' },
+      { name: 'Salary_Slip_2026.pdf', type: 'Income Proof', date: daysAgo(3), status: 'uploaded' },
+      { name: 'Bank_Passbook.pdf', type: 'Bank Proof', date: daysAgo(3), status: 'uploaded' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-04-22T09:00:00.000Z",
-        "actor": "Ravi Kumar",
-        "note": ""
-      },
-      {
-        "action": "Status updated to rejected",
-        "date": "2026-04-24T09:00:00.000Z",
-        "actor": "Gokul Rao",
-        "note": "Income exceeds limit."
-      }
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(3), actor: 'Sunita Verma', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(3), actor: 'System', note: 'Payment of ₹35 received. TXN: TXN-7831002B' },
     ],
-    "submittedDate": "2026-04-22T09:00:00.000Z",
-    "slaDate": "2026-05-13T09:00:00.000Z"
+    submittedDate: daysAgo(3), slaDate: daysFromNow(4),
   },
   {
-    "id": "APP-1003",
-    "serviceId": "SVC-006",
-    "serviceName": "Municipal Trade & Commercial License",
-    "serviceType": "permission",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "jurisdiction": "node_w14",
-    "selectedJurisdictionNodeId": "node_w14",
-    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Urban Sub-Division > Tirupati Municipal Corporation > Ward 14",
-    "officerId": "OFF-WARD-01",
-    "officerName": "R. Ramesh (WAO)",
-    "dept": "Municipal Administration & Urban Development (MA&UD)",
-    "status": "under-review",
-    "remarks": "",
-    "fee": 200,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Venue Proof.pdf",
-        "type": "Venue Proof",
-        "date": "2026-05-03T05:58:07.177Z",
-        "status": "uploaded"
-      }
+    id: 'APP-2003', serviceId: 'srv_residence_ap',
+    serviceName: 'Residence & Domicile Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1003', citizenName: 'Kaveri Devi',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'pending', remarks: '', fee: 30, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831003C',
+    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(1), status: 'uploaded' },
+      { name: 'Electricity_Bill.pdf', type: 'Address Proof', date: daysAgo(1), status: 'uploaded' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-05-03T05:58:07.178Z",
-        "actor": "Ravi Kumar",
-        "note": ""
-      }
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(1), actor: 'Kaveri Devi', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(1), actor: 'System', note: 'Payment of ₹30 received. TXN: TXN-7831003C' },
     ],
-    "submittedDate": "2026-05-03T05:58:07.178Z",
-    "slaDate": "2026-05-08T05:58:07.178Z"
+    submittedDate: daysAgo(1), slaDate: daysFromNow(6),
   },
   {
-    "id": "APP-1004",
-    "serviceId": "SVC-002",
-    "serviceName": "Caste Certificate",
-    "serviceType": "certificate",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "jurisdiction": "node_cg_vil",
-    "selectedJurisdictionNodeId": "node_cg_vil",
-    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village",
-    "officerId": "OFF-VRO-01",
-    "officerName": "Gokul Rao (VRO)",
-    "dept": "Revenue, Registration & Stamps Department",
-    "status": "approved",
-    "remarks": "Field verification clear.",
-    "fee": 50,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Declaration.pdf",
-        "type": "Declaration",
-        "date": "2026-05-02T05:58:07.178Z",
-        "status": "verified"
-      }
+    id: 'APP-2004', serviceId: 'srv_caste_income_ap',
+    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'query', remarks: 'Please upload a clear photo of your Aadhaar card. Current upload is blurry.',
+    fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831004D',
+    currentStepNumber: 1, totalWorkflowSteps: 3,
+    queries: [{
+      queryId: 'QRY-001001', officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
+      queryText: 'Please upload a clear photo of your Aadhaar card. Current upload is blurry.',
+      timestamp: daysAgo(1), status: 'OPEN',
+    }],
+    documents: [
+      { name: 'Aadhaar_blurry.jpg', type: 'Identity Proof', date: daysAgo(4), status: 'uploaded' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-05-02T05:58:07.178Z",
-        "actor": "Ravi Kumar",
-        "note": ""
-      },
-      {
-        "action": "Status updated to approved",
-        "date": "2026-05-04T04:58:07.178Z",
-        "actor": "Gokul Rao",
-        "note": "Field verification clear."
-      }
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(4), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(4), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-7831004D' },
+      { action: 'Clarification Query Raised (Workflow Paused)', date: daysAgo(1), actor: 'Gokul Rao (VRO)', note: 'Please upload a clear photo of your Aadhaar card. Current upload is blurry.' },
     ],
-    "submittedDate": "2026-05-02T05:58:07.178Z",
-    "slaDate": "2026-05-09T05:58:07.178Z"
+    submittedDate: daysAgo(4), slaDate: daysFromNow(3),
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 2: PENDING AT MRO (Mandal Revenue Officer — OFF-MRO-01)
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'APP-2005', serviceId: 'srv_caste_income_ap',
+    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1002', citizenName: 'Sunita Verma',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-MRO-01', officerName: 'Sunita Sharma (MRO)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'under-review', remarks: 'VRO village verification completed and verified. Awaiting Mandal endorsement.',
+    fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831005E',
+    currentStepNumber: 2, totalWorkflowSteps: 3, queries: [] as any[],
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(5), status: 'verified' },
+      { name: 'Ration_Card.pdf', type: 'Address Proof', date: daysAgo(5), status: 'verified' },
+      { name: 'School_Leaving_Certificate.pdf', type: 'DOB Proof', date: daysAgo(5), status: 'uploaded' },
+    ],
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(5), actor: 'Sunita Verma', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(5), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-7831005E' },
+      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(2), actor: 'Gokul Rao (VRO)', note: 'Field survey completed. Ancestry verified.' },
+    ],
+    submittedDate: daysAgo(5), slaDate: daysFromNow(8),
   },
   {
-    "id": "APP-1005",
-    "serviceId": "SVC-004",
-    "serviceName": "Integrated Community & Nativity Certificate",
-    "serviceType": "certificate",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "jurisdiction": "node_cg_vil",
-    "selectedJurisdictionNodeId": "node_cg_vil",
-    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village",
-    "officerId": "OFF-VRO-01",
-    "officerName": "Gokul Rao (VRO)",
-    "dept": "Revenue, Registration & Stamps Department",
-    "status": "query",
-    "remarks": "Please upload clear bank passbook.",
-    "fee": 0,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Aadhaar.pdf",
-        "type": "Identity Proof",
-        "date": "2026-05-01T05:58:07.178Z",
-        "status": "uploaded"
-      }
+    id: 'APP-2006', serviceId: 'srv_residence_ap',
+    serviceName: 'Residence & Domicile Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1003', citizenName: 'Kaveri Devi',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-MRO-01', officerName: 'Sunita Sharma (MRO)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'under-review', remarks: 'VRO verified physical residence. Awaiting final Mandal approval & DSC.',
+    fee: 30, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831006F',
+    currentStepNumber: 2, totalWorkflowSteps: 2, queries: [] as any[],
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(4), status: 'verified' },
+      { name: 'Electricity_Bill.pdf', type: 'Address Proof', date: daysAgo(4), status: 'verified' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-05-01T05:58:07.178Z",
-        "actor": "Ravi Kumar",
-        "note": ""
-      },
-      {
-        "action": "Status updated to query",
-        "date": "2026-05-03T05:58:07.178Z",
-        "actor": "Priya Nair",
-        "note": "Please upload clear bank passbook."
-      }
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(4), actor: 'Kaveri Devi', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(4), actor: 'System', note: 'Payment of ₹30 received. TXN: TXN-7831006F' },
+      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(2), actor: 'Gokul Rao (VRO)', note: 'Continuous residence confirmed by local inquiry.' },
     ],
-    "submittedDate": "2026-05-01T05:58:07.178Z",
-    "slaDate": "2026-05-15T05:58:07.178Z"
+    submittedDate: daysAgo(4), slaDate: daysFromNow(4),
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // STEP 3: PENDING AT TAHSILDAR (Final Approval & DSC — OFF-TAH-01)
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'APP-2007', serviceId: 'srv_caste_income_ap',
+    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-TAH-01', officerName: 'K. V. Reddy (Tahsildar)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'under-review', remarks: 'VRO and MRO stages successfully verified and endorsed. Ready for Tahsildar digital signature.',
+    fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831007G',
+    currentStepNumber: 3, totalWorkflowSteps: 3, queries: [] as any[],
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(7), status: 'verified' },
+      { name: 'Ration_Card.pdf', type: 'Address Proof', date: daysAgo(7), status: 'verified' },
+      { name: 'School_Leaving_Certificate.pdf', type: 'DOB Proof', date: daysAgo(7), status: 'verified' },
+    ],
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(7), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(7), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-7831007G' },
+      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(5), actor: 'Gokul Rao (VRO)', note: 'Village verification clear.' },
+      { action: 'Stage 2 Approved -> Advanced to Step 3', date: daysAgo(2), actor: 'Sunita Sharma (MRO)', note: 'Mandal records verified. Forwarded to Tahsildar.' },
+    ],
+    submittedDate: daysAgo(7), slaDate: daysFromNow(7),
   },
   {
-    "id": "APP-1006",
-    "serviceId": "SVC-007",
-    "serviceName": "Vendor License",
-    "serviceType": "permission",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1007",
-    "officerName": "Mohan Das",
-    "dept": "Municipal Corporation",
-    "status": "query",
-    "remarks": "Provide shop photo.",
-    "fee": 500,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Aadhaar.pdf",
-        "type": "Identity Proof",
-        "date": "2026-04-19T05:58:07.178Z",
-        "status": "uploaded"
-      }
+    id: 'APP-2008', serviceId: 'srv_income_ap',
+    serviceName: 'Income & Asset Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1003', citizenName: 'Kaveri Devi',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-TAH-01', officerName: 'K. V. Reddy (Tahsildar)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'under-review', remarks: 'VRO income inquiry completed. Awaiting Tahsildar approval & DSC.',
+    fee: 35, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831008H',
+    currentStepNumber: 2, totalWorkflowSteps: 2, queries: [] as any[],
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(6), status: 'verified' },
+      { name: 'Salary_Certificate.pdf', type: 'Income Proof', date: daysAgo(6), status: 'verified' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-04-19T05:58:07.178Z",
-        "actor": "Ravi Kumar",
-        "note": ""
-      },
-      {
-        "action": "Status updated to query",
-        "date": "2026-04-24T05:58:07.178Z",
-        "actor": "Mohan Das",
-        "note": "Provide shop photo."
-      }
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(6), actor: 'Kaveri Devi', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(6), actor: 'System', note: 'Payment of ₹35 received. TXN: TXN-7831008H' },
+      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(3), actor: 'Gokul Rao (VRO)', note: 'Income records checked and verified.' },
     ],
-    "submittedDate": "2026-04-19T05:58:07.178Z",
-    "slaDate": "2026-04-26T05:58:07.178Z"
+    submittedDate: daysAgo(6), slaDate: daysFromNow(2),
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // TERMINAL RECORDS (Completed / Rejected — for citizen tracking history)
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'APP-1001', serviceId: 'srv_caste_income_ap',
+    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-TAH-01', officerName: 'K. V. Reddy (Tahsildar)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'completed', remarks: 'All documents verified. Certificate issued.',
+    fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-6001001A',
+    currentStepNumber: 3, totalWorkflowSteps: 3, queries: [] as any[],
+    certificateId: 'CERT-AP-2001', certificateIssuedDate: daysAgo(10),
+    certificateDownloadUrl: '/certificates/CERT-AP-2001.pdf',
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(20), status: 'verified' },
+      { name: 'Ration_Card.pdf', type: 'Address Proof', date: daysAgo(20), status: 'verified' },
+    ],
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(20), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(20), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-6001001A' },
+      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(18), actor: 'Gokul Rao (VRO)', note: 'Village-level verification passed.' },
+      { action: 'Stage 2 Approved -> Advanced to Step 3', date: daysAgo(15), actor: 'Sunita Sharma (MRO)', note: 'Mandal records match.' },
+      { action: 'Final Approval & Digital Certificate Issued', date: daysAgo(10), actor: 'K. V. Reddy (Tahsildar)', note: 'Certificate CERT-AP-2001 generated.' },
+    ],
+    submittedDate: daysAgo(20), slaDate: daysAgo(13),
   },
   {
-    "id": "APP-1007",
-    "serviceId": "SVC-008",
-    "serviceName": "Record Correction",
-    "serviceType": "correction",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1001",
-    "officerName": "Suresh Reddy",
-    "dept": "Revenue Department",
-    "status": "escalated",
-    "remarks": "",
-    "fee": 100,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Gazette.pdf",
-        "type": "Gazette Notification",
-        "date": "2026-04-22T05:58:07.178Z",
-        "status": "uploaded"
-      }
+    id: 'APP-1002', serviceId: 'srv_income_ap',
+    serviceName: 'Income & Asset Certificate',
+    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
+    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
+    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
+    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
+    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
+    status: 'rejected', remarks: 'Income declaration does not match bank statements. Please re-apply.',
+    fee: 35, paymentStatus: 'paid', paymentTransactionId: 'TXN-6001002B',
+    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    documents: [
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(14), status: 'verified' },
+      { name: 'Income_Declaration.pdf', type: 'Income Proof', date: daysAgo(14), status: 'rejected' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-04-22T05:58:07.178Z",
-        "actor": "Ravi Kumar",
-        "note": ""
-      },
-      {
-        "action": "SLA Breached",
-        "date": "2026-05-02T05:58:07.178Z",
-        "actor": "System",
-        "note": "Officer failed to act within SLA"
-      },
-      {
-        "action": "Status transitioned to escalated",
-        "date": "2026-05-02T05:58:07.178Z",
-        "actor": "System Daemon",
-        "note": "Auto-Escalated due to SLA breach"
-      }
+    timeline: [
+      { action: 'Application Submitted', date: daysAgo(14), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
+      { action: 'Payment Confirmed', date: daysAgo(14), actor: 'System', note: 'Payment of ₹35 received. TXN: TXN-6001002B' },
+      { action: 'Application Rejected', date: daysAgo(11), actor: 'Gokul Rao (VRO)', note: 'Income declaration does not match bank statements.' },
     ],
-    "submittedDate": "2026-04-22T05:58:07.178Z",
-    "slaDate": "2026-05-02T05:58:07.178Z"
+    submittedDate: daysAgo(14), slaDate: daysAgo(9),
+  },
+
+  // ═══════════════════════════════════════════════════════════════
+  // MULTI-STATE APPLICATIONS (TN, KA, KL)
+  // ═══════════════════════════════════════════════════════════════
+  {
+    id: 'APP-TN-001', serviceId: 'SVC-TN-01',
+    serviceName: 'Community & Nativity Certificate', serviceType: 'certificate',
+    citizenId: 'CIT-TN-01', citizenName: 'K. Muthukrishnan',
+    jurisdiction: 'node_pollachi_vil', selectedJurisdictionNodeId: 'node_pollachi_vil',
+    jurisdictionPath: 'Tamil Nadu > Coimbatore District > Pollachi Revenue Division > Pollachi Taluk > Anaimalai Revenue Village',
+    officerId: 'OFF-VAO-TN-01', officerName: 'M. Selvakumar (VAO)',
+    dept: 'Revenue & Disaster Management Department', departmentId: 'dept_rev_tn',
+    status: 'pending', remarks: '', fee: 60, paymentStatus: 'paid', paymentTransactionId: 'TXN-TN-001A',
+    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    documents: [
+      { name: 'Family_Ration_Card.pdf', type: 'Address Proof', date: daysAgo(3), status: 'uploaded' },
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(3), status: 'uploaded' },
+    ],
+    timeline: [{ action: 'Application Submitted', date: daysAgo(3), actor: 'K. Muthukrishnan', note: 'Submitted via e-Sevai portal' }],
+    submittedDate: daysAgo(3), slaDate: daysFromNow(11),
   },
   {
-    "id": "APP-2456",
-    "serviceId": "SVC-008",
-    "serviceName": "Record Correction",
-    "serviceType": "correction",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1001",
-    "officerName": "Suresh Reddy",
-    "dept": "Revenue Department",
-    "status": "rejected",
-    "remarks": "DOB mismatch between Aadhaar and certificate. UIDAI cross-verification required.",
-    "fee": 100,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Aadhaar Card.pdf",
-        "type": "Identity Proof",
-        "date": "2026-01-18T05:58:07.178Z",
-        "status": "uploaded"
-      },
-      {
-        "name": "Original Certificate.pdf",
-        "type": "Certificate",
-        "date": "2026-01-18T05:58:07.178Z",
-        "status": "uploaded"
-      }
+    id: 'APP-KA-001', serviceId: 'SVC-KA-01',
+    serviceName: 'Caste & Income Certificate (Nadakacheri)', serviceType: 'certificate',
+    citizenId: 'CIT-KA-01', citizenName: 'H. Chethan Gowda',
+    jurisdiction: 'node_bilikere_vil', selectedJurisdictionNodeId: 'node_bilikere_vil',
+    jurisdictionPath: 'Karnataka > Mysuru District > Hunsur Sub-Division > Hunsur Taluk > Bilikere Revenue Village',
+    officerId: 'OFF-VA-KA-01', officerName: 'Basavaraj Patil (Village Accountant)',
+    dept: 'Revenue Department (Kandaya Ilakhe)', departmentId: 'dept_rev_ka',
+    status: 'pending', remarks: '', fee: 40, paymentStatus: 'paid', paymentTransactionId: 'TXN-KA-001A',
+    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    documents: [
+      { name: 'RTC_Pahani.pdf', type: 'Land Record', date: daysAgo(2), status: 'uploaded' },
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(2), status: 'uploaded' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-01-18T05:58:07.178Z",
-        "actor": "Ravi Kumar",
-        "note": ""
-      },
-      {
-        "action": "Assigned to Officer",
-        "date": "2026-01-19T05:58:07.178Z",
-        "actor": "System",
-        "note": "Assigned to Suresh Reddy"
-      },
-      {
-        "action": "Application Rejected",
-        "date": "2026-01-21T05:58:07.178Z",
-        "actor": "Suresh Reddy",
-        "note": "DOB mismatch detected between Aadhaar and certificate"
-      }
-    ],
-    "submittedDate": "2026-01-18T05:58:07.178Z",
-    "slaDate": "2026-01-25T05:58:07.178Z"
+    timeline: [{ action: 'Application Submitted', date: daysAgo(2), actor: 'H. Chethan Gowda', note: 'Nadakacheri service application' }],
+    submittedDate: daysAgo(2), slaDate: daysFromNow(12),
   },
   {
-    "id": "APP-1008",
-    "serviceId": "SVC-004",
-    "serviceName": "Welfare / Subsidy Scheme",
-    "serviceType": "welfare",
-    "citizenId": "CIT-1002",
-    "citizenName": "Sunita Verma",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1004",
-    "officerName": "Priya Nair",
-    "dept": "Welfare Department",
-    "status": "escalated",
-    "remarks": "",
-    "fee": 0,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Aadhaar.pdf",
-        "type": "Identity Proof",
-        "date": "2026-04-16T05:58:07.178Z",
-        "status": "uploaded"
-      }
+    id: 'APP-KL-001', serviceId: 'SVC-KL-01',
+    serviceName: 'Land Possession & Valuation Certificate', serviceType: 'certificate',
+    citizenId: 'CIT-KL-01', citizenName: 'V. Sreekumar',
+    jurisdiction: 'node_nedumangad_vil', selectedJurisdictionNodeId: 'node_nedumangad_vil',
+    jurisdictionPath: 'Kerala > Thiruvananthapuram District > Nedumangad Revenue Division > Nedumangad Taluk > Vembayam Revenue Village',
+    officerId: 'OFF-VO-KL-01', officerName: 'Sajeev Kumar (Village Officer)',
+    dept: 'Revenue & Disaster Management Department', departmentId: 'dept_rev_kl',
+    status: 'pending', remarks: '', fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-KL-001A',
+    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    documents: [
+      { name: 'Land_Tax_Receipt.pdf', type: 'Tax Receipt', date: daysAgo(4), status: 'uploaded' },
+      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(4), status: 'uploaded' },
     ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-04-16T05:58:07.178Z",
-        "actor": "Sunita Verma",
-        "note": ""
-      },
-      {
-        "action": "SLA Breached",
-        "date": "2026-04-30T05:58:07.178Z",
-        "actor": "System",
-        "note": "Officer failed to act within SLA"
-      },
-      {
-        "action": "Status transitioned to escalated",
-        "date": "2026-04-30T05:58:07.178Z",
-        "actor": "System Daemon",
-        "note": "Auto-Escalated due to SLA breach"
-      }
-    ],
-    "submittedDate": "2026-04-16T05:58:07.178Z",
-    "slaDate": "2026-04-30T05:58:07.178Z"
+    timeline: [{ action: 'Application Submitted', date: daysAgo(4), actor: 'V. Sreekumar', note: 'Submitted via e-District Kerala' }],
+    submittedDate: daysAgo(4), slaDate: daysFromNow(10),
   },
-  {
-    "id": "APP-1009",
-    "serviceId": "SVC-007",
-    "serviceName": "Vendor License",
-    "serviceType": "permission",
-    "citizenId": "CIT-1003",
-    "citizenName": "Kaveri Devi",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1007",
-    "officerName": "Mohan Das",
-    "dept": "Municipal Corporation",
-    "status": "under-review",
-    "remarks": "",
-    "fee": 500,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Aadhaar.pdf",
-        "type": "Identity Proof",
-        "date": "2026-04-29T05:58:07.178Z",
-        "status": "uploaded"
-      }
-    ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-04-29T05:58:07.178Z",
-        "actor": "Kaveri Devi",
-        "note": ""
-      }
-    ],
-    "submittedDate": "2026-04-29T05:58:07.178Z",
-    "slaDate": "2026-05-06T05:58:07.178Z"
-  },
-  // ─── TAMIL NADU REALISTIC DEMO APPLICATION ───
-  {
-    "id": "APP-TN-001",
-    "serviceId": "SVC-TN-01",
-    "serviceName": "Community & Nativity Certificate",
-    "serviceType": "certificate",
-    "citizenId": "CIT-TN-01",
-    "citizenName": "K. Muthukrishnan",
-    "jurisdiction": "node_pollachi_vil",
-    "selectedJurisdictionNodeId": "node_pollachi_vil",
-    "jurisdictionPath": "Tamil Nadu > Coimbatore District > Pollachi Revenue Division > Pollachi Taluk > Anaimalai Revenue Village",
-    "officerId": "OFF-VAO-TN-01",
-    "officerName": "M. Selvakumar (VAO)",
-    "dept": "Revenue & Disaster Management Department",
-    "status": "pending",
-    "remarks": "Awaiting initial village inquiry and genealogy verification.",
-    "fee": 60,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Family_Ration_Card.pdf",
-        "type": "Address Proof",
-        "date": "2026-05-01T09:00:00.000Z",
-        "status": "uploaded"
-      }
-    ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-05-01T09:00:00.000Z",
-        "actor": "K. Muthukrishnan",
-        "note": "Submitted via e-Sevai portal"
-      }
-    ],
-    "submittedDate": "2026-05-01T09:00:00.000Z",
-    "slaDate": "2026-05-15T09:00:00.000Z"
-  },
-  // ─── KARNATAKA REALISTIC DEMO APPLICATION ───
-  {
-    "id": "APP-KA-001",
-    "serviceId": "SVC-KA-01",
-    "serviceName": "Caste & Income Certificate (Nadakacheri)",
-    "serviceType": "certificate",
-    "citizenId": "CIT-KA-01",
-    "citizenName": "H. Chethan Gowda",
-    "jurisdiction": "node_bilikere_vil",
-    "selectedJurisdictionNodeId": "node_bilikere_vil",
-    "jurisdictionPath": "Karnataka > Mysuru District > Hunsur Sub-Division > Hunsur Taluk > Bilikere Revenue Village",
-    "officerId": "OFF-VA-KA-01",
-    "officerName": "Basavaraj Patil (Village Accountant)",
-    "dept": "Revenue Department (Kandaya Ilakhe)",
-    "status": "pending",
-    "remarks": "Bhoomi landholding & income verification in progress.",
-    "fee": 40,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "RTC_Pahani.pdf",
-        "type": "Land Record",
-        "date": "2026-05-02T10:00:00.000Z",
-        "status": "uploaded"
-      }
-    ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-05-02T10:00:00.000Z",
-        "actor": "H. Chethan Gowda",
-        "note": "Nadakacheri service application"
-      }
-    ],
-    "submittedDate": "2026-05-02T10:00:00.000Z",
-    "slaDate": "2026-05-16T10:00:00.000Z"
-  },
-  // ─── KERALA REALISTIC DEMO APPLICATION ───
-  {
-    "id": "APP-KL-001",
-    "serviceId": "SVC-KL-01",
-    "serviceName": "Land Possession & Valuation Certificate",
-    "serviceType": "certificate",
-    "citizenId": "CIT-KL-01",
-    "citizenName": "V. Sreekumar",
-    "jurisdiction": "node_nedumangad_vil",
-    "selectedJurisdictionNodeId": "node_nedumangad_vil",
-    "jurisdictionPath": "Kerala > Thiruvananthapuram District > Nedumangad Revenue Division > Nedumangad Taluk > Vembayam Revenue Village",
-    "officerId": "OFF-VO-KL-01",
-    "officerName": "Sajeev Kumar (Village Officer)",
-    "dept": "Revenue & Disaster Management Department",
-    "status": "pending",
-    "remarks": "Thandaper register check initiated at Village Office.",
-    "fee": 50,
-    "paymentStatus": "paid",
-    "documents": [
-      {
-        "name": "Land_Tax_Receipt.pdf",
-        "type": "Tax Receipt",
-        "date": "2026-05-03T11:00:00.000Z",
-        "status": "uploaded"
-      }
-    ],
-    "timeline": [
-      {
-        "action": "Application Submitted",
-        "date": "2026-05-03T11:00:00.000Z",
-        "actor": "V. Sreekumar",
-        "note": "Submitted via e-District Kerala"
-      }
-    ],
-    "submittedDate": "2026-05-03T11:00:00.000Z",
-    "slaDate": "2026-05-13T11:00:00.000Z"
-  }
 ];
 
 
@@ -2438,5 +2193,83 @@ export const db: {
       ],
       createdAt: '2026-01-01T00:00:00.000Z',
     },
+    {
+      id: 'srv_income_ap',
+      departmentId: 'dept_rev_ap',
+      stateId: 'state_ap',
+      name: 'Income & Asset Certificate',
+      code: 'INCOME_CERT_AP',
+      description: 'Annual family income certificate for educational scholarships, welfare concessions, and subsidies.',
+      status: 'ACTIVE',
+      serviceFee: 20,
+      platformFee: 15,
+      totalFee: 35,
+      termsAndConditions: 'I hereby declare that all submitted income statements and IT declarations are authentic.',
+      fields: [
+        { id: 'applicant_name', label: 'Full Name of Applicant', type: 'TEXT', required: true },
+        { id: 'annual_income', label: 'Annual Family Income (INR)', type: 'NUMBER', required: true },
+      ],
+      documentRequirements: [
+        { id: 'doc_salary_slip', name: 'Salary Slip / Income Proof', required: true },
+        { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
+      ],
+      workflowSteps: [
+        { stepNumber: 1, stepName: 'VRO Income Verification', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+        { stepNumber: 2, stepName: 'Tahsildar Approval & DSC Issuance', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+    {
+      id: 'srv_residence_ap',
+      departmentId: 'dept_rev_ap',
+      stateId: 'state_ap',
+      name: 'Residence & Domicile Certificate',
+      code: 'RESIDENCE_CERT_AP',
+      description: 'Proof of local residence and domicile within Andhra Pradesh administrative jurisdiction.',
+      status: 'ACTIVE',
+      serviceFee: 20,
+      platformFee: 10,
+      totalFee: 30,
+      termsAndConditions: 'I hereby declare that I have continuously resided at the mentioned address.',
+      fields: [
+        { id: 'applicant_name', label: 'Full Name of Applicant', type: 'TEXT', required: true },
+        { id: 'years_of_residence', label: 'Duration of Continuous Residence (Years)', type: 'NUMBER', required: true },
+      ],
+      documentRequirements: [
+        { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
+        { id: 'doc_utility_bill', name: 'Electricity Bill / Ration Card', required: true },
+      ],
+      workflowSteps: [
+        { stepNumber: 1, stepName: 'VRO Verification & Field Inquiry', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+        { stepNumber: 2, stepName: 'MRO Approval & DSC Issuance', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+    {
+      id: 'srv_land_mutation_ap',
+      departmentId: 'dept_rev_ap',
+      stateId: 'state_ap',
+      name: 'Agricultural Land Mutation & Pattadar Passbook',
+      code: 'LAND_MUTATION_AP',
+      description: 'Title deed transfer and revenue record title passbook endorsement for agricultural landholdings.',
+      status: 'ACTIVE',
+      serviceFee: 75,
+      platformFee: 25,
+      totalFee: 100,
+      termsAndConditions: 'I declare that the agricultural land parcel is free of civil litigation and undisputed.',
+      fields: [
+        { id: 'survey_number', label: 'Survey Number / Sub-division', type: 'TEXT', required: true },
+      ],
+      documentRequirements: [
+        { id: 'doc_sale_deed', name: 'Registered Sale Deed Copy', required: true },
+      ],
+      workflowSteps: [
+        { stepNumber: 1, stepName: 'Revenue Inspector Spot Survey', requiredDesignationId: 'desig_ri', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+        { stepNumber: 2, stepName: 'MRO Endorsement & Verification', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+        { stepNumber: 3, stepName: 'Tahsildar Record Mutation & Issue', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
   ],
 };
+

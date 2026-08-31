@@ -218,11 +218,38 @@ export async function initOfficerDashboard() {
       apiGetOfficerWeekChart(),
     ]);
     officerQueue = qRes.data || [];
-    // Show ALL active apps in queue (breached ones show in breach tab too)
-    displayQueue = [...officerQueue].filter(a => isActive(a));
+    // Backend already filters to actionable statuses — show all returned apps
+    displayQueue = [...officerQueue];
     displayQueue.sort((a, b) => urgency(a) - urgency(b));
     window._officerQueries = qrRes.data || [];
     officerActivity = actRes.data || [];
+    officerSlaRisks = slaRes.data || [];
+    officerWeekChart = chartRes.data || { days: [], vals: [] };
+
+    // ── Populate service filter dropdown dynamically from actual queue ──
+    const serviceSelect = document.querySelector('select[onchange="filterQueue(this.value)"]');
+    if (serviceSelect && officerQueue.length > 0) {
+      const uniqueServices = [...new Set(officerQueue.map(a => a.service || a.serviceName).filter(Boolean))].sort();
+      serviceSelect.innerHTML = '<option value="">All Services</option>' +
+        uniqueServices.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    // ── Update SLA rate dynamically ──
+    const totalProcessed = officerQueue.length;
+    const withinSla = officerQueue.filter(a => a.slaLeft >= 0).length;
+    const slaRate = totalProcessed > 0 ? Math.round((withinSla / totalProcessed) * 100) : 100;
+    const slaRateEl = document.querySelector('.stat-value');
+    // Find the SLA rate stat card specifically
+    document.querySelectorAll('.stat-card').forEach(card => {
+      const label = card.querySelector('.stat-label');
+      if (label && label.textContent.trim() === 'My SLA Rate') {
+        const valEl = card.querySelector('.stat-value');
+        if (valEl) valEl.textContent = slaRate + '%';
+        const noteEl = card.querySelector('[style*="text-muted"]');
+        if (noteEl) noteEl.textContent = `Target: 95% | ${withinSla}/${totalProcessed} on-time`;
+      }
+    });
+
     officerSlaRisks = slaRes.data || [];
     officerWeekChart = chartRes.data || { days: [], vals: [] };
   } catch (e) {
@@ -398,18 +425,22 @@ export async function initOfficerDashboard() {
   };
 
   function applyFilters() {
-    displayQueue = [...officerQueue].filter(a => isActive(a));
+    // Backend already returns only actionable apps — no need to filter by isActive again
+    displayQueue = [...officerQueue];
     if (currentServiceFilter) {
-      displayQueue = displayQueue.filter(a => a.service === currentServiceFilter);
+      displayQueue = displayQueue.filter(a =>
+        (a.service || a.serviceName || '') === currentServiceFilter
+      );
     }
     displayQueue.sort((a, b) => {
-      if (currentSortFilter === 'date') return 0; // simplified
+      if (currentSortFilter === 'date') return new Date(b.submittedDate || 0) - new Date(a.submittedDate || 0);
       if (currentSortFilter === 'sla') return urgency(a) - urgency(b);
-      return a.service.localeCompare(b.service);
+      return (a.service || a.serviceName || '').localeCompare(b.service || b.serviceName || '');
     });
     currentPage = 1;
     renderQueue();
   }
+
 
   window.changePageSize = function (size) {
     pageSize = parseInt(size, 10);

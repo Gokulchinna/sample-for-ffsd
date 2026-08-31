@@ -398,6 +398,27 @@ export class ApplicationsService {
       app.status = AppStatus.PENDING_OFFICER_REVIEW;
       (app as any).currentStatus = AppStatus.PENDING_OFFICER_REVIEW;
 
+      // Find the next step in workflow and reassign officerId / officerName
+      const service = (db.dynamicServices || []).find((s: any) => s.id === app.serviceId) ||
+                      (db.services || []).find((s: any) => s.id === app.serviceId);
+      const workflowSteps = (service as any)?.workflowSteps || [];
+      const nextStepConfig = workflowSteps.find((s: any) => s.stepNumber === nextStep);
+
+      if (nextStepConfig && nextStepConfig.requiredDesignationId) {
+        const leafNodeId = (app as any).selectedJurisdictionNodeId || app.jurisdiction;
+        const nextOfficer = db.officers.find(o => 
+          o.designationId === nextStepConfig.requiredDesignationId &&
+          (!(app as any).departmentId || o.departmentId === (app as any).departmentId) &&
+          this.geographyService.isNodeWithinScope(leafNodeId, o.assignedNodeId)
+        ) || db.officers.find(o => o.designationId === nextStepConfig.requiredDesignationId);
+
+
+        if (nextOfficer) {
+          app.officerId = nextOfficer.id;
+          app.officerName = `${nextOfficer.name} (${nextOfficer.designationTitle || nextOfficer.designationId})`;
+        }
+      }
+
       app.timeline.push({
         action: `Stage ${currentStep} Approved -> Advanced to Step ${nextStep}`,
         date: timestamp,
@@ -508,27 +529,67 @@ export class ApplicationsService {
 
   // ── Officer Dashboard Data with Hierarchical Scoping ──
 
+
   getOfficerQueue(officerId?: string) {
-    let apps = db.applications;
+    // Actionable statuses only — completed/rejected should NOT appear in an officer's work queue
+    const ACTIONABLE = [
+      AppStatus.PENDING,
+      AppStatus.UNDER_REVIEW,
+      AppStatus.QUERY,
+      AppStatus.QUERY_RAISED,
+      AppStatus.PENDING_OFFICER_REVIEW,
+      'pending',
+      'under-review',
+      'query',
+      'pending_officer_review',
+    ];
+
+    let apps = db.applications.filter(a => ACTIONABLE.includes(a.status as any));
 
     if (officerId) {
+      // 1. Resolve officer record from db.officers or db.users
       const officer = db.officers.find((o) => o.id === officerId);
-      if (officer && officer.assignedNodeId) {
-        apps = apps.filter((a) => {
-          const leafNodeId = (a as any).selectedJurisdictionNodeId || a.jurisdiction;
-          return this.geographyService.isNodeWithinScope(leafNodeId, officer.assignedNodeId);
-        });
-      } else {
-        apps = apps.filter((a) => a.officerId === officerId);
-      }
+      const userRecord = db.users.find((u) => u.id === officerId);
+
+      const resolvedDesignationId = officer?.designationId || (userRecord as any)?.designationId || '';
+      const resolvedNodeId = officer?.assignedNodeId || (userRecord as any)?.assignedNodeId || '';
+      const linkedOfficerId = (userRecord as any)?.officerId || '';
+
+      apps = apps.filter((a) => {
+        const leafNodeId = (a as any).selectedJurisdictionNodeId || a.jurisdiction;
+        const currentStepNum = Number((a as any).currentStepNumber) || 1;
+
+        // Check service workflow definition
+        const service = (db.dynamicServices || []).find((s: any) => s.id === a.serviceId) ||
+                        (db.services || []).find((s: any) => s.id === a.serviceId);
+        const workflowSteps = (service as any)?.workflowSteps || [];
+
+        if (workflowSteps.length > 0 && resolvedDesignationId) {
+          const currentStep = workflowSteps.find((s: any) => s.stepNumber === currentStepNum);
+          if (currentStep) {
+            // Step must match officer's designation
+            const designationMatches = currentStep.requiredDesignationId === resolvedDesignationId;
+            if (!designationMatches) return false;
+
+            // Jurisdiction scope check
+            if (resolvedNodeId) {
+              return this.geographyService.isNodeWithinScope(leafNodeId, resolvedNodeId);
+            }
+            return true;
+          }
+        }
+
+        // Fallback: direct officer ID assignment
+        return a.officerId === officerId || (linkedOfficerId && a.officerId === linkedOfficerId);
+      });
     }
 
-    // Filter out locked applications
+    // Filter out grievance-locked applications
     apps = apps.filter(a => {
-      const activeGrievance = db.grievances.find(g => 
-        g.relatedAppId === a.id && 
+      const activeGrievance = db.grievances.find(g =>
+        g.relatedAppId === a.id &&
         (g.category === 'misconduct' || g.status === GrievanceStatus.ESCALATED) &&
-        g.status !== GrievanceStatus.RESOLVED && 
+        g.status !== GrievanceStatus.RESOLVED &&
         g.status !== GrievanceStatus.REJECTED &&
         g.status !== 'escalated-resolved'
       );
@@ -557,7 +618,7 @@ export class ApplicationsService {
         submitted: submittedDate.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         slaLeft,
         slaTotal: totalDays,
-        status: a.status === AppStatus.PENDING ? 'new' : a.status,
+        status: a.status === AppStatus.PENDING || a.status === ('pending' as any) ? 'new' : a.status,
         // Citizen personal details for officer review
         aadhaar: maskedAadhaar,
         dob: citizenUser?.dob || '—',
@@ -565,14 +626,46 @@ export class ApplicationsService {
         address: citizenUser?.address
           ? [citizenUser.address, citizenUser.mandal, citizenUser.district, citizenUser.state, citizenUser.pincode].filter(Boolean).join(', ')
           : '—',
+        // Workflow info
+        currentStepNumber: (a as any).currentStepNumber || 1,
+        totalWorkflowSteps: (a as any).totalWorkflowSteps || 1,
+        queries: (a as any).queries || [],
       };
     });
   }
 
 
+
   getOfficerQueries(officerId?: string) {
-    let apps = db.applications.filter(a => a.status === AppStatus.QUERY);
-    if (officerId) apps = apps.filter(a => a.officerId === officerId);
+    let apps = db.applications.filter(a =>
+      a.status === AppStatus.QUERY || a.status === AppStatus.QUERY_RAISED || a.status === ('query' as any)
+    );
+    if (officerId) {
+      const officer = db.officers.find((o) => o.id === officerId);
+      const userRecord = db.users.find((u) => u.id === officerId);
+      const resolvedDesignationId = officer?.designationId || (userRecord as any)?.designationId || '';
+      const resolvedNodeId = officer?.assignedNodeId || (userRecord as any)?.assignedNodeId || '';
+      const linkedOfficerId = (userRecord as any)?.officerId || '';
+
+      apps = apps.filter(a => {
+        if (a.officerId === officerId || (linkedOfficerId && a.officerId === linkedOfficerId)) return true;
+        const currentStepNum = Number((a as any).currentStepNumber) || 1;
+        const service = (db.dynamicServices || []).find((s: any) => s.id === a.serviceId) ||
+                        (db.services || []).find((s: any) => s.id === a.serviceId);
+        const workflowSteps = (service as any)?.workflowSteps || [];
+        if (workflowSteps.length > 0 && resolvedDesignationId) {
+          const currentStep = workflowSteps.find((s: any) => s.stepNumber === currentStepNum);
+          if (currentStep && currentStep.requiredDesignationId === resolvedDesignationId) {
+            if (resolvedNodeId) {
+              const leafNodeId = (a as any).selectedJurisdictionNodeId || a.jurisdiction;
+              return this.geographyService.isNodeWithinScope(leafNodeId, resolvedNodeId);
+            }
+            return true;
+          }
+        }
+        return false;
+      });
+    }
 
     return apps.map(a => {
       const queryAction = [...a.timeline].reverse().find(t => t.action.toLowerCase().includes('query'));
@@ -593,11 +686,11 @@ export class ApplicationsService {
 
   getOfficerActivity(officerId?: string) {
     if (!officerId) return [];
-    const officer = db.users.find(u => u.id === officerId);
+    const officer = db.users.find(u => u.id === officerId) || db.officers.find(o => o.id === officerId);
     if (!officer) return [];
 
     return db.auditLogs
-      .filter(log => log.actor === officer.email || log.actor === officer.name)
+      .filter(log => log.actor === officer.email || log.actor === officer.name || (officer as any).title && log.actor.includes((officer as any).title))
       .slice(0, 10)
       .map(log => {
         let icon = 'check';
@@ -615,10 +708,9 @@ export class ApplicationsService {
   }
 
   getOfficerSlaRisks(officerId?: string) {
-    let apps = db.applications.filter(a => a.status !== AppStatus.APPROVED && a.status !== AppStatus.COMPLETED && a.status !== AppStatus.REJECTED);
-    if (officerId) apps = apps.filter(a => a.officerId === officerId);
+    let queueApps = this.getOfficerQueue(officerId);
 
-    return apps.map(a => {
+    return queueApps.map(a => {
       const submittedDate = new Date(a.submittedDate);
       const slaDate = new Date(a.slaDate);
       const totalDays = Math.max(1, Math.ceil((slaDate.getTime() - submittedDate.getTime()) / 86400000));
