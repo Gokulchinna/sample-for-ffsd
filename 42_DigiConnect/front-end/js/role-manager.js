@@ -387,8 +387,13 @@ export function isRoleAllowed(userRole, requiredRole) {
  * @returns {object}
  */
 export function getRoleConfig(role) {
-  const norm = String(role).toLowerCase();
-  return roleConfig[norm] || roleConfig['citizen'];
+  const norm = String(role).toLowerCase().replace(/[\s-]+/g, '_');
+  if (roleConfig[norm]) return roleConfig[norm];
+  if (['grievance_officer', 'grievance_redressal_officer'].includes(norm)) return roleConfig['grievance'];
+  if (['verification_officer', 'field_officer'].includes(norm)) return roleConfig['officer'];
+  if (['super_user', 'admin', 'super_admin'].includes(norm)) return roleConfig['central_admin'];
+  if (['dept_head'].includes(norm)) return roleConfig['department_head'];
+  return roleConfig['citizen'];
 }
 
 /**

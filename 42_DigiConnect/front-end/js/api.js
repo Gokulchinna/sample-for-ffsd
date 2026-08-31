@@ -1257,6 +1257,24 @@ export async function apiUpdateOfficerStatus(officerId, status) {
   });
 }
 
+export async function apiGetDepartmentAnalytics(deptId = 'dept_rev_ap') {
+  try {
+    const res = await apiFetch(`/department-head/analytics?departmentId=${deptId}`);
+    if (res && res.data) return res;
+  } catch (e) {}
+  return {
+    success: true,
+    data: {
+      totalServices: 4,
+      activeServices: 4,
+      totalDesignations: 4,
+      totalOfficers: 3,
+      totalApplications: 4,
+      totalRevenue: 0,
+    },
+  };
+}
+
 export async function apiGetDepartmentServices(deptId = 'dept_rev_ap') {
   try {
     const res = await apiFetch(`/department-head/services?departmentId=${deptId}`);
@@ -1272,6 +1290,8 @@ export async function apiGetDepartmentServices(deptId = 'dept_rev_ap') {
         code: 'CASTE_CERT_AP',
         slaDays: 7,
         totalFee: 50,
+        serviceFee: 35,
+        platformFee: 15,
         status: 'ACTIVE',
         workflowSteps: [
           { stepNumber: 1, stepName: 'VRO Verification & Field Inquiry', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true },
@@ -1286,10 +1306,12 @@ export async function apiGetDepartmentServices(deptId = 'dept_rev_ap') {
         code: 'INCOME_CERT_AP',
         slaDays: 5,
         totalFee: 35,
+        serviceFee: 20,
+        platformFee: 15,
         status: 'ACTIVE',
         workflowSteps: [
           { stepNumber: 1, stepName: 'VRO Income Verification', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true },
-          { stepNumber: 2, stepName: 'Tahsildar Approval', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, isFinalApprovalStep: true },
+          { stepNumber: 2, stepName: 'Tahsildar Approval & DSC Issuance', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, isFinalApprovalStep: true },
         ],
       },
       {
@@ -1299,11 +1321,28 @@ export async function apiGetDepartmentServices(deptId = 'dept_rev_ap') {
         code: 'LAND_MUTATION_AP',
         slaDays: 14,
         totalFee: 100,
+        serviceFee: 75,
+        platformFee: 25,
         status: 'ACTIVE',
         workflowSteps: [
           { stepNumber: 1, stepName: 'Revenue Inspector Spot Survey', requiredDesignationId: 'desig_ri', canApprove: true, canReject: true, canRaiseQuery: true },
-          { stepNumber: 2, stepName: 'MRO Endorsement', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, canRaiseQuery: true },
+          { stepNumber: 2, stepName: 'MRO Endorsement & Verification', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, canRaiseQuery: true },
           { stepNumber: 3, stepName: 'Tahsildar Record Mutation & Issue', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, isFinalApprovalStep: true },
+        ],
+      },
+      {
+        id: 'srv_residence_ap',
+        departmentId: 'dept_rev_ap',
+        name: 'Residence & Domicile Certificate',
+        code: 'RESIDENCE_CERT_AP',
+        slaDays: 7,
+        totalFee: 30,
+        serviceFee: 20,
+        platformFee: 10,
+        status: 'ACTIVE',
+        workflowSteps: [
+          { stepNumber: 1, stepName: 'VRO Verification & Field Inquiry', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true },
+          { stepNumber: 2, stepName: 'MRO Approval & DSC Issuance', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, isFinalApprovalStep: true },
         ],
       },
     ],

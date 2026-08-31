@@ -2,7 +2,8 @@
 // navigation.js — Dynamic sidebar, topbar, breadcrumb builder
 // ═══════════════════════════════════════════
 
-import { getSession } from './auth.js';
+import { getSession, setSession } from './auth.js';
+export { getSession, setSession };
 import { getRoleConfig, svgIcons, isRoleAllowed, getRoleDashboardPath } from './role-manager.js';
 import { getInitials, toggleSidebar, setupGlobalClickHandlers, initEventDelegation, showToast } from './utils.js';
 import { logout } from './auth.js';
@@ -256,7 +257,7 @@ export function initPage(options = {}) {
 
   document.title = `${options.title || 'Dashboard'} | DigiConnect`;
 
-  const role = session ? session.role : 'citizen';
+  const role = session ? (session.roleKey || session.role) : 'citizen';
   const config = getRoleConfig(role);
 
   // Build navigation
