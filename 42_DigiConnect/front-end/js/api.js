@@ -511,8 +511,17 @@ export async function apiConfigureGrievanceCell(data) {
 }
 
 export async function apiGetStateRevenue(stateId = 'state_ap') {
-  return apiFetch(`/state-admin/revenue?stateId=${stateId}`);
+  return apiFetch(`/state-admin/analytics/revenue?stateId=${stateId}`);
 }
+
+export async function apiGetStateAnalytics(stateId = 'state_ap') {
+  return apiFetch(`/state-admin/analytics/kpis?stateId=${stateId}`);
+}
+
+export async function apiGetStateKpis(stateId = 'state_ap') {
+  return apiFetch(`/state-admin/analytics/kpis?stateId=${stateId}`);
+}
+
 
 // ──────────────────────────────────────────
 // DEPARTMENT HEAD
