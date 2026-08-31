@@ -185,6 +185,20 @@ export class StateAdminController {
     };
   }
 
+  @Get('grievance-cells')
+  @ApiOperation({ summary: 'List all grievance cells for a state (only for existing departments)' })
+  listGrievanceCells(
+    @Query('stateId') stateId?: string,
+    @Headers('x-state-id') headerStateId?: string,
+  ) {
+    const targetState = stateId || headerStateId || 'state_ap';
+    const cells = this.stateAdminService.listGrievanceCells(targetState);
+    return {
+      success: true,
+      data: cells,
+    };
+  }
+
   @Get('grievance-cells/:deptId')
   @ApiOperation({ summary: 'Get grievance cell configuration for department' })
   getGrievanceCell(@Param('deptId') deptId: string) {

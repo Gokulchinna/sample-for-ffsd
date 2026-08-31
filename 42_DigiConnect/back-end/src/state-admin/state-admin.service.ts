@@ -62,28 +62,7 @@ export class StateAdminService {
       ],
       createdAt: '2026-01-01T00:00:00.000Z',
     },
-    {
-      id: 'cell_mun_ap',
-      stateId: 'state_ap',
-      departmentId: 'dept_mun_ap',
-      cellName: 'Municipal Grievance Redressal Cell',
-      workflowSteps: [
-        {
-          stepNumber: 1,
-          roleTitle: 'Municipal Grievance Officer',
-          jurisdictionTier: 'MUNICIPALITY',
-          assignedOfficerId: 'GO-MUN-01',
-        },
-        {
-          stepNumber: 2,
-          roleTitle: 'District Urban Grievance Officer',
-          jurisdictionTier: 'DISTRICT',
-          assignedOfficerId: 'GO-DIST-01',
-        },
-      ],
-      createdAt: '2026-01-01T00:00:00.000Z',
-    },
-  ];
+    ];
 
   /**
    * List departments in a state.
@@ -466,6 +445,29 @@ export class StateAdminService {
 
   getGrievanceCellByDepartment(deptId: string): GrievanceCellConfig | undefined {
     return this.grievanceCells.find((c) => c.departmentId === deptId);
+  }
+
+  /**
+   * List all grievance cells for a state.
+   * Only returns cells whose department actually exists in the state.
+   */
+  listGrievanceCells(stateId: string): (GrievanceCellConfig & { deptName: string; slaDays: number; jurisdictionTier: string; status: string })[] {
+    const stateDepts = db.departments.filter((d) => !stateId || d.stateId === stateId);
+    const deptIds = new Set(stateDepts.map((d) => d.id));
+
+    return this.grievanceCells
+      .filter((c) => !stateId || (c.stateId === stateId && deptIds.has(c.departmentId)))
+      .map((c) => {
+        const dept = stateDepts.find((d) => d.id === c.departmentId);
+        return {
+          ...c,
+          deptName: dept?.name || c.departmentId,
+          slaDays: 7,
+          jurisdictionTier: c.workflowSteps?.length > 0 ? c.workflowSteps[c.workflowSteps.length - 1].jurisdictionTier : 'DISTRICT',
+          workflowSummary: c.workflowSteps?.map((s) => s.roleTitle).join(' ➔ ') || '',
+          status: 'ACTIVE',
+        };
+      });
   }
 
   /**

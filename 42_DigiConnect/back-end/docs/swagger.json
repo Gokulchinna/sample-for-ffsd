@@ -3162,6 +3162,36 @@
         "tags": [
           "state-admin"
         ]
+      },
+      "get": {
+        "operationId": "StateAdminController_listGrievanceCells",
+        "parameters": [
+          {
+            "name": "stateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "List all grievance cells for a state (only for existing departments)",
+        "tags": [
+          "state-admin"
+        ]
       }
     },
     "/api/v1/state-admin/grievance-cells/{deptId}": {

@@ -798,28 +798,6 @@ const INITIAL_LOCAL_GRIEVANCE_CELLS = [
     workflowSummary: 'District Grievance Officer ➔ State Appellate Authority',
     status: 'ACTIVE',
   },
-  {
-    id: 'cell_mun_ap',
-    stateId: 'state_ap',
-    departmentId: 'dept_mun_ap',
-    deptName: 'Municipal Administration & Urban Development',
-    cellName: 'Municipal Grievance Redressal Cell',
-    jurisdictionTier: 'SUB_DIVISION & DISTRICT',
-    slaDays: 5,
-    workflowSummary: 'Divisional Officer ➔ Municipal Commissioner',
-    status: 'ACTIVE',
-  },
-  {
-    id: 'cell_trans_ap',
-    stateId: 'state_ap',
-    departmentId: 'dept_trans_ap',
-    deptName: 'Transport Department',
-    cellName: 'Transport Department Grievance Cell',
-    jurisdictionTier: 'DISTRICT',
-    slaDays: 7,
-    workflowSummary: 'RTO Tirupati Appellate Officer',
-    status: 'ACTIVE',
-  },
 ];
 
 function getStoredDepartments() {
@@ -845,7 +823,17 @@ function getStoredGrievanceCells() {
     const raw = localStorage.getItem('DigiConnect_grievance_cells');
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // Purge stale cells whose department no longer exists in stored departments
+        const depts = getStoredDepartments();
+        const deptIds = new Set(depts.map(d => d.id));
+        const valid = parsed.filter(c => !c.departmentId || deptIds.has(c.departmentId));
+        if (valid.length !== parsed.length) {
+          // Stale cells found — save the cleaned list back
+          saveStoredGrievanceCells(valid);
+        }
+        if (valid.length > 0) return valid;
+      }
     }
   } catch (e) {}
   saveStoredGrievanceCells(INITIAL_LOCAL_GRIEVANCE_CELLS);
