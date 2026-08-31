@@ -33,9 +33,42 @@ export class UpdateDepartmentDto {
 
   @IsOptional()
   @IsString()
+  code?: string;
+
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @IsOptional()
   @IsString()
   headUserId?: string;
+
+  @IsOptional()
+  @IsString()
+  headUserName?: string;
+
+  @IsOptional()
+  @IsString()
+  headUserEmail?: string;
+
+  @IsOptional()
+  @IsString()
+  status?: 'ACTIVE' | 'SUSPENDED' | 'INACTIVE' | string;
 }
+
+export class UpdateStatusDto {
+  @IsNotEmpty()
+  @IsString()
+  status: 'ACTIVE' | 'SUSPENDED' | 'INACTIVE' | string;
+}
+
+export class AssignHeadDto {
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @IsNotEmpty()
+  @IsString()
+  email: string;
+}
+

@@ -88,36 +88,75 @@ export class StateAdminService {
   /**
    * List departments in a state.
    */
+  /**
+   * List departments in a state with comprehensive metrics.
+   */
   listDepartments(stateId: string) {
     return db.departments
       .filter((d) => !stateId || d.stateId === stateId)
       .map((dept) => {
         const head = db.users.find((u) => u.id === dept.headUserId);
-        const servicesCount = db.services.filter((s) => (s as any).departmentId === dept.id || s.dept === dept.name).length;
-        const officersCount = db.officers.filter((o) => o.departmentId === dept.id).length;
-        const designationsCount = db.designations.filter((d) => d.departmentId === dept.id).length;
+        const servicesCount = (db.services || []).filter((s) => (s as any).departmentId === dept.id || s.dept === dept.name).length +
+          ((db as any).dynamicServices || []).filter((s: any) => s.departmentId === dept.id).length;
+        const officersCount = (db.officers || []).filter((o) => o.departmentId === dept.id).length;
+        const applicationsCount = (db.applications || []).filter((a) => (a as any).departmentId === dept.id || a.dept === dept.name).length;
+        const grievancesCount = (db.grievances || []).filter((g) => (g as any).departmentId === dept.id || (g as any).dept === dept.name).length;
+        const designationsCount = (db.designations || []).filter((d) => d.departmentId === dept.id).length;
         const grievanceCell = this.grievanceCells.find((c) => c.departmentId === dept.id);
 
         return {
           ...dept,
-          headUser: head ? { id: head.id, name: head.name, email: head.email } : null,
+          headUser: head ? { id: head.id, name: head.name, email: head.email, phone: head.phone } : null,
+          headName: head ? head.name : null,
+          headEmail: head ? head.email : null,
           servicesCount,
           officersCount,
+          applicationsCount,
+          grievancesCount,
           designationsCount,
           hasGrievanceCell: !!grievanceCell,
+          grievanceCellName: grievanceCell ? grievanceCell.cellName : null,
         };
       });
   }
 
   /**
-   * Get single department by ID.
+   * Get single department by ID with detailed inspect stats.
    */
-  getDepartmentById(id: string): Department {
+  getDepartmentById(id: string): any {
     const dept = db.departments.find((d) => d.id === id);
     if (!dept) {
       throw new NotFoundException(`Department '${id}' not found.`);
     }
-    return dept;
+
+    const head = db.users.find((u) => u.id === dept.headUserId);
+    const services = [
+      ...(db.services || []).filter((s) => (s as any).departmentId === dept.id || s.dept === dept.name),
+      ...((db as any).dynamicServices || []).filter((s: any) => s.departmentId === dept.id),
+    ];
+    const officers = (db.officers || []).filter((o) => o.departmentId === dept.id);
+    const applications = (db.applications || []).filter((a) => (a as any).departmentId === dept.id || a.dept === dept.name);
+    const grievances = (db.grievances || []).filter((g) => (g as any).departmentId === dept.id || (g as any).dept === dept.name);
+    const designations = (db.designations || []).filter((d) => d.departmentId === dept.id);
+    const grievanceCell = this.grievanceCells.find((c) => c.departmentId === dept.id);
+    const state = db.states.find((s) => s.id === dept.stateId);
+
+    return {
+      ...dept,
+      stateName: state ? state.name : dept.stateId,
+      headUser: head ? { id: head.id, name: head.name, email: head.email, phone: head.phone } : null,
+      headName: head ? head.name : null,
+      headEmail: head ? head.email : null,
+      metrics: {
+        servicesCount: services.length,
+        officersCount: officers.length,
+        applicationsCount: applications.length,
+        grievancesCount: grievances.length,
+        designationsCount: designations.length,
+      },
+      hasGrievanceCell: !!grievanceCell,
+      grievanceCell: grievanceCell || null,
+    };
   }
 
   /**
@@ -207,28 +246,178 @@ export class StateAdminService {
   }
 
   /**
-   * Update department name or description.
+   * Update department name, code, description, or head assignment.
    */
   updateDepartment(id: string, dto: UpdateDepartmentDto): Department {
-    const dept = this.getDepartmentById(id);
+    const dept = db.departments.find((d) => d.id === id);
+    if (!dept) {
+      throw new NotFoundException(`Department '${id}' not found.`);
+    }
+
     if (dto.name) dept.name = dto.name.trim();
-    if (dto.description) dept.description = dto.description;
-    if (dto.headUserId) dept.headUserId = dto.headUserId;
+    if (dto.code) dept.code = dto.code.trim().toUpperCase();
+    if (dto.description !== undefined) dept.description = dto.description;
+    if (dto.status) dept.status = dto.status as any;
+
+    if (dto.headUserId) {
+      dept.headUserId = dto.headUserId;
+    }
+
+    if (dto.headUserName || dto.headUserEmail) {
+      let head = db.users.find((u) => u.id === dept.headUserId);
+      if (!head) {
+        const headUserId = `USR-DH-${Date.now().toString().slice(-4)}`;
+        head = {
+          id: headUserId,
+          name: dto.headUserName || `${dept.name} Department Head`,
+          email: dto.headUserEmail || `head.${dept.code.toLowerCase()}@gov.in`,
+          phone: '9876543201',
+          aadhaar: '895421670001',
+          role: Role.DEPARTMENT_HEAD,
+          dept: dept.name,
+          status: 'Active',
+          joinedDate: new Date().toISOString(),
+        };
+        db.users.push(head);
+        dept.headUserId = headUserId;
+      } else {
+        if (dto.headUserName) head.name = dto.headUserName.trim();
+        if (dto.headUserEmail) head.email = dto.headUserEmail.trim();
+      }
+    }
+
     dept.updatedAt = new Date().toISOString();
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: 'DEPARTMENT_UPDATED',
+      actor: 'State Admin',
+      role: 'STATE_ADMIN',
+      date: new Date().toISOString(),
+      details: `Updated details for department '${dept.name}'.`,
+    });
+
     return dept;
   }
 
   /**
-   * Delete department.
+   * Change department status (ACTIVE / SUSPENDED / INACTIVE).
    */
-  deleteDepartment(id: string): { success: boolean; message: string } {
-    const dept = this.getDepartmentById(id);
+  updateDepartmentStatus(id: string, status: string): Department {
+    const dept = db.departments.find((d) => d.id === id);
+    if (!dept) {
+      throw new NotFoundException(`Department '${id}' not found.`);
+    }
 
-    // Check if services exist
-    const hasServices = db.services.some((s) => (s as any).departmentId === id || s.dept === dept.name);
-    if (hasServices) {
+    dept.status = status as any;
+    dept.updatedAt = new Date().toISOString();
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: `DEPARTMENT_${status.toUpperCase()}`,
+      actor: 'State Admin',
+      role: 'STATE_ADMIN',
+      date: new Date().toISOString(),
+      details: `Department '${dept.name}' status changed to '${status}'.`,
+    });
+
+    return dept;
+  }
+
+  /**
+   * Assign or change Department Head.
+   */
+  assignDepartmentHead(id: string, name: string, email: string): Department {
+    const dept = db.departments.find((d) => d.id === id);
+    if (!dept) {
+      throw new NotFoundException(`Department '${id}' not found.`);
+    }
+
+    let headUser = db.users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (!headUser) {
+      const headUserId = `USR-DH-${Date.now().toString().slice(-4)}`;
+      const newHead: User = {
+        id: headUserId,
+        name: name.trim(),
+        email: email.trim(),
+        phone: '9876543201',
+        aadhaar: '895421670001',
+        role: Role.DEPARTMENT_HEAD,
+        dept: dept.name,
+        status: 'Active',
+        joinedDate: new Date().toISOString(),
+      };
+      db.users.push(newHead);
+      headUser = newHead;
+    } else {
+      headUser.name = name.trim();
+      headUser.role = Role.DEPARTMENT_HEAD;
+      headUser.dept = dept.name;
+    }
+
+    dept.headUserId = headUser.id;
+    dept.updatedAt = new Date().toISOString();
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: 'DEPARTMENT_HEAD_ASSIGNED',
+      actor: 'State Admin',
+      role: 'STATE_ADMIN',
+      date: new Date().toISOString(),
+      details: `Assigned '${headUser.name}' (${headUser.email}) as Head of Department '${dept.name}'.`,
+    });
+
+    return dept;
+  }
+
+  /**
+   * Remove Department Head relationship without deleting user.
+   */
+  removeDepartmentHead(id: string): Department {
+    const dept = db.departments.find((d) => d.id === id);
+    if (!dept) {
+      throw new NotFoundException(`Department '${id}' not found.`);
+    }
+
+    const previousHeadId = dept.headUserId;
+    dept.headUserId = undefined;
+    dept.updatedAt = new Date().toISOString();
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: 'DEPARTMENT_HEAD_REMOVED',
+      actor: 'State Admin',
+      role: 'STATE_ADMIN',
+      date: new Date().toISOString(),
+      details: `Removed Department Head association from '${dept.name}'.`,
+    });
+
+    return dept;
+  }
+
+  /**
+   * Delete department with dependency check protection.
+   */
+  deleteDepartment(id: string): { success: boolean; message: string; details?: any } {
+    const dept = db.departments.find((d) => d.id === id);
+    if (!dept) {
+      throw new NotFoundException(`Department '${id}' not found.`);
+    }
+
+    // Comprehensive dependency audit
+    const services = [
+      ...(db.services || []).filter((s) => (s as any).departmentId === id || s.dept === dept.name),
+      ...((db as any).dynamicServices || []).filter((s: any) => s.departmentId === id),
+    ];
+    const officers = (db.officers || []).filter((o) => o.departmentId === id);
+    const applications = (db.applications || []).filter((a) => (a as any).departmentId === id || a.dept === dept.name);
+    const grievances = (db.grievances || []).filter((g) => (g as any).departmentId === id || (g as any).dept === dept.name);
+
+    if (services.length > 0 || officers.length > 0 || applications.length > 0 || grievances.length > 0) {
       throw new BadRequestException(
-        `Cannot delete department '${dept.name}' because active services are configured under it.`,
+        `Cannot delete department '${dept.name}' because historical/operational records depend on it: ` +
+          `${services.length} services, ${officers.length} officers, ${applications.length} applications, ${grievances.length} grievances. ` +
+          `Please suspend/deactivate the department instead to preserve audit integrity.`,
       );
     }
 
@@ -236,6 +425,15 @@ export class StateAdminService {
     if (index >= 0) {
       db.departments.splice(index, 1);
     }
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: 'DEPARTMENT_DELETED',
+      actor: 'State Admin',
+      role: 'STATE_ADMIN',
+      date: new Date().toISOString(),
+      details: `Deleted department '${dept.name}' (${dept.id}).`,
+    });
 
     return {
       success: true,

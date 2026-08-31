@@ -2965,6 +2965,46 @@
           "state-admin"
         ]
       },
+      "patch": {
+        "operationId": "StateAdminController_patchDepartment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "STATE_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDepartmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Update department details (PATCH alias)",
+        "tags": [
+          "state-admin"
+        ]
+      },
       "delete": {
         "operationId": "StateAdminController_deleteDepartment",
         "parameters": [
@@ -2990,7 +3030,101 @@
             "description": ""
           }
         },
-        "summary": "Delete department (fails if services exist)",
+        "summary": "Delete department (fails if dependent records exist)",
+        "tags": [
+          "state-admin"
+        ]
+      }
+    },
+    "/api/v1/state-admin/departments/{id}/status": {
+      "patch": {
+        "operationId": "StateAdminController_updateDepartmentStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "STATE_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Change department operational status (ACTIVE/SUSPENDED/INACTIVE)",
+        "tags": [
+          "state-admin"
+        ]
+      }
+    },
+    "/api/v1/state-admin/departments/{id}/head": {
+      "post": {
+        "operationId": "StateAdminController_assignDepartmentHead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "STATE_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "summary": "Assign or replace Department Head",
+        "tags": [
+          "state-admin"
+        ]
+      },
+      "delete": {
+        "operationId": "StateAdminController_removeDepartmentHead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-role",
+            "in": "header",
+            "description": "STATE_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Remove Department Head relationship",
         "tags": [
           "state-admin"
         ]

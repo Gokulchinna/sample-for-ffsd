@@ -898,14 +898,28 @@ const MOCK_WORKFLOW_CONFIG = [
     ]
   },
   {
-    id: 10,
-    service: 'Death Certificate',
+    id: 'srv_caste_income_ap',
+    service: 'Integrated Community, Nativity & Date of Birth Certificate',
+    name: 'Integrated Community, Nativity & Date of Birth Certificate',
+    dept: 'Revenue Department',
+    departmentId: 'dept_rev_ap',
+    status: 'Active',
+    fee: 50,
+    sla: 7,
+    docs: ['Aadhaar Card Proof'],
+    stages: 3,
+  },
+  {
+    id: 'srv_trade_license_ap',
+    service: 'Municipal Trade & Commercial License',
+    name: 'Municipal Trade & Commercial License',
     dept: 'Municipal Corporation',
-    status: 'Inactive',
-    stages: [
-      { name: 'Hospital Record Verification', role: 'Dept. Officer (VRO)', days: 1, type: 'officer' },
-      { name: 'Certificate Issuance', role: 'Dept. Supervisor (MRO)', days: 2, type: 'supervisor' },
-    ]
+    departmentId: 'dept_mun_ap',
+    status: 'Active',
+    fee: 175,
+    sla: 14,
+    docs: ['Property Tax Receipt'],
+    stages: 2,
   },
 ];
 
@@ -2363,6 +2377,7 @@ export const db: {
   departments: Department[];
   designations: Designation[];
   officers: OfficerUser[];
+  dynamicServices: any[];
 } = {
   users: MOCK_USERS as User[],
   applications: MOCK_APPLICATIONS as Application[],
@@ -2392,4 +2407,36 @@ export const db: {
   departments: [...MASTER_DEPARTMENTS],
   designations: [...MASTER_DESIGNATIONS],
   officers: [...MASTER_OFFICERS],
+  dynamicServices: [
+    {
+      id: 'srv_caste_income_ap',
+      departmentId: 'dept_rev_ap',
+      stateId: 'state_ap',
+      name: 'Integrated Community, Nativity & Date of Birth Certificate',
+      code: 'CASTE_CERT_AP',
+      description: 'Official statutory certificate verifying caste, nativity, and parental ancestry.',
+      status: 'ACTIVE',
+      serviceFee: 35,
+      platformFee: 15,
+      totalFee: 50,
+      termsAndConditions: 'I hereby declare that the details provided are true and verified per Revenue Act guidelines.',
+      fields: [
+        { id: 'applicant_name', label: 'Full Name of Applicant', type: 'TEXT', required: true },
+        { id: 'aadhaar_number', label: 'Aadhaar Card Number', type: 'TEXT', required: true },
+        { id: 'caste_category', label: 'Social Category / Caste', type: 'DROPDOWN', required: true },
+        { id: 'annual_income', label: 'Annual Family Income (INR)', type: 'NUMBER', required: true },
+        { id: 'dob', label: 'Date of Birth', type: 'DATE', required: true },
+      ],
+      documentRequirements: [
+        { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
+        { id: 'doc_address', name: 'Address / Residence Proof', required: true },
+      ],
+      workflowSteps: [
+        { stepNumber: 1, stepName: 'VRO Verification', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+        { stepNumber: 2, stepName: 'MRO Verification', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+        { stepNumber: 3, stepName: 'Tahsildar Final Approval', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+  ],
 };

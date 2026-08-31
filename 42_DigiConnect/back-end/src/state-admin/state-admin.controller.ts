@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Param,
   Query,
@@ -96,11 +97,76 @@ export class StateAdminController {
     };
   }
 
+  @Patch('departments/:id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.STATE_ADMIN)
+  @ApiHeader({ name: 'x-role', description: 'STATE_ADMIN' })
+  @ApiOperation({ summary: 'Update department details (PATCH alias)' })
+  patchDepartment(
+    @Param('id') id: string,
+    @Body() dto: UpdateDepartmentDto,
+  ) {
+    const updated = this.stateAdminService.updateDepartment(id, dto);
+    return {
+      success: true,
+      message: `Department '${updated.name}' updated successfully.`,
+      data: updated,
+    };
+  }
+
+  @Patch('departments/:id/status')
+  @UseGuards(RolesGuard)
+  @Roles(Role.STATE_ADMIN)
+  @ApiHeader({ name: 'x-role', description: 'STATE_ADMIN' })
+  @ApiOperation({ summary: 'Change department operational status (ACTIVE/SUSPENDED/INACTIVE)' })
+  updateDepartmentStatus(
+    @Param('id') id: string,
+    @Body() body: { status: string },
+  ) {
+    const updated = this.stateAdminService.updateDepartmentStatus(id, body.status);
+    return {
+      success: true,
+      message: `Department '${updated.name}' status set to ${updated.status}.`,
+      data: updated,
+    };
+  }
+
+  @Post('departments/:id/head')
+  @UseGuards(RolesGuard)
+  @Roles(Role.STATE_ADMIN)
+  @ApiHeader({ name: 'x-role', description: 'STATE_ADMIN' })
+  @ApiOperation({ summary: 'Assign or replace Department Head' })
+  assignDepartmentHead(
+    @Param('id') id: string,
+    @Body() body: { name: string; email: string },
+  ) {
+    const updated = this.stateAdminService.assignDepartmentHead(id, body.name, body.email);
+    return {
+      success: true,
+      message: `Department Head assigned successfully for '${updated.name}'.`,
+      data: updated,
+    };
+  }
+
+  @Delete('departments/:id/head')
+  @UseGuards(RolesGuard)
+  @Roles(Role.STATE_ADMIN)
+  @ApiHeader({ name: 'x-role', description: 'STATE_ADMIN' })
+  @ApiOperation({ summary: 'Remove Department Head relationship' })
+  removeDepartmentHead(@Param('id') id: string) {
+    const updated = this.stateAdminService.removeDepartmentHead(id);
+    return {
+      success: true,
+      message: `Department Head removed from '${updated.name}'.`,
+      data: updated,
+    };
+  }
+
   @Delete('departments/:id')
   @UseGuards(RolesGuard)
   @Roles(Role.STATE_ADMIN)
   @ApiHeader({ name: 'x-role', description: 'STATE_ADMIN' })
-  @ApiOperation({ summary: 'Delete department (fails if services exist)' })
+  @ApiOperation({ summary: 'Delete department (fails if dependent records exist)' })
   deleteDepartment(@Param('id') id: string) {
     return this.stateAdminService.deleteDepartment(id);
   }

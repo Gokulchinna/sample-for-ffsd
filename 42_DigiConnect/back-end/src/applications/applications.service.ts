@@ -22,7 +22,10 @@ export class ApplicationsService {
   ) {}
 
   submit(createApplicationDto: CreateApplicationDto): Application {
-    const service = db.services.find(s => s.id === createApplicationDto.serviceId);
+    let service: any = db.services.find(s => String(s.id) === String(createApplicationDto.serviceId));
+    if (!service && (db as any).dynamicServices) {
+      service = (db as any).dynamicServices.find((s: any) => s.id === createApplicationDto.serviceId);
+    }
     if (!service) {
       throw new NotFoundException(`Service not found with ID: ${createApplicationDto.serviceId}`);
     }
