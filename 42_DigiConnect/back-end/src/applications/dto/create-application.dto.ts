@@ -38,5 +38,10 @@ export class CreateApplicationDto {
   document?: any; // Single uploaded document field
 
   @IsOptional()
+  @IsString()
+  selectedJurisdictionNodeId?: string;
+
+  @IsOptional()
   formData?: any; // Allow dynamic form data
 }
+

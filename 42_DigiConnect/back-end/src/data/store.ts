@@ -101,6 +101,244 @@ const MOCK_USERS = [
     "dob": "1975-06-01",
     "gender": "Male"
   },
+  // ─── 4 REAL STATE ADMINISTRATORS ───
+  {
+    "id": "USR-SA-AP",
+    "name": "Sri K. Vijayanand IAS",
+    "role": "state_admin",
+    "title": "Special Chief Secretary & State Administrator",
+    "email": "admin@ap.gov.in",
+    "phone": "9876543201",
+    "aadhaar": "895421671001",
+    "joined": "01 Jan 2023",
+    "status": "Active",
+    "dept": "General Administration Department",
+    "jurisdiction": "state_ap",
+    "state": "Andhra Pradesh",
+    "password": "password123"
+  },
+  {
+    "id": "USR-SA-TN",
+    "name": "Thiru Shiv Das Meena IAS",
+    "role": "state_admin",
+    "title": "Chief Secretary & State Administrator",
+    "email": "admin@tn.gov.in",
+    "phone": "9876543202",
+    "aadhaar": "895421671002",
+    "joined": "01 Jan 2023",
+    "status": "Active",
+    "dept": "Public Department (Government of Tamil Nadu)",
+    "jurisdiction": "state_tn",
+    "state": "Tamil Nadu",
+    "password": "password123"
+  },
+  {
+    "id": "USR-SA-KA",
+    "name": "Smt. Vandita Sharma IAS",
+    "role": "state_admin",
+    "title": "Chief Secretary & State Administrator",
+    "email": "admin@ka.gov.in",
+    "phone": "9876543203",
+    "aadhaar": "895421671003",
+    "joined": "01 Jan 2023",
+    "status": "Active",
+    "dept": "Department of Personnel & Administrative Reforms (DPAR)",
+    "jurisdiction": "state_ka",
+    "state": "Karnataka",
+    "password": "password123"
+  },
+  {
+    "id": "USR-SA-KL",
+    "name": "Dr. V. Venu IAS",
+    "role": "state_admin",
+    "title": "Chief Secretary & State Administrator",
+    "email": "admin@kl.gov.in",
+    "phone": "9876543204",
+    "aadhaar": "895421671004",
+    "joined": "01 Jan 2023",
+    "status": "Active",
+    "dept": "General Administration Department (Kerala)",
+    "jurisdiction": "state_kl",
+    "state": "Kerala",
+    "password": "password123"
+  },
+
+  // ─── 8 REAL DEPARTMENT HEADS ───
+  {
+    "id": "USR-DH-REV-AP",
+    "name": "Dr. B. R. Ambedkar IAS",
+    "role": "department_head",
+    "title": "Principal Secretary (Revenue)",
+    "email": "head.rev@ap.gov.in",
+    "phone": "9876543211",
+    "aadhaar": "895421672001",
+    "status": "Active",
+    "dept": "Revenue, Registration & Stamps Department",
+    "jurisdiction": "state_ap",
+    "state": "Andhra Pradesh",
+    "password": "password123"
+  },
+  {
+    "id": "USR-DH-MUN-AP",
+    "name": "Sri K. Praveen Kumar IAS",
+    "role": "department_head",
+    "title": "Commissioner & Director of Municipal Administration",
+    "email": "head.mun@ap.gov.in",
+    "phone": "9876543212",
+    "aadhaar": "895421672002",
+    "status": "Active",
+    "dept": "Municipal Administration & Urban Development (MA&UD)",
+    "jurisdiction": "state_ap",
+    "state": "Andhra Pradesh",
+    "password": "password123"
+  },
+  {
+    "id": "USR-DH-REV-TN",
+    "name": "Thiru Kumar Jayant IAS",
+    "role": "department_head",
+    "title": "Principal Secretary (Revenue & Disaster Management)",
+    "email": "head.rev@tn.gov.in",
+    "phone": "9876543213",
+    "aadhaar": "895421672003",
+    "status": "Active",
+    "dept": "Revenue & Disaster Management Department",
+    "jurisdiction": "state_tn",
+    "state": "Tamil Nadu",
+    "password": "password123"
+  },
+  {
+    "id": "USR-DH-MAWS-TN",
+    "name": "Thiru D. Karthikeyan IAS",
+    "role": "department_head",
+    "title": "Principal Secretary (MAWS)",
+    "email": "head.maws@tn.gov.in",
+    "phone": "9876543214",
+    "aadhaar": "895421672004",
+    "status": "Active",
+    "dept": "Municipal Administration & Water Supply (MAWS)",
+    "jurisdiction": "state_tn",
+    "state": "Tamil Nadu",
+    "password": "password123"
+  },
+  {
+    "id": "USR-DH-REV-KA",
+    "name": "Sri Rajender Kumar Kataria IAS",
+    "role": "department_head",
+    "title": "Principal Secretary (Revenue - Kandaya Ilakhe)",
+    "email": "head.rev@ka.gov.in",
+    "phone": "9876543215",
+    "aadhaar": "895421672005",
+    "status": "Active",
+    "dept": "Revenue Department (Kandaya Ilakhe)",
+    "jurisdiction": "state_ka",
+    "state": "Karnataka",
+    "password": "password123"
+  },
+  {
+    "id": "USR-DH-UDD-KA",
+    "name": "Dr. R. Vishal IAS",
+    "role": "department_head",
+    "title": "Secretary (Urban Development Department)",
+    "email": "head.udd@ka.gov.in",
+    "phone": "9876543216",
+    "aadhaar": "895421672006",
+    "status": "Active",
+    "dept": "Urban Development Department (UDD / BBMP)",
+    "jurisdiction": "state_ka",
+    "state": "Karnataka",
+    "password": "password123"
+  },
+  {
+    "id": "USR-DH-REV-KL",
+    "name": "Dr. A. Jayathilak IAS",
+    "role": "department_head",
+    "title": "Additional Chief Secretary (Revenue)",
+    "email": "head.rev@kl.gov.in",
+    "phone": "9876543217",
+    "aadhaar": "895421672007",
+    "status": "Active",
+    "dept": "Revenue & Disaster Management Department",
+    "jurisdiction": "state_kl",
+    "state": "Kerala",
+    "password": "password123"
+  },
+  {
+    "id": "USR-DH-LSGD-KL",
+    "name": "Smt. Sarada Muraleedharan IAS",
+    "role": "department_head",
+    "title": "Additional Chief Secretary (LSGD)",
+    "email": "head.lsgd@kl.gov.in",
+    "phone": "9876543218",
+    "aadhaar": "895421672008",
+    "status": "Active",
+    "dept": "Local Self Government Department (LSGD)",
+    "jurisdiction": "state_kl",
+    "state": "Kerala",
+    "password": "password123"
+  },
+
+  // ─── MULTI-STATE CITIZENS ───
+  {
+    "id": "CIT-TN-01",
+    "name": "K. Muthukrishnan",
+    "role": "citizen",
+    "email": "muthu.k@gmail.com",
+    "phone": "9876543399",
+    "aadhaar": "895421674401",
+    "joined": "15 Feb 2024",
+    "status": "Active",
+    "dept": "-",
+    "jurisdiction": "node_pollachi_vil",
+    "address": "12, Sannathi Street, Anaimalai",
+    "state": "Tamil Nadu",
+    "district": "Coimbatore",
+    "mandal": "Pollachi Taluk",
+    "pincode": "642104",
+    "dob": "1990-06-15",
+    "gender": "Male",
+    "password": "password123"
+  },
+  {
+    "id": "CIT-KA-01",
+    "name": "H. Chethan Gowda",
+    "role": "citizen",
+    "email": "chethan.gowda@gmail.com",
+    "phone": "9876543499",
+    "aadhaar": "895421674402",
+    "joined": "20 Feb 2024",
+    "status": "Active",
+    "dept": "-",
+    "jurisdiction": "node_bilikere_vil",
+    "address": "Main Road, Bilikere",
+    "state": "Karnataka",
+    "district": "Mysuru",
+    "mandal": "Hunsur Taluk",
+    "pincode": "571103",
+    "dob": "1988-11-22",
+    "gender": "Male",
+    "password": "password123"
+  },
+  {
+    "id": "CIT-KL-01",
+    "name": "V. Sreekumar",
+    "role": "citizen",
+    "email": "sreekumar.v@gmail.com",
+    "phone": "9876543599",
+    "aadhaar": "895421674403",
+    "joined": "01 Mar 2024",
+    "status": "Active",
+    "dept": "-",
+    "jurisdiction": "node_nedumangad_vil",
+    "address": "Kavuvila House, Vembayam",
+    "state": "Kerala",
+    "district": "Thiruvananthapuram",
+    "mandal": "Nedumangad Taluk",
+    "pincode": "695615",
+    "dob": "1983-03-10",
+    "gender": "Male",
+    "password": "password123"
+  },
+
   {
     "id": "CIT-1001",
     "name": "Ravi Kumar",
@@ -683,10 +921,12 @@ const MOCK_APPLICATIONS = [
     "serviceType": "certificate",
     "citizenId": "CIT-1001",
     "citizenName": "Ravi Kumar",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1001",
-    "officerName": "Suresh Reddy",
-    "dept": "Revenue Department",
+    "jurisdiction": "node_cg_vil",
+    "selectedJurisdictionNodeId": "node_cg_vil",
+    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village",
+    "officerId": "OFF-VRO-01",
+    "officerName": "Gokul Rao (VRO)",
+    "dept": "Revenue, Registration & Stamps Department",
     "status": "completed",
     "remarks": "All verified.",
     "fee": 50,
@@ -709,13 +949,13 @@ const MOCK_APPLICATIONS = [
       {
         "action": "Status updated to approved",
         "date": "2026-04-22T09:00:00.000Z",
-        "actor": "Suresh Reddy",
+        "actor": "Gokul Rao",
         "note": "Approved"
       },
       {
         "action": "Supervisor Final Approval",
         "date": "2026-04-23T09:00:00.000Z",
-        "actor": "Deepak Verma",
+        "actor": "K. V. Reddy",
         "note": "Certificate Generated"
       },
       {
@@ -735,10 +975,12 @@ const MOCK_APPLICATIONS = [
     "serviceType": "welfare",
     "citizenId": "CIT-1001",
     "citizenName": "Ravi Kumar",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1004",
-    "officerName": "Priya Nair",
-    "dept": "Welfare Department",
+    "jurisdiction": "node_cg_vil",
+    "selectedJurisdictionNodeId": "node_cg_vil",
+    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village",
+    "officerId": "OFF-VRO-01",
+    "officerName": "Gokul Rao (VRO)",
+    "dept": "Revenue, Registration & Stamps Department",
     "status": "rejected",
     "remarks": "Income exceeds limit for scholarship.",
     "fee": 0,
@@ -761,7 +1003,7 @@ const MOCK_APPLICATIONS = [
       {
         "action": "Status updated to rejected",
         "date": "2026-04-24T09:00:00.000Z",
-        "actor": "Priya Nair",
+        "actor": "Gokul Rao",
         "note": "Income exceeds limit."
       }
     ],
@@ -771,14 +1013,16 @@ const MOCK_APPLICATIONS = [
   {
     "id": "APP-1003",
     "serviceId": "SVC-006",
-    "serviceName": "Event Permission",
+    "serviceName": "Municipal Trade & Commercial License",
     "serviceType": "permission",
     "citizenId": "CIT-1001",
     "citizenName": "Ravi Kumar",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1007",
-    "officerName": "Mohan Das",
-    "dept": "Municipal Corporation",
+    "jurisdiction": "node_w14",
+    "selectedJurisdictionNodeId": "node_w14",
+    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Urban Sub-Division > Tirupati Municipal Corporation > Ward 14",
+    "officerId": "OFF-WARD-01",
+    "officerName": "R. Ramesh (WAO)",
+    "dept": "Municipal Administration & Urban Development (MA&UD)",
     "status": "under-review",
     "remarks": "",
     "fee": 200,
@@ -809,10 +1053,12 @@ const MOCK_APPLICATIONS = [
     "serviceType": "certificate",
     "citizenId": "CIT-1001",
     "citizenName": "Ravi Kumar",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1001",
-    "officerName": "Suresh Reddy",
-    "dept": "Revenue Department",
+    "jurisdiction": "node_cg_vil",
+    "selectedJurisdictionNodeId": "node_cg_vil",
+    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village",
+    "officerId": "OFF-VRO-01",
+    "officerName": "Gokul Rao (VRO)",
+    "dept": "Revenue, Registration & Stamps Department",
     "status": "approved",
     "remarks": "Field verification clear.",
     "fee": 50,
@@ -835,7 +1081,7 @@ const MOCK_APPLICATIONS = [
       {
         "action": "Status updated to approved",
         "date": "2026-05-04T04:58:07.178Z",
-        "actor": "Suresh Reddy",
+        "actor": "Gokul Rao",
         "note": "Field verification clear."
       }
     ],
@@ -845,14 +1091,16 @@ const MOCK_APPLICATIONS = [
   {
     "id": "APP-1005",
     "serviceId": "SVC-004",
-    "serviceName": "Welfare / Subsidy Scheme",
-    "serviceType": "welfare",
+    "serviceName": "Integrated Community & Nativity Certificate",
+    "serviceType": "certificate",
     "citizenId": "CIT-1001",
     "citizenName": "Ravi Kumar",
-    "jurisdiction": "Secunderabad",
-    "officerId": "EMP-1004",
-    "officerName": "Priya Nair",
-    "dept": "Welfare Department",
+    "jurisdiction": "node_cg_vil",
+    "selectedJurisdictionNodeId": "node_cg_vil",
+    "jurisdictionPath": "Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village",
+    "officerId": "OFF-VRO-01",
+    "officerName": "Gokul Rao (VRO)",
+    "dept": "Revenue, Registration & Stamps Department",
     "status": "query",
     "remarks": "Please upload clear bank passbook.",
     "fee": 0,
@@ -1099,8 +1347,120 @@ const MOCK_APPLICATIONS = [
     ],
     "submittedDate": "2026-04-29T05:58:07.178Z",
     "slaDate": "2026-05-06T05:58:07.178Z"
+  },
+  // ─── TAMIL NADU REALISTIC DEMO APPLICATION ───
+  {
+    "id": "APP-TN-001",
+    "serviceId": "SVC-TN-01",
+    "serviceName": "Community & Nativity Certificate",
+    "serviceType": "certificate",
+    "citizenId": "CIT-TN-01",
+    "citizenName": "K. Muthukrishnan",
+    "jurisdiction": "node_pollachi_vil",
+    "selectedJurisdictionNodeId": "node_pollachi_vil",
+    "jurisdictionPath": "Tamil Nadu > Coimbatore District > Pollachi Revenue Division > Pollachi Taluk > Anaimalai Revenue Village",
+    "officerId": "OFF-VAO-TN-01",
+    "officerName": "M. Selvakumar (VAO)",
+    "dept": "Revenue & Disaster Management Department",
+    "status": "pending",
+    "remarks": "Awaiting initial village inquiry and genealogy verification.",
+    "fee": 60,
+    "paymentStatus": "paid",
+    "documents": [
+      {
+        "name": "Family_Ration_Card.pdf",
+        "type": "Address Proof",
+        "date": "2026-05-01T09:00:00.000Z",
+        "status": "uploaded"
+      }
+    ],
+    "timeline": [
+      {
+        "action": "Application Submitted",
+        "date": "2026-05-01T09:00:00.000Z",
+        "actor": "K. Muthukrishnan",
+        "note": "Submitted via e-Sevai portal"
+      }
+    ],
+    "submittedDate": "2026-05-01T09:00:00.000Z",
+    "slaDate": "2026-05-15T09:00:00.000Z"
+  },
+  // ─── KARNATAKA REALISTIC DEMO APPLICATION ───
+  {
+    "id": "APP-KA-001",
+    "serviceId": "SVC-KA-01",
+    "serviceName": "Caste & Income Certificate (Nadakacheri)",
+    "serviceType": "certificate",
+    "citizenId": "CIT-KA-01",
+    "citizenName": "H. Chethan Gowda",
+    "jurisdiction": "node_bilikere_vil",
+    "selectedJurisdictionNodeId": "node_bilikere_vil",
+    "jurisdictionPath": "Karnataka > Mysuru District > Hunsur Sub-Division > Hunsur Taluk > Bilikere Revenue Village",
+    "officerId": "OFF-VA-KA-01",
+    "officerName": "Basavaraj Patil (Village Accountant)",
+    "dept": "Revenue Department (Kandaya Ilakhe)",
+    "status": "pending",
+    "remarks": "Bhoomi landholding & income verification in progress.",
+    "fee": 40,
+    "paymentStatus": "paid",
+    "documents": [
+      {
+        "name": "RTC_Pahani.pdf",
+        "type": "Land Record",
+        "date": "2026-05-02T10:00:00.000Z",
+        "status": "uploaded"
+      }
+    ],
+    "timeline": [
+      {
+        "action": "Application Submitted",
+        "date": "2026-05-02T10:00:00.000Z",
+        "actor": "H. Chethan Gowda",
+        "note": "Nadakacheri service application"
+      }
+    ],
+    "submittedDate": "2026-05-02T10:00:00.000Z",
+    "slaDate": "2026-05-16T10:00:00.000Z"
+  },
+  // ─── KERALA REALISTIC DEMO APPLICATION ───
+  {
+    "id": "APP-KL-001",
+    "serviceId": "SVC-KL-01",
+    "serviceName": "Land Possession & Valuation Certificate",
+    "serviceType": "certificate",
+    "citizenId": "CIT-KL-01",
+    "citizenName": "V. Sreekumar",
+    "jurisdiction": "node_nedumangad_vil",
+    "selectedJurisdictionNodeId": "node_nedumangad_vil",
+    "jurisdictionPath": "Kerala > Thiruvananthapuram District > Nedumangad Revenue Division > Nedumangad Taluk > Vembayam Revenue Village",
+    "officerId": "OFF-VO-KL-01",
+    "officerName": "Sajeev Kumar (Village Officer)",
+    "dept": "Revenue & Disaster Management Department",
+    "status": "pending",
+    "remarks": "Thandaper register check initiated at Village Office.",
+    "fee": 50,
+    "paymentStatus": "paid",
+    "documents": [
+      {
+        "name": "Land_Tax_Receipt.pdf",
+        "type": "Tax Receipt",
+        "date": "2026-05-03T11:00:00.000Z",
+        "status": "uploaded"
+      }
+    ],
+    "timeline": [
+      {
+        "action": "Application Submitted",
+        "date": "2026-05-03T11:00:00.000Z",
+        "actor": "V. Sreekumar",
+        "note": "Submitted via e-District Kerala"
+      }
+    ],
+    "submittedDate": "2026-05-03T11:00:00.000Z",
+    "slaDate": "2026-05-13T11:00:00.000Z"
   }
 ];
+
 
 // ── Grievance statuses ──
 // Active  : 'open'  (NEW_GRIEVANCE) | 'investigating' (UNDER_INVESTIGATION) | 'escalated' (GRIEVANCE_ESCALATED — pending supervisor)

@@ -40,15 +40,27 @@ export class ApplicationsService {
       }
     }
 
+    const selectedNodeId =
+      (createApplicationDto as any).selectedJurisdictionNodeId ||
+      createApplicationDto.formData?.selectedJurisdictionNodeId ||
+      citizen?.jurisdiction;
+
     // Auto-assign logic: Hybrid Jurisdiction + Workload Balancer
     // 1. Filter officers by department AND jurisdiction matching the citizen
     let eligibleOfficers = this.usersService.findEligibleOfficers(
       createApplicationDto.dept, 
-      citizen ? citizen.jurisdiction : undefined
+      selectedNodeId || citizen?.jurisdiction
     );
 
     if (eligibleOfficers.length === 0) {
-      throw new BadRequestException(`No officers available in jurisdiction: ${citizen ? citizen.jurisdiction : 'Unknown'} for department: ${createApplicationDto.dept}`);
+      eligibleOfficers = this.usersService.findFallbackOfficers(createApplicationDto.dept);
+    }
+    if (eligibleOfficers.length === 0) {
+      eligibleOfficers = this.usersService.findFallbackOfficers();
+    }
+
+    if (eligibleOfficers.length === 0) {
+      throw new BadRequestException(`No officers available in jurisdiction: ${selectedNodeId || citizen?.jurisdiction || 'Unknown'} for department: ${createApplicationDto.dept}`);
     }
 
     // 2. Workload Balancer: Find the officer with the fewest active applications
@@ -66,10 +78,6 @@ export class ApplicationsService {
         officer = off;
       }
     }
-    const selectedNodeId =
-      (createApplicationDto as any).selectedJurisdictionNodeId ||
-      createApplicationDto.formData?.selectedJurisdictionNodeId ||
-      citizen?.jurisdiction;
 
     let jurisdictionPath = citizen && citizen.jurisdiction ? citizen.jurisdiction : '-';
     if (selectedNodeId) {

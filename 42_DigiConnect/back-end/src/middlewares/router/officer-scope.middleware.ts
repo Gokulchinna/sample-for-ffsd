@@ -1,17 +1,25 @@
 import { Injectable, NestMiddleware, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
+import { Role, normalizeRole } from '../../models/enums';
 
 @Injectable()
 export class OfficerScopeMiddleware implements NestMiddleware {
-  private readonly allowedRoles = ['officer', 'supervisor', 'super_user', 'grievance'];
+  private readonly staffRoles: Role[] = [
+    Role.OFFICER,
+    Role.DEPARTMENT_HEAD,
+    Role.GRIEVANCE_OFFICER,
+    Role.STATE_ADMIN,
+    Role.CENTRAL_ADMIN,
+  ];
 
   use(req: Request, res: Response, next: NextFunction): void {
-    const role = req.headers['x-role'] as string;
+    const roleHeader = req.headers['x-role'] as string;
     const userId = req.headers['x-user-id'] as string;
+    const normalized = normalizeRole(roleHeader);
 
-    if (!role || !this.allowedRoles.includes(role)) {
+    if (!normalized || !this.staffRoles.includes(normalized)) {
       throw new ForbiddenException(
-        `Staff Scope Required: Access restricted to authorized departmental personnel (Provided: ${role || 'none'})`,
+        `Staff Scope Required: Access restricted to authorized departmental personnel (Provided: ${roleHeader || 'none'})`,
       );
     }
 

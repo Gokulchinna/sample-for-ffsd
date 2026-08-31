@@ -24,11 +24,31 @@ export class UsersService {
   }
 
   findEligibleOfficers(dept: string, jurisdiction?: string): User[] {
-    return db.users.filter(u => 
+    let officers = db.users.filter(u => 
       u.role === 'officer' && 
-      u.dept === dept &&
+      (!dept || u.dept === dept || dept.toLowerCase().includes((u.dept || '').toLowerCase()) || (u.dept || '').toLowerCase().includes(dept.toLowerCase())) &&
       (!jurisdiction || u.jurisdiction === jurisdiction || u.jurisdiction === 'All Mandals' || u.jurisdiction === 'All' || !u.jurisdiction)
     );
+
+    if (officers.length === 0) {
+      // Check db.officers (Modern UCSDP Architecture)
+      const modernOfficers = (db.officers || []).filter(o => o.status === 'Active');
+      if (modernOfficers.length > 0) {
+        return modernOfficers.map(o => ({
+          id: o.id,
+          name: o.name,
+          role: Role.OFFICER,
+          title: o.designationTitle,
+          email: o.email,
+          phone: o.phone,
+          status: o.status,
+          dept: o.departmentId,
+          jurisdiction: o.assignedNodeId,
+        } as any));
+      }
+    }
+
+    return officers;
   }
 
   findFallbackOfficers(dept?: string): User[] {

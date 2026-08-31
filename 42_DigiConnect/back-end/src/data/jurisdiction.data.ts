@@ -13,20 +13,20 @@ export const MASTER_STATES: StateGovernment[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'state_ka',
-    name: 'Karnataka',
-    code: 'KA',
-    rootNodeId: 'node_ka',
-    stateAdminId: 'USR-SA-KA',
-    status: 'ACTIVE',
-    createdAt: '2026-01-01T00:00:00.000Z',
-  },
-  {
     id: 'state_tn',
     name: 'Tamil Nadu',
     code: 'TN',
     rootNodeId: 'node_tn',
     stateAdminId: 'USR-SA-TN',
+    status: 'ACTIVE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'state_ka',
+    name: 'Karnataka',
+    code: 'KA',
+    rootNodeId: 'node_ka',
+    stateAdminId: 'USR-SA-KA',
     status: 'ACTIVE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
@@ -42,7 +42,9 @@ export const MASTER_STATES: StateGovernment[] = [
 ];
 
 export const MASTER_JURISDICTION_NODES: JurisdictionNode[] = [
-  // ─── ANDHRA PRADESH ROOT & DISTRICT ───
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 1. ANDHRA PRADESH (AP) — District -> Revenue Sub-Division -> Mandal -> Village
+  // ═══════════════════════════════════════════════════════════════════════════
   {
     id: 'node_ap',
     stateId: 'state_ap',
@@ -61,8 +63,7 @@ export const MASTER_JURISDICTION_NODES: JurisdictionNode[] = [
     tierLevel: 'DISTRICT',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
-
-  // ─── AP RURAL BRANCH ───
+  // AP Rural Branch
   {
     id: 'node_rsd',
     stateId: 'state_ap',
@@ -99,8 +100,7 @@ export const MASTER_JURISDICTION_NODES: JurisdictionNode[] = [
     tierLevel: 'VILLAGE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
-
-  // ─── AP URBAN BRANCH ───
+  // AP Urban Branch
   {
     id: 'node_usd',
     stateId: 'state_ap',
@@ -138,48 +138,244 @@ export const MASTER_JURISDICTION_NODES: JurisdictionNode[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 
-  // ─── TELANGANA ROOT & DISTRICT ───
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 2. TAMIL NADU (TN) — District -> Revenue Division -> Taluk -> Revenue Village
+  // ═══════════════════════════════════════════════════════════════════════════
   {
-    id: 'node_ts',
-    stateId: 'state_ts',
+    id: 'node_tn',
+    stateId: 'state_tn',
     parentId: null,
-    name: 'Telangana',
+    name: 'Tamil Nadu',
     governanceType: 'COMMON',
     tierLevel: 'STATE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'node_hyd',
-    stateId: 'state_ts',
-    parentId: 'node_ts',
-    name: 'Hyderabad District',
+    id: 'node_cbe',
+    stateId: 'state_tn',
+    parentId: 'node_tn',
+    name: 'Coimbatore District',
     governanceType: 'COMMON',
     tierLevel: 'DISTRICT',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
+  // TN Rural Branch (Pollachi Division -> Pollachi Taluk -> Anaimalai Village)
   {
-    id: 'node_hyd_usd',
-    stateId: 'state_ts',
-    parentId: 'node_hyd',
-    name: 'Charminar Urban Sub-Division',
+    id: 'node_pollachi_div',
+    stateId: 'state_tn',
+    parentId: 'node_cbe',
+    name: 'Pollachi Revenue Division',
+    governanceType: 'RURAL',
+    tierLevel: 'SUB_DIVISION',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_pollachi_taluk',
+    stateId: 'state_tn',
+    parentId: 'node_pollachi_div',
+    name: 'Pollachi Taluk',
+    governanceType: 'RURAL',
+    tierLevel: 'MANDAL',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_pollachi_vil',
+    stateId: 'state_tn',
+    parentId: 'node_pollachi_taluk',
+    name: 'Anaimalai Revenue Village',
+    governanceType: 'RURAL',
+    tierLevel: 'VILLAGE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  // TN Urban Branch (Coimbatore City Municipal Corp -> RS Puram Ward 23)
+  {
+    id: 'node_cbe_usd',
+    stateId: 'state_tn',
+    parentId: 'node_cbe',
+    name: 'Coimbatore West Urban Sub-Division',
     governanceType: 'URBAN',
     tierLevel: 'SUB_DIVISION',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'node_ghmc',
-    stateId: 'state_ts',
-    parentId: 'node_hyd_usd',
-    name: 'GHMC Corporation',
+    id: 'node_ccmc',
+    stateId: 'state_tn',
+    parentId: 'node_cbe_usd',
+    name: 'Coimbatore City Municipal Corporation',
     governanceType: 'URBAN',
     tierLevel: 'MUNICIPALITY',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'node_w21',
-    stateId: 'state_ts',
-    parentId: 'node_ghmc',
-    name: 'Ward 21 - Moghalpura',
+    id: 'node_cbe_w23',
+    stateId: 'state_tn',
+    parentId: 'node_ccmc',
+    name: 'Ward 23 - RS Puram',
+    governanceType: 'URBAN',
+    tierLevel: 'WARD',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 3. KARNATAKA (KA) — District -> Sub-Division -> Taluk -> Hobli / Revenue Village
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'node_ka',
+    stateId: 'state_ka',
+    parentId: null,
+    name: 'Karnataka',
+    governanceType: 'COMMON',
+    tierLevel: 'STATE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_mys',
+    stateId: 'state_ka',
+    parentId: 'node_ka',
+    name: 'Mysuru District',
+    governanceType: 'COMMON',
+    tierLevel: 'DISTRICT',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  // KA Rural Branch (Hunsur Sub-Division -> Hunsur Taluk -> Bilikere Village)
+  {
+    id: 'node_hunsur_subdiv',
+    stateId: 'state_ka',
+    parentId: 'node_mys',
+    name: 'Hunsur Sub-Division',
+    governanceType: 'RURAL',
+    tierLevel: 'SUB_DIVISION',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_hunsur_taluk',
+    stateId: 'state_ka',
+    parentId: 'node_hunsur_subdiv',
+    name: 'Hunsur Taluk',
+    governanceType: 'RURAL',
+    tierLevel: 'MANDAL',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_bilikere_vil',
+    stateId: 'state_ka',
+    parentId: 'node_hunsur_taluk',
+    name: 'Bilikere Revenue Village',
+    governanceType: 'RURAL',
+    tierLevel: 'VILLAGE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  // KA Urban Branch (Bengaluru Urban -> BBMP -> East Zone Ward 80 Indiranagar)
+  {
+    id: 'node_blr',
+    stateId: 'state_ka',
+    parentId: 'node_ka',
+    name: 'Bengaluru Urban District',
+    governanceType: 'COMMON',
+    tierLevel: 'DISTRICT',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_bbmp_east_subdiv',
+    stateId: 'state_ka',
+    parentId: 'node_blr',
+    name: 'BBMP East Sub-Division',
+    governanceType: 'URBAN',
+    tierLevel: 'SUB_DIVISION',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_bbmp',
+    stateId: 'state_ka',
+    parentId: 'node_bbmp_east_subdiv',
+    name: 'Bruhat Bengaluru Mahanagara Palike (BBMP)',
+    governanceType: 'URBAN',
+    tierLevel: 'MUNICIPALITY',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_bbmp_w80',
+    stateId: 'state_ka',
+    parentId: 'node_bbmp',
+    name: 'Ward 80 - Indiranagar',
+    governanceType: 'URBAN',
+    tierLevel: 'WARD',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // 4. KERALA (KL) — District -> Revenue Division -> Taluk -> Revenue Village
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'node_kl',
+    stateId: 'state_kl',
+    parentId: null,
+    name: 'Kerala',
+    governanceType: 'COMMON',
+    tierLevel: 'STATE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_tvm',
+    stateId: 'state_kl',
+    parentId: 'node_kl',
+    name: 'Thiruvananthapuram District',
+    governanceType: 'COMMON',
+    tierLevel: 'DISTRICT',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  // KL Rural Branch (Nedumangad Revenue Division -> Nedumangad Taluk -> Vembayam Village)
+  {
+    id: 'node_nedumangad_div',
+    stateId: 'state_kl',
+    parentId: 'node_tvm',
+    name: 'Nedumangad Revenue Division',
+    governanceType: 'RURAL',
+    tierLevel: 'SUB_DIVISION',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_nedumangad_taluk',
+    stateId: 'state_kl',
+    parentId: 'node_nedumangad_div',
+    name: 'Nedumangad Taluk',
+    governanceType: 'RURAL',
+    tierLevel: 'MANDAL',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_nedumangad_vil',
+    stateId: 'state_kl',
+    parentId: 'node_nedumangad_taluk',
+    name: 'Vembayam Revenue Village',
+    governanceType: 'RURAL',
+    tierLevel: 'VILLAGE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  // KL Urban Branch (Trivandrum Municipal Corporation -> Ward 12 Palayam)
+  {
+    id: 'node_tvm_usd',
+    stateId: 'state_kl',
+    parentId: 'node_tvm',
+    name: 'Thiruvananthapuram Urban Sub-Division',
+    governanceType: 'URBAN',
+    tierLevel: 'SUB_DIVISION',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_tmc_kl',
+    stateId: 'state_kl',
+    parentId: 'node_tvm_usd',
+    name: 'Thiruvananthapuram Municipal Corporation',
+    governanceType: 'URBAN',
+    tierLevel: 'MUNICIPALITY',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'node_tvm_w12',
+    stateId: 'state_kl',
+    parentId: 'node_tmc_kl',
+    name: 'Ward 12 - Palayam',
     governanceType: 'URBAN',
     tierLevel: 'WARD',
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -187,12 +383,13 @@ export const MASTER_JURISDICTION_NODES: JurisdictionNode[] = [
 ];
 
 export const MASTER_DEPARTMENTS: Department[] = [
+  // ─── 1. ANDHRA PRADESH DEPARTMENTS ───
   {
     id: 'dept_rev_ap',
     stateId: 'state_ap',
-    name: 'Revenue Department',
+    name: 'Revenue, Registration & Stamps Department',
     code: 'REV-AP',
-    description: 'Land administration, caste, income, and residence certificates',
+    description: 'Land records, patta passbooks, caste, income, and residence certificates',
     headUserId: 'USR-DH-REV-AP',
     status: 'ACTIVE',
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -200,41 +397,97 @@ export const MASTER_DEPARTMENTS: Department[] = [
   {
     id: 'dept_mun_ap',
     stateId: 'state_ap',
-    name: 'Municipal Administration Department',
+    name: 'Municipal Administration & Urban Development (MA&UD)',
     code: 'CDMA-AP',
-    description: 'Urban civic works, sanitation, trade licenses, and property assessments',
+    description: 'Urban local bodies, trade licenses, property tax, and municipal clearances',
     headUserId: 'USR-DH-MUN-AP',
     status: 'ACTIVE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
+
+  // ─── 2. TAMIL NADU DEPARTMENTS ───
   {
-    id: 'dept_rev_ts',
-    stateId: 'state_ts',
-    name: 'Revenue Department',
-    code: 'REV-TS',
-    description: 'Telangana revenue and land records administration',
-    headUserId: 'USR-DH-REV-TS',
+    id: 'dept_rev_tn',
+    stateId: 'state_tn',
+    name: 'Revenue & Disaster Management Department',
+    code: 'REV-TN',
+    description: 'Land administration, community, nativity, legal heir certificates, and e-Sevai',
+    headUserId: 'USR-DH-REV-TN',
+    status: 'ACTIVE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'dept_maws_tn',
+    stateId: 'state_tn',
+    name: 'Municipal Administration & Water Supply (MAWS)',
+    code: 'MAWS-TN',
+    description: 'Corporation approvals, building licenses, water connections, and urban health',
+    headUserId: 'USR-DH-MAWS-TN',
+    status: 'ACTIVE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 3. KARNATAKA DEPARTMENTS ───
+  {
+    id: 'dept_rev_ka',
+    stateId: 'state_ka',
+    name: 'Revenue Department (Kandaya Ilakhe)',
+    code: 'REV-KA',
+    description: 'Bhoomi RTC land records, caste & income (Atalji Janasnehi Kendra - Nadakacheri)',
+    headUserId: 'USR-DH-REV-KA',
+    status: 'ACTIVE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'dept_udd_ka',
+    stateId: 'state_ka',
+    name: 'Urban Development Department (UDD / BBMP)',
+    code: 'UDD-KA',
+    description: 'BBMP Khata services, building plan sanctions, trade licenses, and urban planning',
+    headUserId: 'USR-DH-UDD-KA',
+    status: 'ACTIVE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 4. KERALA DEPARTMENTS ───
+  {
+    id: 'dept_rev_kl',
+    stateId: 'state_kl',
+    name: 'Revenue & Disaster Management Department',
+    code: 'REV-KL',
+    description: 'e-District portal certificates, land tax, possession, and nativity certificates',
+    headUserId: 'USR-DH-REV-KL',
+    status: 'ACTIVE',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'dept_lsgd_kl',
+    stateId: 'state_kl',
+    name: 'Local Self Government Department (LSGD)',
+    code: 'LSGD-KL',
+    description: 'Panchayat & Corporation clearances, birth/death registrations, and property tax',
+    headUserId: 'USR-DH-LSGD-KL',
     status: 'ACTIVE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 ];
 
 export const MASTER_DESIGNATIONS: Designation[] = [
-  // AP Revenue
+  // ─── ANDHRA PRADESH REVENUE DESIGNATIONS ───
   {
     id: 'desig_vro',
     departmentId: 'dept_rev_ap',
-    title: 'VRO',
+    title: 'Village Revenue Officer (VRO)',
     code: 'VRO',
-    description: 'Village Revenue Officer — First Level Verification',
+    description: 'Village Revenue Officer — First Level Verification & Nativity Inspection',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'desig_mro',
     departmentId: 'dept_rev_ap',
-    title: 'MRO',
+    title: 'Mandal Revenue Officer (MRO)',
     code: 'MRO',
-    description: 'Mandal Revenue Officer / Tehsildar — Intermediate Review',
+    description: 'Mandal Revenue Officer / Tehsildar — Intermediate Review & Endorsement',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
@@ -242,33 +495,25 @@ export const MASTER_DESIGNATIONS: Designation[] = [
     departmentId: 'dept_rev_ap',
     title: 'Tahsildar',
     code: 'TAHSILDAR',
-    description: 'Tahsildar — Issuing & Digital Approval Authority',
+    description: 'Tahsildar — Issuing & Digital Approval Authority with DSC Signoff',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
     id: 'desig_ri',
     departmentId: 'dept_rev_ap',
-    title: 'Revenue Inspector',
+    title: 'Revenue Inspector (RI)',
     code: 'RI',
     description: 'Revenue Inspector — Field Assessment & Spot Verification',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 
-  // AP Municipal
+  // ─── ANDHRA PRADESH MUNICIPAL DESIGNATIONS ───
   {
     id: 'desig_ward_officer',
     departmentId: 'dept_mun_ap',
-    title: 'Ward Administrative Officer',
+    title: 'Ward Administrative Officer (WAO)',
     code: 'WAO',
-    description: 'Ward level intake and preliminary verification officer',
-    createdAt: '2026-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'desig_sanitary_insp',
-    departmentId: 'dept_mun_ap',
-    title: 'Municipal Sanitary Inspector',
-    code: 'MSI',
-    description: 'Field inspection and hygiene verification',
+    description: 'Ward Secretariat intake and preliminary civic document verification',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
@@ -276,12 +521,115 @@ export const MASTER_DESIGNATIONS: Designation[] = [
     departmentId: 'dept_mun_ap',
     title: 'Municipal Commissioner',
     code: 'MC',
-    description: 'Final municipal approval authority',
+    description: 'Final municipal approval & trade licensing authority',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── TAMIL NADU REVENUE DESIGNATIONS ───
+  {
+    id: 'desig_vao_tn',
+    departmentId: 'dept_rev_tn',
+    title: 'Village Administrative Officer (VAO)',
+    code: 'VAO',
+    description: 'Village level administrative officer — Land record & nativity verifier',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_ri_tn',
+    departmentId: 'dept_rev_tn',
+    title: 'Revenue Inspector (RI - Firka)',
+    code: 'RI-TN',
+    description: 'Firka level field inspection & inquiry officer',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_tah_tn',
+    departmentId: 'dept_rev_tn',
+    title: 'Tahsildar (Taluk Head)',
+    code: 'TAH-TN',
+    description: 'Taluk Magistrate — Statutory certificate issuing authority',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_zonal_tn',
+    departmentId: 'dept_maws_tn',
+    title: 'Zonal Assistant Commissioner',
+    code: 'ZAC-TN',
+    description: 'Municipal corporation zonal officer for building and trade approvals',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── KARNATAKA REVENUE DESIGNATIONS ───
+  {
+    id: 'desig_va_ka',
+    departmentId: 'dept_rev_ka',
+    title: 'Village Accountant (Grama Adhikari)',
+    code: 'VA-KA',
+    description: 'Village officer for Nadakacheri revenue applications & RTC verification',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_ri_ka',
+    departmentId: 'dept_rev_ka',
+    title: 'Revenue Inspector (Hobli RI)',
+    code: 'RI-KA',
+    description: 'Hobli level scrutinizer for agricultural and income validations',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_tah_ka',
+    departmentId: 'dept_rev_ka',
+    title: 'Tahsildar (Taluk Magistrate)',
+    code: 'TAH-KA',
+    description: 'Taluk authority for Bhoomi RTC and formal caste/income certs',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_aro_ka',
+    departmentId: 'dept_udd_ka',
+    title: 'Assistant Revenue Officer (ARO - BBMP)',
+    code: 'ARO-BBMP',
+    description: 'BBMP Ward level property assessment & e-Khata verification',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── KERALA REVENUE DESIGNATIONS ───
+  {
+    id: 'desig_vo_kl',
+    departmentId: 'dept_rev_kl',
+    title: 'Village Officer (VO)',
+    code: 'VO-KL',
+    description: 'Village Office head for local inquiry, land tax, and nativity certificates',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_dtah_kl',
+    departmentId: 'dept_rev_kl',
+    title: 'Deputy Tahsildar (e-District)',
+    code: 'DTAH-KL',
+    description: 'Taluk supervisory officer scrutinizing e-District applications',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_tah_kl',
+    departmentId: 'dept_rev_kl',
+    title: 'Tahsildar (Taluk Executive Magistrate)',
+    code: 'TAH-KL',
+    description: 'Taluk head granting formal legal certificates & land title clearances',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'desig_lsgd_eng_kl',
+    departmentId: 'dept_lsgd_kl',
+    title: 'LSGD Assistant Engineer',
+    code: 'AE-LSGD',
+    description: 'Panchayat & Municipal building permits and spatial clearances',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 ];
 
 export const MASTER_OFFICERS: OfficerUser[] = [
+  // ─── AP OFFICERS ───
   {
     id: 'OFF-VRO-01',
     name: 'Gokul Rao',
@@ -302,7 +650,7 @@ export const MASTER_OFFICERS: OfficerUser[] = [
     departmentId: 'dept_rev_ap',
     designationId: 'desig_mro',
     designationTitle: 'MRO',
-    assignedNodeId: 'node_cg_mdl', // Chandragiri Mandal (covers child villages)
+    assignedNodeId: 'node_cg_mdl', // Chandragiri Mandal
     status: 'Active',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
@@ -314,7 +662,7 @@ export const MASTER_OFFICERS: OfficerUser[] = [
     departmentId: 'dept_rev_ap',
     designationId: 'desig_tahsildar',
     designationTitle: 'Tahsildar',
-    assignedNodeId: 'node_tpt', // Tirupati District (covers all sub-nodes)
+    assignedNodeId: 'node_tpt', // Tirupati District
     status: 'Active',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
@@ -339,6 +687,120 @@ export const MASTER_OFFICERS: OfficerUser[] = [
     designationId: 'desig_commissioner',
     designationTitle: 'Municipal Commissioner',
     assignedNodeId: 'node_tmc', // Tirupati Municipal Corp
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── TAMIL NADU OFFICERS ───
+  {
+    id: 'OFF-VAO-TN-01',
+    name: 'M. Selvakumar',
+    email: 'selvakumar.vao@tn.gov.in',
+    phone: '9876543301',
+    departmentId: 'dept_rev_tn',
+    designationId: 'desig_vao_tn',
+    designationTitle: 'Village Administrative Officer',
+    assignedNodeId: 'node_pollachi_vil', // Anaimalai Village
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'OFF-RI-TN-01',
+    name: 'K. Meenakshi Sundaram',
+    email: 'meenakshi.ri@tn.gov.in',
+    phone: '9876543302',
+    departmentId: 'dept_rev_tn',
+    designationId: 'desig_ri_tn',
+    designationTitle: 'Revenue Inspector',
+    assignedNodeId: 'node_pollachi_taluk', // Pollachi Taluk
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'OFF-TAH-TN-01',
+    name: 'S. Soundararajan',
+    email: 'soundar.tah@tn.gov.in',
+    phone: '9876543303',
+    departmentId: 'dept_rev_tn',
+    designationId: 'desig_tah_tn',
+    designationTitle: 'Tahsildar',
+    assignedNodeId: 'node_cbe', // Coimbatore District
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── KARNATAKA OFFICERS ───
+  {
+    id: 'OFF-VA-KA-01',
+    name: 'Basavaraj Patil',
+    email: 'basavaraj.va@karnataka.gov.in',
+    phone: '9876543401',
+    departmentId: 'dept_rev_ka',
+    designationId: 'desig_va_ka',
+    designationTitle: 'Village Accountant',
+    assignedNodeId: 'node_bilikere_vil', // Bilikere Village
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'OFF-RI-KA-01',
+    name: 'Geetha Gowda',
+    email: 'geetha.ri@karnataka.gov.in',
+    phone: '9876543402',
+    departmentId: 'dept_rev_ka',
+    designationId: 'desig_ri_ka',
+    designationTitle: 'Revenue Inspector',
+    assignedNodeId: 'node_hunsur_taluk', // Hunsur Taluk
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'OFF-TAH-KA-01',
+    name: 'Manjunath Swamy',
+    email: 'manjunath.tah@karnataka.gov.in',
+    phone: '9876543403',
+    departmentId: 'dept_rev_ka',
+    designationId: 'desig_tah_ka',
+    designationTitle: 'Tahsildar',
+    assignedNodeId: 'node_mys', // Mysuru District
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── KERALA OFFICERS ───
+  {
+    id: 'OFF-VO-KL-01',
+    name: 'Sajeev Kumar',
+    email: 'sajeev.vo@kerala.gov.in',
+    phone: '9876543501',
+    departmentId: 'dept_rev_kl',
+    designationId: 'desig_vo_kl',
+    designationTitle: 'Village Officer',
+    assignedNodeId: 'node_nedumangad_vil', // Vembayam Village
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'OFF-DTAH-KL-01',
+    name: 'Reshma Nair',
+    email: 'reshma.dtah@kerala.gov.in',
+    phone: '9876543502',
+    departmentId: 'dept_rev_kl',
+    designationId: 'desig_dtah_kl',
+    designationTitle: 'Deputy Tahsildar',
+    assignedNodeId: 'node_nedumangad_taluk', // Nedumangad Taluk
+    status: 'Active',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'OFF-TAH-KL-01',
+    name: 'Gopalan Nambiar',
+    email: 'gopalan.tah@kerala.gov.in',
+    phone: '9876543503',
+    departmentId: 'dept_rev_kl',
+    designationId: 'desig_tah_kl',
+    designationTitle: 'Tahsildar',
+    assignedNodeId: 'node_tvm', // Thiruvananthapuram District
     status: 'Active',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
