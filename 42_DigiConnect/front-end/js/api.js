@@ -529,7 +529,7 @@ export async function apiGetCentralMetrics() {
 // STATE GOVERNMENT (STATE ADMIN)
 // ──────────────────────────────────────────
 
-const LOCAL_DEPARTMENTS = [
+const INITIAL_LOCAL_DEPARTMENTS = [
   {
     id: 'dept_rev_ap',
     stateId: 'state_ap',
@@ -608,56 +608,136 @@ const LOCAL_DEPARTMENTS = [
   },
 ];
 
+const INITIAL_LOCAL_GRIEVANCE_CELLS = [
+  {
+    id: 'cell_rev_ap',
+    stateId: 'state_ap',
+    departmentId: 'dept_rev_ap',
+    deptName: 'Revenue, Registration & Stamps Department',
+    cellName: 'Revenue Department Appellate Redressal Cell',
+    jurisdictionTier: 'DISTRICT & STATE',
+    slaDays: 7,
+    workflowSummary: 'District Grievance Officer ➔ State Appellate Authority',
+    status: 'ACTIVE',
+  },
+  {
+    id: 'cell_mun_ap',
+    stateId: 'state_ap',
+    departmentId: 'dept_mun_ap',
+    deptName: 'Municipal Administration & Urban Development',
+    cellName: 'Municipal Grievance Redressal Cell',
+    jurisdictionTier: 'SUB_DIVISION & DISTRICT',
+    slaDays: 5,
+    workflowSummary: 'Divisional Officer ➔ Municipal Commissioner',
+    status: 'ACTIVE',
+  },
+  {
+    id: 'cell_trans_ap',
+    stateId: 'state_ap',
+    departmentId: 'dept_trans_ap',
+    deptName: 'Transport Department',
+    cellName: 'Transport Department Grievance Cell',
+    jurisdictionTier: 'DISTRICT',
+    slaDays: 7,
+    workflowSummary: 'RTO Tirupati Appellate Officer',
+    status: 'ACTIVE',
+  },
+];
+
+function getStoredDepartments() {
+  try {
+    const raw = localStorage.getItem('DigiConnect_departments');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  saveStoredDepartments(INITIAL_LOCAL_DEPARTMENTS);
+  return [...INITIAL_LOCAL_DEPARTMENTS];
+}
+
+function saveStoredDepartments(list) {
+  try {
+    localStorage.setItem('DigiConnect_departments', JSON.stringify(list));
+  } catch (e) {}
+}
+
+function getStoredGrievanceCells() {
+  try {
+    const raw = localStorage.getItem('DigiConnect_grievance_cells');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+  saveStoredGrievanceCells(INITIAL_LOCAL_GRIEVANCE_CELLS);
+  return [...INITIAL_LOCAL_GRIEVANCE_CELLS];
+}
+
+function saveStoredGrievanceCells(list) {
+  try {
+    localStorage.setItem('DigiConnect_grievance_cells', JSON.stringify(list));
+  } catch (e) {}
+}
+
 export async function apiGetStateDashboard(stateId = 'state_ap') {
   try {
     return await apiFetch(`/state-admin/dashboard?stateId=${stateId}`);
   } catch (e) {
-    return { success: true, data: { summary: { totalDepartments: LOCAL_DEPARTMENTS.filter(d => d.stateId === stateId).length } } };
+    const totalDepartments = getStoredDepartments().filter(d => d.stateId === stateId).length;
+    return { success: true, data: { summary: { totalDepartments } } };
   }
 }
 
 export async function apiGetStateDepartments(stateId = 'state_ap') {
   try {
-    return await apiFetch(`/state-admin/departments?stateId=${stateId}`);
-  } catch (e) {
-    const list = LOCAL_DEPARTMENTS.filter(d => !stateId || d.stateId === stateId);
-    return { success: true, data: list };
-  }
+    const res = await apiFetch(`/state-admin/departments?stateId=${stateId}`);
+    if (res && res.data && Array.isArray(res.data)) {
+      saveStoredDepartments(res.data);
+      return res;
+    }
+  } catch (e) {}
+  const list = getStoredDepartments().filter(d => !stateId || d.stateId === stateId);
+  return { success: true, data: list };
 }
 
 export async function apiGetDepartmentById(id) {
   try {
-    return await apiFetch(`/state-admin/departments/${id}`);
-  } catch (e) {
-    const dept = LOCAL_DEPARTMENTS.find(d => d.id === id);
-    if (!dept) throw new Error(`Department '${id}' not found.`);
-    return {
-      success: true,
-      data: {
-        ...dept,
-        metrics: {
-          servicesCount: dept.servicesCount || 0,
-          officersCount: dept.officersCount || 0,
-          applicationsCount: dept.applicationsCount || 0,
-          grievancesCount: dept.grievancesCount || 0,
-          designationsCount: dept.designationsCount || 0,
-        },
-        headUser: dept.headName ? { id: dept.headUserId || 'DH-01', name: dept.headName, email: dept.headEmail } : null,
-        grievanceCell: { cellName: dept.grievanceCellName || `${dept.name} Grievance Cell`, workflowSteps: [{ roleTitle: 'District Grievance Officer' }, { roleTitle: 'State Appellate Authority' }] },
+    const res = await apiFetch(`/state-admin/departments/${id}`);
+    if (res && res.data) return res;
+  } catch (e) {}
+  const dept = getStoredDepartments().find(d => d.id === id);
+  if (!dept) throw new Error(`Department '${id}' not found.`);
+  return {
+    success: true,
+    data: {
+      ...dept,
+      metrics: {
+        servicesCount: dept.servicesCount || 0,
+        officersCount: dept.officersCount || 0,
+        applicationsCount: dept.applicationsCount || 0,
+        grievancesCount: dept.grievancesCount || 0,
+        designationsCount: dept.designationsCount || 0,
       },
-    };
-  }
+      headUser: dept.headName ? { id: dept.headUserId || 'DH-01', name: dept.headName, email: dept.headEmail } : null,
+      grievanceCell: { cellName: dept.grievanceCellName || `${dept.name} Grievance Cell`, workflowSteps: [{ roleTitle: 'District Grievance Officer' }, { roleTitle: 'State Appellate Authority' }] },
+    },
+  };
 }
 
 export async function apiCreateDepartment(data) {
+  let created = null;
   try {
-    return await apiFetch('/state-admin/departments', {
+    const res = await apiFetch('/state-admin/departments', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-  } catch (e) {
+    if (res && res.data) created = res.data;
+  } catch (e) {}
+
+  if (!created) {
     const deptId = `dept_${data.code.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now().toString().slice(-4)}`;
-    const newDept = {
+    created = {
       id: deptId,
       stateId: data.stateId || 'state_ap',
       name: data.name.trim(),
@@ -672,98 +752,172 @@ export async function apiCreateDepartment(data) {
       applicationsCount: 0,
       grievancesCount: 0,
       designationsCount: 0,
-      hasGrievanceCell: true,
+      hasGrievanceCell: false,
       createdAt: new Date().toISOString(),
     };
-    LOCAL_DEPARTMENTS.push(newDept);
-    return { success: true, data: newDept };
   }
+
+  const list = getStoredDepartments();
+  const existingIdx = list.findIndex(d => d.id === created.id);
+  if (existingIdx >= 0) {
+    list[existingIdx] = created;
+  } else {
+    list.unshift(created);
+  }
+  saveStoredDepartments(list);
+  return { success: true, data: created };
 }
 
 export async function apiUpdateDepartment(id, data) {
+  let updated = null;
   try {
-    return await apiFetch(`/state-admin/departments/${id}`, {
+    const res = await apiFetch(`/state-admin/departments/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
-  } catch (e) {
-    const dept = LOCAL_DEPARTMENTS.find(d => d.id === id);
-    if (!dept) throw new Error(`Department '${id}' not found.`);
+    if (res && res.data) updated = res.data;
+  } catch (e) {}
+
+  const list = getStoredDepartments();
+  const dept = list.find(d => d.id === id);
+  if (!dept && !updated) throw new Error(`Department '${id}' not found.`);
+  if (dept) {
     if (data.name) dept.name = data.name.trim();
     if (data.code) dept.code = data.code.trim().toUpperCase();
     if (data.description !== undefined) dept.description = data.description;
     if (data.status) dept.status = data.status;
+    saveStoredDepartments(list);
     return { success: true, data: dept };
   }
+  return { success: true, data: updated };
 }
 
 export async function apiUpdateDepartmentStatus(id, status) {
   try {
-    return await apiFetch(`/state-admin/departments/${id}/status`, {
+    await apiFetch(`/state-admin/departments/${id}/status`, {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     });
-  } catch (e) {
-    const dept = LOCAL_DEPARTMENTS.find(d => d.id === id);
-    if (!dept) throw new Error(`Department '${id}' not found.`);
-    dept.status = status;
-    return { success: true, data: dept };
-  }
+  } catch (e) {}
+  const list = getStoredDepartments();
+  const dept = list.find(d => d.id === id);
+  if (!dept) throw new Error(`Department '${id}' not found.`);
+  dept.status = status;
+  saveStoredDepartments(list);
+  return { success: true, data: dept };
 }
 
 export async function apiAssignDepartmentHead(id, name, email) {
   try {
-    return await apiFetch(`/state-admin/departments/${id}/head`, {
+    await apiFetch(`/state-admin/departments/${id}/head`, {
       method: 'POST',
       body: JSON.stringify({ name, email }),
     });
-  } catch (e) {
-    const dept = LOCAL_DEPARTMENTS.find(d => d.id === id);
-    if (!dept) throw new Error(`Department '${id}' not found.`);
-    dept.headUserId = `USR-DH-${Date.now().toString().slice(-4)}`;
-    dept.headName = name.trim();
-    dept.headEmail = email.trim();
-    return { success: true, data: dept };
-  }
+  } catch (e) {}
+  const list = getStoredDepartments();
+  const dept = list.find(d => d.id === id);
+  if (!dept) throw new Error(`Department '${id}' not found.`);
+  dept.headUserId = `USR-DH-${Date.now().toString().slice(-4)}`;
+  dept.headName = name.trim();
+  dept.headEmail = email.trim();
+  saveStoredDepartments(list);
+  return { success: true, data: dept };
 }
 
 export async function apiRemoveDepartmentHead(id) {
   try {
-    return await apiFetch(`/state-admin/departments/${id}/head`, {
+    await apiFetch(`/state-admin/departments/${id}/head`, {
       method: 'DELETE',
     });
-  } catch (e) {
-    const dept = LOCAL_DEPARTMENTS.find(d => d.id === id);
-    if (!dept) throw new Error(`Department '${id}' not found.`);
-    dept.headUserId = null;
-    dept.headName = null;
-    dept.headEmail = null;
-    return { success: true, data: dept };
-  }
+  } catch (e) {}
+  const list = getStoredDepartments();
+  const dept = list.find(d => d.id === id);
+  if (!dept) throw new Error(`Department '${id}' not found.`);
+  dept.headUserId = null;
+  dept.headName = null;
+  dept.headEmail = null;
+  saveStoredDepartments(list);
+  return { success: true, data: dept };
 }
 
 export async function apiDeleteDepartment(id) {
   try {
-    return await apiFetch(`/state-admin/departments/${id}`, {
+    await apiFetch(`/state-admin/departments/${id}`, {
       method: 'DELETE',
     });
-  } catch (e) {
-    const index = LOCAL_DEPARTMENTS.findIndex(d => d.id === id);
-    if (index === -1) throw new Error(`Department '${id}' not found.`);
-    const dept = LOCAL_DEPARTMENTS[index];
-    if ((dept.servicesCount && dept.servicesCount > 0) || (dept.officersCount && dept.officersCount > 0) || (dept.applicationsCount && dept.applicationsCount > 0)) {
-      throw new Error(`Cannot delete department '${dept.name}' because historical/operational records depend on it: ${dept.servicesCount || 0} services, ${dept.officersCount || 0} officers, ${dept.applicationsCount || 0} applications. Please suspend/deactivate the department instead.`);
-    }
-    LOCAL_DEPARTMENTS.splice(index, 1);
-    return { success: true, message: `Department '${dept.name}' deleted.` };
+  } catch (e) {}
+  const list = getStoredDepartments();
+  const index = list.findIndex(d => d.id === id);
+  if (index === -1) throw new Error(`Department '${id}' not found.`);
+  const dept = list[index];
+  if ((dept.servicesCount && dept.servicesCount > 0) || (dept.officersCount && dept.officersCount > 0) || (dept.applicationsCount && dept.applicationsCount > 0)) {
+    throw new Error(`Cannot delete department '${dept.name}' because historical/operational records depend on it: ${dept.servicesCount || 0} services, ${dept.officersCount || 0} officers, ${dept.applicationsCount || 0} applications. Please suspend/deactivate the department instead.`);
   }
+  list.splice(index, 1);
+  saveStoredDepartments(list);
+  return { success: true, message: `Department '${dept.name}' deleted.` };
+}
+
+export async function apiGetGrievanceCells(stateId = 'state_ap') {
+  try {
+    const res = await apiFetch(`/state-admin/grievance-cells?stateId=${stateId}`);
+    if (res && res.data && Array.isArray(res.data)) {
+      saveStoredGrievanceCells(res.data);
+      return res;
+    }
+  } catch (e) {}
+  const list = getStoredGrievanceCells().filter(c => !stateId || c.stateId === stateId);
+  return { success: true, data: list };
 }
 
 export async function apiConfigureGrievanceCell(data) {
-  return apiFetch('/state-admin/grievance-cells', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
+  let configured = null;
+  try {
+    const res = await apiFetch('/state-admin/grievance-cells', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+    if (res && res.data) configured = res.data;
+  } catch (e) {}
+
+  const depts = getStoredDepartments();
+  const dept = depts.find(d => d.id === data.departmentId);
+  const deptName = dept ? dept.name : (data.deptName || 'Department');
+
+  if (dept) {
+    dept.hasGrievanceCell = true;
+    dept.grievanceCellName = data.cellName;
+    saveStoredDepartments(depts);
+  }
+
+  if (!configured) {
+    configured = {
+      id: `cell_${Date.now().toString().slice(-4)}`,
+      stateId: data.stateId || 'state_ap',
+      departmentId: data.departmentId,
+      deptName: deptName,
+      cellName: data.cellName,
+      jurisdictionTier: data.jurisdictionTier,
+      slaDays: data.slaDays || 7,
+      workflowSummary: 'District Grievance Officer ➔ State Appellate Authority',
+      status: 'ACTIVE',
+      createdAt: new Date().toISOString(),
+    };
+  } else {
+    configured.deptName = deptName;
+    configured.workflowSummary = configured.workflowSummary || 'District Grievance Officer ➔ State Appellate Authority';
+    configured.status = 'ACTIVE';
+  }
+
+  const cells = getStoredGrievanceCells();
+  const existingIdx = cells.findIndex(c => c.departmentId === data.departmentId);
+  if (existingIdx >= 0) {
+    cells[existingIdx] = { ...cells[existingIdx], ...configured };
+  } else {
+    cells.unshift(configured);
+  }
+  saveStoredGrievanceCells(cells);
+  return { success: true, data: configured };
 }
 
 export async function apiGetStateRevenue(stateId = 'state_ap') {
