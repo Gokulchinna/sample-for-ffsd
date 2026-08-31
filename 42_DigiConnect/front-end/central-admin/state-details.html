@@ -526,6 +526,8 @@
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('id')) {
             stateId = urlParams.get('id');
+        } else if (urlParams.get('code')) {
+            stateId = urlParams.get('code');
         }
 
         // Expose modal functions to window immediately
@@ -707,37 +709,16 @@
 
         async function loadStateDetails() {
             try {
-                const res = await apiGetStateDetails(stateId).catch(() => ({ data: null }));
+                // ALWAYS fetch directly from backend API for 100% consistency
+                const res = await apiGetStateDetails(stateId);
                 stateData = res?.data;
 
                 if (!stateData) {
-                    const code = urlParams.get('code') || 'AP';
-                    stateData = {
-                        state: { id: stateId, name: 'Andhra Pradesh', code: code, status: 'ACTIVE', createdAt: '2026-01-01T00:00:00.000Z' },
-                        stateAdmin: { id: 'USR-SA-AP', name: 'Dr. K. Vijayanand IAS', email: 'cs@ap.gov.in', phone: '+91 98765 43200', role: 'State Government Administrator', status: 'Active', joinedDate: '2026-01-01T00:00:00.000Z' },
-                        summary: { totalCitizens: 35820, totalApplications: 8420, totalRevenue: 425000, serviceFees: 382500, platformFees: 42500, avgRevenuePerApp: 505, totalDepartments: 12, totalOfficers: 420, totalServices: 86, totalGrievances: 1240 },
-                        jurisdiction: { districtsCount: 26, subDivisionsCount: 68, mandalsCount: 679, villagesCount: 14200, municipalitiesCount: 124, wardsCount: 3400 },
-                        departments: [
-                            { id: 'dept_rev_ap', name: 'Revenue & Disaster Management', code: 'REV', headName: 'Dr. B. R. Ambedkar IAS', headEmail: 'director.rev@ap.gov.in', servicesCount: 8, officersCount: 120, status: 'Active' },
-                            { id: 'dept_trans_ap', name: 'Transport & Road Safety', code: 'TRANS', headName: 'Suresh Rao IAS', headEmail: 'comm.trans@ap.gov.in', servicesCount: 5, officersCount: 80, status: 'Active' },
-                            { id: 'dept_mun_ap', name: 'Municipal Administration & Urban Development', code: 'MAUD', headName: 'Anil Kumar IAS', headEmail: 'director.maud@ap.gov.in', servicesCount: 6, officersCount: 95, status: 'Active' },
-                            { id: 'dept_agri_ap', name: 'Agriculture & Farmers Welfare', code: 'AGRI', headName: 'P. Lakshmi Devi IAS', headEmail: 'director.agri@ap.gov.in', servicesCount: 7, officersCount: 110, status: 'Active' },
-                        ],
-                        services: { total: 86, active: 79, suspended: 7 },
-                        officers: { total: 420, active: 390, suspended: 30 },
-                        applications: { total: 8420, submitted: 8420, inProgress: 1120, pending: 1650, completed: 5900, rejected: 580, queryRaised: 290 },
-                        grievances: { total: 1240, pending: 310, inProgress: 190, resolved: 820, escalated: 50 },
-                        recentActivity: [
-                            { id: 'ACT-1', details: 'State Admin updated Revenue Department configuration', date: '2 hours ago' },
-                            { id: 'ACT-2', details: 'New department Agriculture & Cooperation created', date: 'Yesterday' },
-                            { id: 'ACT-3', details: 'Integrated Caste & Income Certificate workflow updated', date: '2 days ago' },
-                            { id: 'ACT-4', details: 'Tirupati Revenue Division nodes validated', date: '3 days ago' },
-                        ]
-                    };
+                    throw new Error(`State '${stateId}' details not found in backend.`);
                 }
 
                 // Check localStorage for status override
-                const localStatus = localStorage.getItem('state_status_' + stateId) || 
+                const localStatus = localStorage.getItem('state_status_' + stateData.state.id) || 
                                     (stateData?.state?.code && localStorage.getItem('state_status_' + stateData.state.code.toUpperCase()));
                 if (localStatus && stateData?.state) {
                     stateData.state.status = localStatus;
@@ -745,8 +726,8 @@
 
                 renderUI();
             } catch (e) {
-                console.error(e);
-                showToast('Failed to load state details', 'error');
+                console.error('Failed to load state details from backend:', e);
+                showToast(e.message || 'Failed to load state details from backend', 'error');
             }
         }
 
@@ -814,18 +795,30 @@
             // Departments table
             document.getElementById('deptCountBadge').textContent = `${departments.length} Active Departments`;
             const deptTbody = document.getElementById('deptTableTbody');
-            deptTbody.innerHTML = departments.map(d => `
-                <tr>
-                    <td style="font-weight:700;color:var(--navy-900);">🏢 ${d.name}</td>
-                    <td>
-                        <div style="font-weight:600;">${d.headName}</div>
-                        <div style="font-size:0.75rem;color:var(--slate-500);">${d.headEmail}</div>
-                    </td>
-                    <td><span class="badge badge-purple">${d.servicesCount} Services</span></td>
-                    <td><span class="badge badge-neutral">${d.officersCount} Officers</span></td>
-                    <td><span class="badge badge-success">● Active</span></td>
-                </tr>
-            `).join('');
+            if (!departments || departments.length === 0) {
+                deptTbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align:center;padding:32px;color:var(--slate-500);">
+                            <div style="font-size:1.5rem;margin-bottom:6px;">🏢</div>
+                            <div style="font-weight:700;color:var(--navy-900);">No Departments Configured Yet</div>
+                            <div style="font-size:0.8125rem;color:var(--slate-400);margin-top:2px;">The appointed State Administrator can configure departments and services.</div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                deptTbody.innerHTML = departments.map(d => `
+                    <tr>
+                        <td style="font-weight:700;color:var(--navy-900);">🏢 ${d.name}</td>
+                        <td>
+                            <div style="font-weight:600;">${d.headName}</div>
+                            <div style="font-size:0.75rem;color:var(--slate-500);">${d.headEmail}</div>
+                        </td>
+                        <td><span class="badge badge-purple">${d.servicesCount} Services</span></td>
+                        <td><span class="badge badge-neutral">${d.officersCount} Officers</span></td>
+                        <td><span class="badge badge-success">● Active</span></td>
+                    </tr>
+                `).join('');
+            }
 
             // Services, Officers, Grievances
             document.getElementById('svc-total').textContent = services.total;

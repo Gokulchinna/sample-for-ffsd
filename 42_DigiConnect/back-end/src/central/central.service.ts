@@ -11,6 +11,103 @@ import { User } from '../models/user.model';
 import { Role } from '../models/enums';
 import { CreateStateDto } from './dto/create-state.dto';
 
+const SEED_STATE_METRICS: Record<string, {
+  apps: number;
+  revenue: number;
+  completed: number;
+  pending: number;
+  inProgress: number;
+  rejected: number;
+  queryRaised: number;
+  grievances: number;
+  departments: number;
+  officers: number;
+  citizens: number;
+  districts: number;
+  subDivisions: number;
+  mandals: number;
+  villages: number;
+  municipalities: number;
+  wards: number;
+}> = {
+  AP: {
+    apps: 8420,
+    revenue: 425000,
+    completed: 5900,
+    pending: 1650,
+    inProgress: 1095,
+    rejected: 580,
+    queryRaised: 290,
+    grievances: 1250,
+    departments: 12,
+    officers: 420,
+    citizens: 35820,
+    districts: 26,
+    subDivisions: 68,
+    mandals: 679,
+    villages: 14200,
+    municipalities: 124,
+    wards: 3400,
+  },
+  KA: {
+    apps: 7820,
+    revenue: 390000,
+    completed: 5400,
+    pending: 1580,
+    inProgress: 980,
+    rejected: 550,
+    queryRaised: 290,
+    grievances: 1180,
+    departments: 12,
+    officers: 390,
+    citizens: 32844,
+    districts: 31,
+    subDivisions: 52,
+    mandals: 240,
+    villages: 29340,
+    municipalities: 281,
+    wards: 4200,
+  },
+  TN: {
+    apps: 5980,
+    revenue: 295000,
+    completed: 4200,
+    pending: 1210,
+    inProgress: 760,
+    rejected: 410,
+    queryRaised: 160,
+    grievances: 890,
+    departments: 12,
+    officers: 360,
+    citizens: 25116,
+    districts: 38,
+    subDivisions: 87,
+    mandals: 313,
+    villages: 16500,
+    municipalities: 150,
+    wards: 3800,
+  },
+  KL: {
+    apps: 1980,
+    revenue: 98000,
+    completed: 1480,
+    pending: 360,
+    inProgress: 240,
+    rejected: 100,
+    queryRaised: 40,
+    grievances: 290,
+    departments: 12,
+    officers: 280,
+    citizens: 8316,
+    districts: 14,
+    subDivisions: 27,
+    mandals: 77,
+    villages: 1664,
+    municipalities: 87,
+    wards: 2100,
+  },
+};
+
 @Injectable()
 export class CentralService {
   /**
@@ -33,13 +130,22 @@ export class CentralService {
         return isPaid ? acc + (Number(a.fee) || 0) : acc;
       }, 0);
 
+      const seed = SEED_STATE_METRICS[state.code];
+      const stateCitizens = db.users.filter((u) => u.role === Role.CITIZEN && (u.state === state.name || (u as any).stateId === state.id));
+
+      const finalApps = (seed?.apps || 0) + stateApplications.length;
+      const finalRevenue = (seed?.revenue || 0) + totalRevenue;
+      const finalCitizens = (seed?.citizens || 0) + stateCitizens.length;
+      const finalDepts = seed ? Math.max(depts.length, seed.departments) : depts.length;
+
       return {
         ...state,
-        departmentsCount: depts.length || 12,
-        jurisdictionNodesCount: nodes.length || 24,
+        departmentsCount: finalDepts,
+        jurisdictionNodesCount: nodes.length,
         stateAdmin: admin ? { id: admin.id, name: admin.name, email: admin.email } : null,
-        totalApplications: stateApplications.length || (state.code === 'AP' ? 8420 : state.code === 'KA' ? 7820 : state.code === 'TN' ? 5980 : 1980),
-        totalRevenue: totalRevenue || (state.code === 'AP' ? 425000 : state.code === 'KA' ? 390000 : state.code === 'TN' ? 295000 : 98000),
+        citizensCount: finalCitizens,
+        totalApplications: finalApps,
+        totalRevenue: finalRevenue,
       };
     });
   }
@@ -305,15 +411,23 @@ export class CentralService {
       submitted++;
     });
 
-    if (submitted === 0) {
-      submitted = state.code === 'AP' ? 8420 : state.code === 'KA' ? 7820 : state.code === 'TN' ? 5980 : 1980;
-      completed = Math.round(submitted * 0.7);
-      pending = Math.round(submitted * 0.2);
-      rejected = Math.round(submitted * 0.07);
-      queryRaised = Math.round(submitted * 0.03);
-      inProgress = Math.round(submitted * 0.13);
-      totalRevenue = state.code === 'AP' ? 425000 : state.code === 'KA' ? 390000 : state.code === 'TN' ? 295000 : 98000;
-    }
+    const seed = SEED_STATE_METRICS[state.code];
+    const stateCitizens = db.users.filter((u) => u.role === Role.CITIZEN && (u.state === state.name || (u as any).stateId === state.id));
+    const stateOfficers = db.officers.filter((o) => {
+      const dept = db.departments.find((d) => d.id === o.departmentId);
+      return dept ? dept.stateId === state.id : false;
+    });
+    const stateServices = db.services.filter((s) => {
+      const dept = db.departments.find((d) => d.id === (s as any).departmentId);
+      return dept ? dept.stateId === state.id : false;
+    });
+
+    const finalApps = (seed?.apps || 0) + submitted;
+    const finalRevenue = (seed?.revenue || 0) + totalRevenue;
+    const finalCitizens = (seed?.citizens || 0) + stateCitizens.length;
+    const finalDepts = seed ? Math.max(depts.length, seed.departments) : depts.length;
+    const finalOfficers = seed ? Math.max(stateOfficers.length, seed.officers) : stateOfficers.length;
+    const finalServices = seed ? 86 : stateServices.length;
 
     const recentActivity = db.auditLogs
       .filter((l) => l.details?.includes(state.name) || l.details?.includes(state.code) || l.actor?.includes(state.name))
@@ -341,69 +455,71 @@ export class CentralService {
         joinedDate: state.createdAt,
       },
       summary: {
-        totalCitizens: Math.round(submitted * 4.2),
-        totalApplications: submitted,
-        totalRevenue,
-        serviceFees: Math.round(totalRevenue * 0.9),
-        platformFees: Math.round(totalRevenue * 0.1),
-        avgRevenuePerApp: submitted > 0 ? Math.round(totalRevenue / submitted) : 505,
-        totalDepartments: Math.max(depts.length, 12),
-        totalOfficers: Math.max(db.officers.length, 420),
-        totalServices: 86,
-        totalGrievances: Math.round(submitted * 0.15),
+        totalCitizens: finalCitizens,
+        totalApplications: finalApps,
+        totalRevenue: finalRevenue,
+        serviceFees: Math.round(finalRevenue * 0.9),
+        platformFees: Math.round(finalRevenue * 0.1),
+        avgRevenuePerApp: finalApps > 0 ? Math.round(finalRevenue / finalApps) : 0,
+        totalDepartments: finalDepts,
+        totalOfficers: finalOfficers,
+        totalServices: finalServices,
+        totalGrievances: seed?.grievances || 0,
       },
       jurisdiction: {
-        districtsCount: Math.max(districts.length, 26),
-        subDivisionsCount: Math.max(subDivisions.length, 68),
-        mandalsCount: Math.max(mandals.length, 679),
-        villagesCount: Math.max(villages.length, 14200),
-        municipalitiesCount: Math.max(municipalities.length, 124),
-        wardsCount: Math.max(wards.length, 3400),
+        districtsCount: seed ? Math.max(districts.length, seed.districts) : districts.length,
+        subDivisionsCount: seed ? Math.max(subDivisions.length, seed.subDivisions) : subDivisions.length,
+        mandalsCount: seed ? Math.max(mandals.length, seed.mandals) : mandals.length,
+        villagesCount: seed ? Math.max(villages.length, seed.villages) : villages.length,
+        municipalitiesCount: seed ? Math.max(municipalities.length, seed.municipalities) : municipalities.length,
+        wardsCount: seed ? Math.max(wards.length, seed.wards) : wards.length,
       },
-      departments: departmentsDetail.length > 0 ? departmentsDetail : [
+      departments: departmentsDetail.length > 0 ? departmentsDetail : (seed ? [
         { id: `dept_rev_${state.code.toLowerCase()}`, name: 'Revenue & Disaster Management', code: 'REV', headName: 'Dr. B. R. Ambedkar IAS', headEmail: `director.rev@${state.code.toLowerCase()}.gov.in`, servicesCount: 8, officersCount: 120, status: 'Active' },
         { id: `dept_trans_${state.code.toLowerCase()}`, name: 'Transport & Road Safety', code: 'TRANS', headName: 'Suresh Rao IAS', headEmail: `comm.trans@${state.code.toLowerCase()}.gov.in`, servicesCount: 5, officersCount: 80, status: 'Active' },
         { id: `dept_mun_${state.code.toLowerCase()}`, name: 'Municipal Administration & Urban Development', code: 'MAUD', headName: 'Anil Kumar IAS', headEmail: `director.maud@${state.code.toLowerCase()}.gov.in`, servicesCount: 6, officersCount: 95, status: 'Active' },
         { id: `dept_agri_${state.code.toLowerCase()}`, name: 'Agriculture & Farmers Welfare', code: 'AGRI', headName: 'P. Lakshmi Devi IAS', headEmail: `director.agri@${state.code.toLowerCase()}.gov.in`, servicesCount: 7, officersCount: 110, status: 'Active' },
-      ],
+      ] : []),
       services: {
-        total: 86,
-        active: 79,
-        suspended: 7,
+        total: finalServices,
+        active: seed ? 79 : stateServices.filter(s => (s as any).status !== 'INACTIVE').length,
+        suspended: seed ? 7 : stateServices.filter(s => (s as any).status === 'INACTIVE').length,
       },
       officers: {
-        total: 420,
-        active: 390,
-        suspended: 30,
-        designations: [
+        total: finalOfficers,
+        active: seed ? Math.round(finalOfficers * 0.93) : stateOfficers.filter(o => (o as any).status !== 'INACTIVE').length,
+        suspended: seed ? Math.round(finalOfficers * 0.07) : stateOfficers.filter(o => (o as any).status === 'INACTIVE').length,
+        designations: seed ? [
           { title: 'Village Revenue Officer (VRO)', count: 240 },
           { title: 'Mandal Revenue Officer / Tahsildar (MRO)', count: 95 },
           { title: 'Revenue Divisional Officer (RDO)', count: 45 },
           { title: 'Joint Collector / District Officer', count: 40 },
-        ],
+        ] : [],
       },
       applications: {
-        total: submitted,
-        submitted: submitted,
-        inProgress: inProgress,
-        pending: pending,
-        completed: completed,
-        rejected: rejected,
-        queryRaised: queryRaised,
+        total: finalApps,
+        submitted: finalApps,
+        inProgress: (seed?.inProgress || 0) + inProgress,
+        pending: (seed?.pending || 0) + pending,
+        completed: (seed?.completed || 0) + completed,
+        rejected: (seed?.rejected || 0) + rejected,
+        queryRaised: (seed?.queryRaised || 0) + queryRaised,
       },
       grievances: {
-        total: Math.round(submitted * 0.15),
-        pending: Math.round(submitted * 0.04),
-        inProgress: Math.round(submitted * 0.02),
-        resolved: Math.round(submitted * 0.08),
-        escalated: Math.round(submitted * 0.01),
+        total: seed?.grievances || 0,
+        pending: Math.round((seed?.grievances || 0) * 0.23),
+        inProgress: Math.round((seed?.grievances || 0) * 0.07),
+        resolved: Math.round((seed?.grievances || 0) * 0.65),
+        escalated: Math.round((seed?.grievances || 0) * 0.05),
       },
-      recentActivity: recentActivity.length > 0 ? recentActivity : [
+      recentActivity: recentActivity.length > 0 ? recentActivity : (seed ? [
         { id: 'ACT-1', action: 'STATE_ADMIN_LOGGED_IN', actor: 'State Admin', date: new Date(Date.now() - 3600000 * 2).toISOString(), details: 'State Admin updated Revenue Department configuration' },
         { id: 'ACT-2', action: 'DEPARTMENT_CREATED', actor: 'State Admin', date: new Date(Date.now() - 86400000).toISOString(), details: 'New department Agriculture & Cooperation created' },
         { id: 'ACT-3', action: 'WORKFLOW_UPDATED', actor: 'Department Head (REV)', date: new Date(Date.now() - 86400000 * 2).toISOString(), details: 'Integrated Caste & Income Certificate workflow updated' },
         { id: 'ACT-4', action: 'JURISDICTION_TREE_SYNC', actor: 'State Admin', date: new Date(Date.now() - 86400000 * 3).toISOString(), details: 'Tirupati Revenue Division nodes validated' },
-      ],
+      ] : [
+        { id: 'ACT-INIT', action: 'STATE_CREATED', actor: 'Central Admin', date: state.createdAt || new Date().toISOString(), details: `State Government '${state.name}' and State Administrator initialized` }
+      ]),
     };
   }
 
@@ -417,7 +533,7 @@ export class CentralService {
     db.auditLogs.push({
       id: `AUD-${Date.now()}`,
       action: 'STATE_DEACTIVATED',
-      actor: 'Central Government Admin',
+      actor: 'Central Administrator',
       role: 'CENTRAL_ADMIN',
       date: new Date().toISOString(),
       details: `Deactivated State Government: ${state.name} (${state.code})`,
@@ -425,12 +541,12 @@ export class CentralService {
 
     return {
       success: true,
-      message: `State '${state.name}' deactivated successfully.`,
+      message: `State Government '${state.name}' (${state.code}) deactivated successfully.`,
     };
   }
 
   /**
-   * Central Government Revenue Analysis.
+   * State-wise Revenue Aggregation
    */
   getStateWiseRevenue() {
     let nationalTotalRevenue = 0;
@@ -455,22 +571,22 @@ export class CentralService {
         }
       });
 
-      if (stateRevenue === 0) {
-        stateRevenue = state.code === 'AP' ? 425000 : state.code === 'KA' ? 390000 : state.code === 'TN' ? 295000 : 98000;
-        paidCount = Math.round(stateRevenue / 50);
-      }
+      const seed = SEED_STATE_METRICS[state.code];
+      const finalRevenue = (seed?.revenue || 0) + stateRevenue;
+      const finalPaidCount = paidCount + (seed ? Math.round(seed.revenue / 50) : 0);
+      const finalApps = (seed?.apps || 0) + stateApplications.length;
 
-      nationalTotalRevenue += stateRevenue;
-      nationalPaidApplications += paidCount;
+      nationalTotalRevenue += finalRevenue;
+      nationalPaidApplications += finalPaidCount;
 
       return {
         stateId: state.id,
         stateName: state.name,
         stateCode: state.code,
-        totalApplications: stateApplications.length || (state.code === 'AP' ? 8420 : state.code === 'KA' ? 7820 : state.code === 'TN' ? 5980 : 1980),
-        paidApplications: paidCount,
-        totalRevenue: stateRevenue,
-        departmentsCount: db.departments.filter((d) => d.stateId === state.id).length || 12,
+        totalApplications: finalApps,
+        paidApplications: finalPaidCount,
+        totalRevenue: finalRevenue,
+        departmentsCount: seed ? Math.max(db.departments.filter((d) => d.stateId === state.id).length, seed.departments) : db.departments.filter((d) => d.stateId === state.id).length,
       };
     });
 

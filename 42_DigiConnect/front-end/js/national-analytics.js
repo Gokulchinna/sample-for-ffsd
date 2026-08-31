@@ -137,17 +137,17 @@ export async function getNationalAnalyticsData() {
       const match = NATIONAL_STATES_DATA.find(
         (s) => s.code.toUpperCase() === code || s.id === bs.id,
       );
-      const apps = match?.applications || bs.totalApplications || 5000;
-      const rev = match?.revenue || bs.totalRevenue || 250000;
-      const completed = match?.completed || Math.round(apps * 0.7);
-      const pending = match?.pending || Math.round(apps * 0.2);
-      const inProgress = match?.inProgress || Math.round(apps * 0.12);
-      const rejected = match?.rejected || Math.round(apps * 0.07);
-      const query = match?.query || Math.round(apps * 0.03);
-      const grievances = match?.grievances || Math.round(apps * 0.15);
-      const grvPending = match?.grvPending || Math.round(grievances * 0.23);
-      const grvResolved = match?.grvResolved || Math.round(grievances * 0.7);
-      const grvEscalated = match?.grvEscalated || Math.round(grievances * 0.06);
+      const apps = match ? match.applications : (bs.totalApplications ?? 0);
+      const rev = match ? match.revenue : (bs.totalRevenue ?? 0);
+      const completed = match ? match.completed : (apps > 0 ? Math.round(apps * 0.7) : 0);
+      const pending = match ? match.pending : (apps > 0 ? Math.round(apps * 0.2) : 0);
+      const inProgress = match ? match.inProgress : (apps > 0 ? Math.round(apps * 0.12) : 0);
+      const rejected = match ? match.rejected : (apps > 0 ? Math.round(apps * 0.07) : 0);
+      const query = match ? match.query : (apps > 0 ? Math.round(apps * 0.03) : 0);
+      const grievances = match ? match.grievances : (apps > 0 ? Math.round(apps * 0.15) : 0);
+      const grvPending = match ? match.grvPending : (grievances > 0 ? Math.round(grievances * 0.23) : 0);
+      const grvResolved = match ? match.grvResolved : (grievances > 0 ? Math.round(grievances * 0.7) : 0);
+      const grvEscalated = match ? match.grvEscalated : (grievances > 0 ? Math.round(grievances * 0.06) : 0);
       const grvInProgress = grievances - (grvPending + grvResolved + grvEscalated);
 
       // Check localStorage for active/inactive status override
@@ -161,8 +161,8 @@ export async function getNationalAnalyticsData() {
         name: bs.name,
         code: code || bs.name.slice(0, 2).toUpperCase(),
         status: status,
-        departmentsCount: bs.departmentsCount || 12,
-        citizens: Math.round(apps * 4.2),
+        departmentsCount: bs.departmentsCount ?? 0,
+        citizens: match ? Math.round(apps * 4.2) : (bs.citizensCount ?? (apps ? Math.round(apps * 4.2) : 0)),
         applications: apps,
         completed,
         pending,

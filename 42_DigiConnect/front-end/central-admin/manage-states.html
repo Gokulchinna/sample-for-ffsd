@@ -510,11 +510,11 @@
                         stateAdminName: b.stateAdmin?.name || b.stateAdminName || `${b.name} State Admin IAS`,
                         stateAdminEmail: b.stateAdmin?.email || b.stateAdminEmail || `admin@${code.toLowerCase()}.gov.in`,
                         status: status,
-                        departmentsCount: b.departmentsCount || 12,
-                        citizensCount: Math.round((b.totalApplications || 8000) * 4.2),
-                        applicationsCount: b.totalApplications || 8000,
-                        revenue: b.totalRevenue || 350000,
-                        createdAt: b.createdAt || '2026-01-01T00:00:00.000Z'
+                        departmentsCount: b.departmentsCount ?? 0,
+                        citizensCount: b.citizensCount ?? (b.totalApplications ? Math.round(b.totalApplications * 4.2) : 0),
+                        applicationsCount: b.totalApplications ?? 0,
+                        revenue: b.totalRevenue ?? 0,
+                        createdAt: b.createdAt || new Date().toISOString()
                     });
                 });
 
