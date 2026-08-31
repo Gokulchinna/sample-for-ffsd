@@ -538,12 +538,9 @@ export async function apiGetPendingOfficers() {
   return apiFetch('/super-user/pending-officers');
 }
 
-/** Onboard a new officer directly: POST /super-user/onboard-officer */
+/** Onboard a new officer directly: POST /department-head/officers */
 export async function apiOnboardOfficer(data) {
-  return apiFetch('/super-user/onboard-officer', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
+  return apiOnboardDepartmentOfficer(data);
 }
 
 /** Approve pending officer: PATCH /super-user/pending-officers/:id/approve */
@@ -1246,6 +1243,13 @@ export async function apiOnboardDepartmentOfficer(data) {
   return apiFetch('/department-head/officers', {
     method: 'POST',
     body: JSON.stringify(data),
+  });
+}
+
+export async function apiUpdateOfficerStatus(officerId, status) {
+  return apiFetch(`/department-head/officers/${officerId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
   });
 }
 
