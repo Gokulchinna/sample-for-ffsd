@@ -44,7 +44,9 @@ export type TierLevel =
   | 'MANDAL'
   | 'MUNICIPALITY'
   | 'VILLAGE'
-  | 'WARD';
+  | 'GRAM_PANCHAYAT'
+  | 'WARD'
+  | 'ZONE';
 
 export enum AppStatus {
   PENDING = 'pending',

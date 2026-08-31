@@ -788,16 +788,12 @@ const MOCK_PENDING_OFFICERS = [
 ];
 
 const MOCK_SERVICES = [
-  { id: 'SVC-001', name: 'Income Certificate', cat: 'Certificate', dept: 'Revenue Department', sla: 7, fee: 50, feeLabel: '₹50', desc: 'Certificate proving annual family income.', docs: ['Aadhaar Card', 'Ration Card', 'Salary Slip / Income Proof'], icon: 'cert', stages: 3, status: 'Active', apps: 892, color: 'var(--navy-500)' },
-  { id: 'SVC-002', name: 'Caste Certificate', cat: 'Certificate', dept: 'Revenue Department', sla: 7, fee: 50, feeLabel: '₹50', desc: 'Official certificate proving caste for reservations.', docs: ['Aadhaar Card', 'Ration Card', 'Father\'s Caste Certificate', 'School Certificate'], icon: 'cert', stages: 3, status: 'Active', apps: 674, color: 'var(--navy-400)' },
-  { id: 'SVC-003', name: 'Residence Certificate', cat: 'Certificate', dept: 'Revenue Department', sla: 7, fee: 30, feeLabel: '₹30', desc: 'Proof of domicile / residence.', docs: ['Aadhaar Card', 'Electricity Bill / Rent Agreement'], icon: 'cert', stages: 3, status: 'Active', apps: 408, color: 'var(--navy-300)' },
-  { id: 'SVC-004', name: 'Welfare / Subsidy Scheme', cat: 'Welfare', dept: 'Welfare Department', sla: 14, fee: 0, feeLabel: 'Free', desc: 'Direct income support under PM Kisan.', docs: ['Aadhaar Card', 'Land Records', 'Bank Passbook', 'Income Certificate', 'Affidavit'], icon: 'welfare', stages: 4, status: 'Active', apps: 521, color: 'var(--green-500)' },
-  { id: 'SVC-005', name: 'Scholarship Application', cat: 'Welfare', dept: 'Welfare Department', sla: 21, fee: 0, feeLabel: 'Free', desc: 'Post-matric scholarship for SC/ST/OBC.', docs: ['Aadhaar Card', 'Income Certificate', 'Caste Certificate', 'Mark Sheets', 'Bank Passbook', 'Fee Receipt'], icon: 'welfare', stages: 4, status: 'Active', apps: 134, color: '#22c55e' },
-  { id: 'SVC-006', name: 'Event Permission', cat: 'Permission', dept: 'Municipal Corporation', sla: 5, fee: 200, feeLabel: '₹200', desc: 'Permission for public events or gatherings.', docs: ['Aadhaar Card', 'Event Detail Letter', 'Venue Proof'], icon: 'permission', stages: 2, status: 'Active', apps: 287, color: 'var(--amber-500)' },
-  { id: 'SVC-007', name: 'Vendor License', cat: 'Permission', dept: 'Municipal Corporation', sla: 7, fee: 500, feeLabel: '₹500', desc: 'License to operate a shop or business.', docs: ['Aadhaar Card', 'Shop Photo', 'Ownership/Rent Agreement', 'NOC from Landlord'], icon: 'permission', stages: 3, status: 'Active', apps: 156, color: 'var(--amber-400)' },
-  { id: 'SVC-008', name: 'Record Correction', cat: 'Correction', dept: 'Revenue Department', sla: 10, fee: 100, feeLabel: '₹100', desc: 'Correction of name in official records.', docs: ['Aadhaar Card', 'Gazette Notification/Affidavit', 'Original Record'], icon: 'correction', stages: 3, status: 'Active', apps: 186, color: 'var(--purple-500)' },
-  { id: 'SVC-009', name: 'Marriage Certificate', cat: 'Certificate', dept: 'Revenue Department', sla: 7, fee: 50, feeLabel: '₹50', desc: 'Official certificate proving marriage.', docs: ['Aadhaar Card', 'Marriage Invitation', 'Photos', 'Affidavit'], icon: 'cert', stages: 3, status: 'Draft', apps: 0, color: 'var(--slate-400)' },
-  { id: 'SVC-010', name: 'Death Certificate', cat: 'Certificate', dept: 'Municipal Corporation', sla: 3, fee: 20, feeLabel: '₹20', desc: 'Official certificate for registering death.', docs: ['Aadhaar Card', 'Hospital Record'], icon: 'cert', stages: 2, status: 'Inactive', apps: 0, color: 'var(--slate-400)' },
+  { id: 'SVC-001', name: 'Income Certificate', cat: 'Certificate', dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap', sla: 7, fee: 50, feeLabel: '₹50', desc: 'Certificate proving annual family income.', docs: ['Aadhaar Card', 'Ration Card', 'Salary Slip / Income Proof'], icon: 'cert', stages: 3, status: 'Active', apps: 892, color: 'var(--navy-500)' },
+  { id: 'SVC-002', name: 'Caste Certificate', cat: 'Certificate', dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap', sla: 7, fee: 50, feeLabel: '₹50', desc: 'Official certificate proving caste for reservations.', docs: ['Aadhaar Card', 'Ration Card', 'Father\'s Caste Certificate', 'School Certificate'], icon: 'cert', stages: 3, status: 'Active', apps: 674, color: 'var(--navy-400)' },
+  { id: 'SVC-003', name: 'Residence Certificate', cat: 'Certificate', dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap', sla: 7, fee: 30, feeLabel: '₹30', desc: 'Proof of domicile / residence.', docs: ['Aadhaar Card', 'Electricity Bill / Rent Agreement'], icon: 'cert', stages: 3, status: 'Active', apps: 408, color: 'var(--navy-300)' },
+  { id: 'SVC-EDU-001', name: 'School Transfer Certificate & Verification', cat: 'Certificate', dept: 'School Education & Literacy Department', departmentId: 'dept_edu_ap', sla: 5, fee: 0, feeLabel: 'Free', desc: 'Authentication and issuance of student transfer record.', docs: ['Student Aadhaar', 'Previous School TC', 'Bonafide Certificate'], icon: 'cert', stages: 2, status: 'Active', apps: 320, color: '#3b82f6' },
+  { id: 'SVC-EDU-002', name: 'Student Merit Scholarship Endorsement', cat: 'Welfare', dept: 'School Education & Literacy Department', departmentId: 'dept_edu_ap', sla: 7, fee: 0, feeLabel: 'Free', desc: 'State scholarship verification for pre/post-matric students.', docs: ['Aadhaar Card', 'Income Certificate', 'Mark Sheets', 'Bank Passbook'], icon: 'welfare', stages: 3, status: 'Active', apps: 280, color: '#22c55e' },
+  { id: 'SVC-EDU-003', name: 'Duplicate Secondary School SSC Memo', cat: 'Certificate', dept: 'School Education & Literacy Department', departmentId: 'dept_edu_ap', sla: 10, fee: 100, feeLabel: '₹100', desc: 'Official duplicate copy of secondary school marks memo.', docs: ['Aadhaar Card', 'Police Lost Property FIR / Self-Declaration', 'Affidavit'], icon: 'cert', stages: 2, status: 'Active', apps: 190, color: '#8b5cf6' },
 ];
 
 const MOCK_WORKFLOW_CONFIG = [
@@ -2373,28 +2369,6 @@ export const db: {
   grievances: MOCK_GRIEVANCES as Grievance[],
   services: [
     ...MOCK_SERVICES as GovtService[],
-    {
-      id: 'srv_caste_income_ap',
-      name: 'Integrated Community, Nativity & Date of Birth Certificate',
-      dept: 'Revenue Department',
-      description: 'Official statutory certificate verifying caste, nativity, and parental ancestry.',
-      fee: 50,
-      status: 'Active',
-      category: 'Certificate',
-      slaDays: 7,
-      requirements: ['Aadhaar Card Proof', 'Address / Residence Proof', 'Photograph'],
-    } as any,
-    {
-      id: 'srv_trade_license_ap',
-      name: 'Municipal Trade & Commercial License',
-      dept: 'Municipal Administration Department',
-      description: 'Establishment permission for retail, service, or commercial operations in urban areas.',
-      fee: 175,
-      status: 'Active',
-      category: 'Permission',
-      slaDays: 14,
-      requirements: ['Property Tax Receipt / Rental Agreement', 'Fire Safety Self-Declaration'],
-    } as any,
   ],
   notifications: MOCK_NOTIFICATIONS as Notification[],
   auditLogs: MOCK_AUDIT_LOGS as AuditLog[],

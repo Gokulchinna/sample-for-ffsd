@@ -26,6 +26,23 @@ import { Role } from '../models/enums';
 export class StateAdminController {
   constructor(private readonly stateAdminService: StateAdminService) {}
 
+  @Get('dashboard')
+  @ApiOperation({ summary: 'State Admin overview & monitoring dashboard' })
+  getStateDashboard(
+    @Query('stateId') stateId?: string,
+    @Headers('x-state-id') headerStateId?: string,
+    @Headers('x-role') role?: string,
+  ) {
+    let targetState = headerStateId || stateId || 'state_ap';
+    if (role === Role.STATE_ADMIN && headerStateId) {
+      targetState = headerStateId;
+    }
+    return {
+      success: true,
+      data: this.stateAdminService.getStateDashboard(targetState),
+    };
+  }
+
   @Get('departments')
   @ApiOperation({ summary: 'List departments in state' })
   listDepartments(

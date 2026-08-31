@@ -8,6 +8,8 @@ export interface JurisdictionNode {
   governanceType: GovernanceType;
   tierLevel: TierLevel;
   code?: string;
+  status?: 'Active' | 'Inactive';
+  areaType?: 'RURAL' | 'URBAN' | 'COMMON';
   createdAt?: string;
   updatedAt?: string;
 }

@@ -407,8 +407,24 @@ export async function apiUpdateWorkflowConfig(data) {
 // GEOGRAPHY / DYNAMIC JURISDICTION TREE
 // ──────────────────────────────────────────
 
+export async function apiGetJurisdictionStats(stateId = 'state_ap') {
+  return apiFetch(`/geography/stats?stateId=${stateId}`);
+}
+
 export async function apiGetJurisdictionTree(stateId = 'state_ap') {
   return apiFetch(`/geography/tree?stateId=${stateId}`);
+}
+
+export async function apiGetJurisdictionNode(nodeId) {
+  return apiFetch(`/geography/nodes/${nodeId}`);
+}
+
+export async function apiGetJurisdictionDetails(nodeId) {
+  return apiFetch(`/geography/nodes/${nodeId}/details`);
+}
+
+export async function apiGetJurisdictionChildren(nodeId, stateId = 'state_ap') {
+  return apiFetch(`/geography/nodes/${nodeId}/children?stateId=${stateId}`);
 }
 
 export async function apiGetJurisdictionAncestors(nodeId) {
@@ -422,8 +438,29 @@ export async function apiCreateJurisdictionNode(data) {
   });
 }
 
-export async function apiDeleteJurisdictionNode(nodeId) {
-  return apiFetch(`/geography/nodes/${nodeId}`, { method: 'DELETE' });
+export async function apiUpdateJurisdictionNode(nodeId, data) {
+  return apiFetch(`/geography/nodes/${nodeId}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function apiToggleJurisdictionStatus(nodeId, status) {
+  return apiFetch(`/geography/nodes/${nodeId}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function apiDeleteJurisdictionNode(nodeId, cascade = false) {
+  const url = cascade
+    ? `/geography/nodes/${nodeId}?cascade=true`
+    : `/geography/nodes/${nodeId}`;
+  return apiFetch(url, { method: 'DELETE' });
+}
+
+export async function apiGetJurisdictionAudit(stateId = 'state_ap') {
+  return apiFetch(`/geography/audit?stateId=${stateId}`);
 }
 
 // ──────────────────────────────────────────
@@ -491,6 +528,10 @@ export async function apiGetCentralMetrics() {
 // ──────────────────────────────────────────
 // STATE GOVERNMENT (STATE ADMIN)
 // ──────────────────────────────────────────
+
+export async function apiGetStateDashboard(stateId = 'state_ap') {
+  return apiFetch(`/state-admin/dashboard?stateId=${stateId}`);
+}
 
 export async function apiGetStateDepartments(stateId = 'state_ap') {
   return apiFetch(`/state-admin/departments?stateId=${stateId}`);

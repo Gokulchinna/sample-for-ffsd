@@ -1321,6 +1321,70 @@
         ]
       }
     },
+    "/api/v1/geography/stats": {
+      "get": {
+        "operationId": "GeographyController_getStats",
+        "parameters": [
+          {
+            "name": "stateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get aggregated tier summary statistics for a state",
+        "tags": [
+          "geography"
+        ]
+      }
+    },
+    "/api/v1/geography/audit": {
+      "get": {
+        "operationId": "GeographyController_getAuditLogs",
+        "parameters": [
+          {
+            "name": "stateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get recent jurisdiction lifecycle audit activities",
+        "tags": [
+          "geography"
+        ]
+      }
+    },
     "/api/v1/geography/tree": {
       "get": {
         "operationId": "GeographyController_getTree",
@@ -1332,6 +1396,14 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1340,6 +1412,30 @@
           }
         },
         "summary": "Get visual hierarchical jurisdiction tree",
+        "tags": [
+          "geography"
+        ]
+      }
+    },
+    "/api/v1/geography/nodes/{id}/details": {
+      "get": {
+        "operationId": "GeographyController_getNodeDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Get deep jurisdiction node details with dependencies and breadcrumbs",
         "tags": [
           "geography"
         ]
@@ -1381,8 +1477,17 @@
           },
           {
             "name": "x-role",
+            "required": true,
             "in": "header",
             "description": "STATE_ADMIN or CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -1403,7 +1508,7 @@
             "description": ""
           }
         },
-        "summary": "Update jurisdiction node",
+        "summary": "Update jurisdiction node properties (renaming keeps stable ID)",
         "tags": [
           "geography"
         ]
@@ -1420,9 +1525,26 @@
             }
           },
           {
+            "name": "cascade",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "x-role",
+            "required": true,
             "in": "header",
             "description": "STATE_ADMIN or CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -1433,7 +1555,7 @@
             "description": ""
           }
         },
-        "summary": "Delete jurisdiction node (fails if children exist)",
+        "summary": "Delete jurisdiction node (fails if dependencies exist; cascade=true deletes all descendants)",
         "tags": [
           "geography"
         ]
@@ -1455,6 +1577,14 @@
             "name": "stateId",
             "required": true,
             "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -1533,8 +1663,17 @@
         "parameters": [
           {
             "name": "x-role",
+            "required": true,
             "in": "header",
             "description": "STATE_ADMIN or CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
             "schema": {
               "type": "string"
             }
@@ -1556,6 +1695,47 @@
           }
         },
         "summary": "Create new dynamic jurisdiction node",
+        "tags": [
+          "geography"
+        ]
+      }
+    },
+    "/api/v1/geography/nodes/{id}/status": {
+      "patch": {
+        "operationId": "GeographyController_toggleStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-role",
+            "required": true,
+            "in": "header",
+            "description": "STATE_ADMIN or CENTRAL_ADMIN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Activate or deactivate a jurisdiction node",
         "tags": [
           "geography"
         ]
@@ -2615,6 +2795,46 @@
         "summary": "National level key performance metrics",
         "tags": [
           "central"
+        ]
+      }
+    },
+    "/api/v1/state-admin/dashboard": {
+      "get": {
+        "operationId": "StateAdminController_getStateDashboard",
+        "parameters": [
+          {
+            "name": "stateId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-state-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-role",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "State Admin overview & monitoring dashboard",
+        "tags": [
+          "state-admin"
         ]
       }
     },

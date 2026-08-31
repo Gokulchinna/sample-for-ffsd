@@ -551,3 +551,24 @@ export async function downloadFile(fileUrl, filename) {
 }
 window.downloadFile = downloadFile;
 
+/**
+ * Format currency as Indian Rupees (₹)
+ */
+export function formatINR(val, compact = false) {
+  const n = Number(val) || 0;
+  if (compact) {
+    if (n >= 10000000) return `₹${(n / 10000000).toFixed(2)}Cr`;
+    if (n >= 100000) return `₹${(n / 100000).toFixed(2)}L`;
+    if (n >= 1000) return `₹${(n / 1000).toFixed(1)}K`;
+    return `₹${n}`;
+  }
+  return '₹' + n.toLocaleString('en-IN');
+}
+
+/**
+ * Number formatter with Indian locale
+ */
+export function formatNum(val) {
+  return (Number(val) || 0).toLocaleString('en-IN');
+}
+

@@ -383,7 +383,7 @@ export const MASTER_JURISDICTION_NODES: JurisdictionNode[] = [
 ];
 
 export const MASTER_DEPARTMENTS: Department[] = [
-  // ─── 1. ANDHRA PRADESH DEPARTMENTS ───
+  // ─── 1. ANDHRA PRADESH DEPARTMENTS (Exactly 2 baseline) ───
   {
     id: 'dept_rev_ap',
     stateId: 'state_ap',
@@ -395,17 +395,17 @@ export const MASTER_DEPARTMENTS: Department[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'dept_mun_ap',
+    id: 'dept_edu_ap',
     stateId: 'state_ap',
-    name: 'Municipal Administration & Urban Development (MA&UD)',
-    code: 'CDMA-AP',
-    description: 'Urban local bodies, trade licenses, property tax, and municipal clearances',
-    headUserId: 'USR-DH-MUN-AP',
+    name: 'School Education & Literacy Department',
+    code: 'EDU-AP',
+    description: 'Elementary, secondary schools, admissions, transfer certificates, and scholarships',
+    headUserId: 'USR-DH-EDU-AP',
     status: 'ACTIVE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 
-  // ─── 2. TAMIL NADU DEPARTMENTS ───
+  // ─── 2. TAMIL NADU DEPARTMENTS (Exactly 2 baseline) ───
   {
     id: 'dept_rev_tn',
     stateId: 'state_tn',
@@ -417,17 +417,17 @@ export const MASTER_DEPARTMENTS: Department[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'dept_maws_tn',
+    id: 'dept_edu_tn',
     stateId: 'state_tn',
-    name: 'Municipal Administration & Water Supply (MAWS)',
-    code: 'MAWS-TN',
-    description: 'Corporation approvals, building licenses, water connections, and urban health',
-    headUserId: 'USR-DH-MAWS-TN',
+    name: 'School Education Department',
+    code: 'EDU-TN',
+    description: 'State school education, examinations, certificates, and student welfare',
+    headUserId: 'USR-DH-EDU-TN',
     status: 'ACTIVE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 
-  // ─── 3. KARNATAKA DEPARTMENTS ───
+  // ─── 3. KARNATAKA DEPARTMENTS (Exactly 2 baseline) ───
   {
     id: 'dept_rev_ka',
     stateId: 'state_ka',
@@ -439,17 +439,17 @@ export const MASTER_DEPARTMENTS: Department[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'dept_udd_ka',
+    id: 'dept_edu_ka',
     stateId: 'state_ka',
-    name: 'Urban Development Department (UDD / BBMP)',
-    code: 'UDD-KA',
-    description: 'BBMP Khata services, building plan sanctions, trade licenses, and urban planning',
-    headUserId: 'USR-DH-UDD-KA',
+    name: 'Department of Primary & Secondary Education',
+    code: 'EDU-KA',
+    description: 'State primary & secondary education, student scholarships, and school affiliation',
+    headUserId: 'USR-DH-EDU-KA',
     status: 'ACTIVE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 
-  // ─── 4. KERALA DEPARTMENTS ───
+  // ─── 4. KERALA DEPARTMENTS (Exactly 2 baseline) ───
   {
     id: 'dept_rev_kl',
     stateId: 'state_kl',
@@ -461,12 +461,12 @@ export const MASTER_DEPARTMENTS: Department[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'dept_lsgd_kl',
+    id: 'dept_edu_kl',
     stateId: 'state_kl',
-    name: 'Local Self Government Department (LSGD)',
-    code: 'LSGD-KL',
-    description: 'Panchayat & Corporation clearances, birth/death registrations, and property tax',
-    headUserId: 'USR-DH-LSGD-KL',
+    name: 'General Education Department',
+    code: 'EDU-KL',
+    description: 'Public education directorate, SSLC examination boards, and student welfare',
+    headUserId: 'USR-DH-EDU-KL',
     status: 'ACTIVE',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
@@ -507,21 +507,21 @@ export const MASTER_DESIGNATIONS: Designation[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 
-  // ─── ANDHRA PRADESH MUNICIPAL DESIGNATIONS ───
+  // ─── ANDHRA PRADESH EDUCATION DESIGNATIONS ───
   {
-    id: 'desig_ward_officer',
-    departmentId: 'dept_mun_ap',
-    title: 'Ward Administrative Officer (WAO)',
-    code: 'WAO',
-    description: 'Ward Secretariat intake and preliminary civic document verification',
+    id: 'desig_meo',
+    departmentId: 'dept_edu_ap',
+    title: 'Mandal Educational Officer (MEO)',
+    code: 'MEO',
+    description: 'Mandal level verification of school records and student certifications',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'desig_commissioner',
-    departmentId: 'dept_mun_ap',
-    title: 'Municipal Commissioner',
-    code: 'MC',
-    description: 'Final municipal approval & trade licensing authority',
+    id: 'desig_deo',
+    departmentId: 'dept_edu_ap',
+    title: 'District Educational Officer (DEO)',
+    code: 'DEO',
+    description: 'District level issuance of secondary memos and scholarship authorisations',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 
@@ -667,26 +667,26 @@ export const MASTER_OFFICERS: OfficerUser[] = [
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'OFF-WARD-01',
-    name: 'R. Ramesh',
-    email: 'ramesh.ward@ap.gov.in',
+    id: 'OFF-MEO-01',
+    name: 'R. Ramesh M.Ed',
+    email: 'ramesh.meo@ap.gov.in',
     phone: '9876543213',
-    departmentId: 'dept_mun_ap',
-    designationId: 'desig_ward_officer',
-    designationTitle: 'Ward Administrative Officer',
-    assignedNodeId: 'node_w14', // Ward 14
+    departmentId: 'dept_edu_ap',
+    designationId: 'desig_meo',
+    designationTitle: 'Mandal Educational Officer',
+    assignedNodeId: 'node_cg_mdl', // Chandragiri Mandal
     status: 'Active',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'OFF-COMM-01',
-    name: 'P. S. Murthy',
-    email: 'psmurthy.mc@ap.gov.in',
+    id: 'OFF-DEO-01',
+    name: 'Dr. P. S. Murthy Ed.D',
+    email: 'psmurthy.deo@ap.gov.in',
     phone: '9876543214',
-    departmentId: 'dept_mun_ap',
-    designationId: 'desig_commissioner',
-    designationTitle: 'Municipal Commissioner',
-    assignedNodeId: 'node_tmc', // Tirupati Municipal Corp
+    departmentId: 'dept_edu_ap',
+    designationId: 'desig_deo',
+    designationTitle: 'District Educational Officer',
+    assignedNodeId: 'node_tpt', // Tirupati District
     status: 'Active',
     createdAt: '2026-01-01T00:00:00.000Z',
   },

@@ -134,7 +134,8 @@
 
     <script type="module">
         import { initPage } from '../js/navigation.js';
-        import { apiConfigureGrievanceCell } from '../js/api.js';
+        import { getSession } from '../js/auth.js';
+        import { apiConfigureGrievanceCell, apiGetStateDepartments } from '../js/api.js';
         import { showToast } from '../js/utils.js';
 
         initPage({
@@ -142,6 +143,22 @@
             breadcrumbs: [{ label: 'State Government', href: 'state-admin/dashboard.html' }, { label: 'Grievance Cells' }],
             requiredRole: 'state_admin'
         });
+
+        const session = getSession();
+        const currentStateId = session?.stateId || 'state_ap';
+
+        async function loadDepartmentOptions() {
+            try {
+                const res = await apiGetStateDepartments(currentStateId);
+                const depts = res.data || [];
+                const select = document.getElementById('cellDeptInput');
+                if (depts.length > 0) {
+                    select.innerHTML = depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
 
         window.openConfigCellModal = () => {
             document.getElementById('configCellModal').style.display = 'flex';
@@ -158,7 +175,7 @@
             btn.textContent = 'Saving...';
 
             const payload = {
-                stateId: 'state_ap',
+                stateId: currentStateId,
                 departmentId: document.getElementById('cellDeptInput').value,
                 cellName: document.getElementById('cellNameInput').value.trim(),
                 jurisdictionTier: document.getElementById('cellTierInput').value,
@@ -177,6 +194,8 @@
                 btn.textContent = 'Save Grievance Cell';
             }
         };
+
+        loadDepartmentOptions();
     </script>
 </body>
 </html>

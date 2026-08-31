@@ -24,13 +24,23 @@ export class CreateNodeDto {
     'MANDAL',
     'MUNICIPALITY',
     'VILLAGE',
+    'GRAM_PANCHAYAT',
     'WARD',
+    'ZONE',
   ])
   tierLevel: string;
 
   @IsOptional()
   @IsString()
   code?: string;
+
+  @IsOptional()
+  @IsIn(['Active', 'Inactive'])
+  status?: 'Active' | 'Inactive';
+
+  @IsOptional()
+  @IsIn(['RURAL', 'URBAN', 'COMMON'])
+  areaType?: string;
 }
 
 export class UpdateNodeDto {
@@ -39,8 +49,16 @@ export class UpdateNodeDto {
   name?: string;
 
   @IsOptional()
+  @IsString()
+  code?: string;
+
+  @IsOptional()
   @IsIn(['RURAL', 'URBAN', 'COMMON'])
   governanceType?: string;
+
+  @IsOptional()
+  @IsIn(['RURAL', 'URBAN', 'COMMON'])
+  areaType?: string;
 
   @IsOptional()
   @IsIn([
@@ -50,7 +68,13 @@ export class UpdateNodeDto {
     'MANDAL',
     'MUNICIPALITY',
     'VILLAGE',
+    'GRAM_PANCHAYAT',
     'WARD',
+    'ZONE',
   ])
   tierLevel?: string;
+
+  @IsOptional()
+  @IsIn(['Active', 'Inactive'])
+  status?: 'Active' | 'Inactive';
 }

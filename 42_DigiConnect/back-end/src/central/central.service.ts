@@ -21,6 +21,7 @@ const SEED_STATE_METRICS: Record<string, {
   queryRaised: number;
   grievances: number;
   departments: number;
+  services: number;
   officers: number;
   citizens: number;
   districts: number;
@@ -38,8 +39,9 @@ const SEED_STATE_METRICS: Record<string, {
     inProgress: 1095,
     rejected: 580,
     queryRaised: 290,
-    grievances: 1250,
-    departments: 12,
+    grievances: 1240,
+    departments: 2,
+    services: 6,
     officers: 420,
     citizens: 35820,
     districts: 26,
@@ -58,7 +60,8 @@ const SEED_STATE_METRICS: Record<string, {
     rejected: 550,
     queryRaised: 290,
     grievances: 1180,
-    departments: 12,
+    departments: 2,
+    services: 6,
     officers: 390,
     citizens: 32844,
     districts: 31,
@@ -77,31 +80,33 @@ const SEED_STATE_METRICS: Record<string, {
     rejected: 410,
     queryRaised: 160,
     grievances: 890,
-    departments: 12,
+    departments: 2,
+    services: 6,
     officers: 360,
-    citizens: 25116,
+    citizens: 28910,
     districts: 38,
     subDivisions: 87,
-    mandals: 313,
-    villages: 16500,
+    mandals: 310,
+    villages: 15979,
     municipalities: 150,
     wards: 3800,
   },
   KL: {
-    apps: 1980,
-    revenue: 98000,
-    completed: 1480,
-    pending: 360,
-    inProgress: 240,
-    rejected: 100,
-    queryRaised: 40,
-    grievances: 290,
-    departments: 12,
-    officers: 280,
-    citizens: 8316,
+    apps: 4210,
+    revenue: 210000,
+    completed: 3100,
+    pending: 820,
+    inProgress: 510,
+    rejected: 290,
+    queryRaised: 110,
+    grievances: 640,
+    departments: 2,
+    services: 6,
+    officers: 310,
+    citizens: 22100,
     districts: 14,
     subDivisions: 27,
-    mandals: 77,
+    mandals: 78,
     villages: 1664,
     municipalities: 87,
     wards: 2100,
@@ -136,7 +141,7 @@ export class CentralService {
       const finalApps = (seed?.apps || 0) + stateApplications.length;
       const finalRevenue = (seed?.revenue || 0) + totalRevenue;
       const finalCitizens = (seed?.citizens || 0) + stateCitizens.length;
-      const finalDepts = seed ? Math.max(depts.length, seed.departments) : depts.length;
+      const finalDepts = depts.length;
 
       return {
         ...state,
@@ -359,23 +364,6 @@ export class CentralService {
     const nodes = db.jurisdictionNodes.filter((n) => n.stateId === state.id);
     const depts = db.departments.filter((d) => d.stateId === state.id);
 
-    // Detailed departments overview
-    const departmentsDetail = depts.map((d) => {
-      const head = db.users.find((u) => u.id === (d as any).headId || (u.role === Role.DEPARTMENT_HEAD && (u as any).departmentId === d.id));
-      const services = db.services.filter((s) => (s as any).departmentId === d.id);
-      const officers = db.officers.filter((o) => o.departmentId === d.id);
-      return {
-        id: d.id,
-        name: d.name,
-        code: d.code,
-        headName: head ? head.name : `${d.name} Director IAS`,
-        headEmail: head ? head.email : `head.${d.code.toLowerCase()}@${state.code.toLowerCase()}.gov.in`,
-        servicesCount: services.length || 6,
-        officersCount: officers.length || 45,
-        status: d.status || 'Active',
-      };
-    });
-
     // Jurisdiction counts by tier
     const districts = nodes.filter((n) => (n.tierLevel as string) === 'DISTRICT');
     const subDivisions = nodes.filter((n) => (n.tierLevel as string) === 'SUB_DIVISION');
@@ -391,7 +379,7 @@ export class CentralService {
       return leaf ? leaf.stateId === state.id : false;
     });
 
-    let totalRevenue = 0;
+    let totalPaidRevenue = 0;
     let submitted = 0;
     let inProgress = 0;
     let pending = 0;
@@ -401,7 +389,7 @@ export class CentralService {
 
     stateApplications.forEach((a) => {
       const isPaid = a.paymentStatus === 'PAID' || a.paymentStatus === 'completed' || a.paymentStatus === 'SUCCESS';
-      if (isPaid) totalRevenue += Number(a.fee) || 0;
+      if (isPaid) totalPaidRevenue += Number(a.fee) || 0;
       const st = String((a as any).currentStatus || a.status || '').toLowerCase();
       if (st.includes('completed') || st.includes('approved')) completed++;
       else if (st.includes('reject')) rejected++;
@@ -421,17 +409,79 @@ export class CentralService {
       const dept = db.departments.find((d) => d.id === (s as any).departmentId);
       return dept ? dept.stateId === state.id : false;
     });
+    const stateGrievances = db.grievances.filter((g) => {
+      return (g as any).stateId === state.id || depts.some((d) => d.id === (g as any).departmentId || d.name === (g as any).dept);
+    });
 
-    const finalApps = (seed?.apps || 0) + submitted;
-    const finalRevenue = (seed?.revenue || 0) + totalRevenue;
-    const finalCitizens = (seed?.citizens || 0) + stateCitizens.length;
-    const finalDepts = seed ? Math.max(depts.length, seed.departments) : depts.length;
-    const finalOfficers = seed ? Math.max(stateOfficers.length, seed.officers) : stateOfficers.length;
-    const finalServices = seed ? 86 : stateServices.length;
+    const finalApps = (seed?.apps || 8420) + stateApplications.length;
+    const finalRevenue = (seed?.revenue || 425000) + totalPaidRevenue;
+    const finalCitizens = (seed?.citizens || 35820) + stateCitizens.length;
+    const finalDepts = depts.length;
+    const finalServices = stateServices.length > 0 ? stateServices.length : (seed?.services || 6);
+    const initialOfficersBaseline = 4;
+    const finalOfficers = (seed?.officers || 420) + (stateOfficers.length > initialOfficersBaseline ? stateOfficers.length - initialOfficersBaseline : 0);
+    const finalGrievances = (seed?.grievances || 1240) + stateGrievances.length;
+
+    // Detailed departments overview with exact reconciled sums
+    const departmentsDetail = depts.map((d) => {
+      const head = db.users.find((u) => u.id === (d as any).headId || (d as any).headUserId === u.id || (u.role === Role.DEPARTMENT_HEAD && (u as any).departmentId === d.id));
+      const deptServices = db.services.filter((s) => (s as any).departmentId === d.id || (s as any).dept === d.name);
+      const deptOfficers = db.officers.filter((o) => o.departmentId === d.id);
+
+      const isRev = d.code?.includes('REV') || d.name?.includes('Revenue');
+      const isEdu = d.code?.includes('EDU') || d.name?.includes('Education');
+
+      const baseDeptApps = isRev ? 5200 : (isEdu ? 3220 : 0);
+      const baseDeptRev = isRev ? 265000 : (isEdu ? 160000 : 0);
+      const baseDeptGrv = isRev ? 770 : (isEdu ? 470 : 0);
+      const baseDeptOfficers = isRev ? 230 : (isEdu ? 190 : 0);
+
+      const liveDeptApps = stateApplications.filter((a) => (a as any).departmentId === d.id || a.dept === d.name);
+      const liveDeptRev = liveDeptApps.reduce((sum, a) => {
+        const isPaid = a.paymentStatus === 'PAID' || a.paymentStatus === 'completed' || a.paymentStatus === 'SUCCESS';
+        return isPaid ? sum + (Number(a.fee) || 0) : sum;
+      }, 0);
+      const liveDeptGrv = stateGrievances.filter((g) => (g as any).departmentId === d.id || (g as any).dept === d.name);
+
+      const deptTotalApps = baseDeptApps + liveDeptApps.length;
+      const deptTotalRev = baseDeptRev + liveDeptRev;
+      const deptTotalGrv = baseDeptGrv + liveDeptGrv.length;
+      const deptOfficersCount = baseDeptOfficers + (deptOfficers.length > 2 ? deptOfficers.length - 2 : 0);
+
+      const deptPending = Math.round(deptTotalApps * 0.196);
+      const deptCompleted = deptTotalApps - deptPending;
+      const resolutionRate = deptTotalApps > 0 ? Math.round((deptCompleted / deptTotalApps) * 100) : 100;
+
+      return {
+        id: d.id,
+        name: d.name,
+        code: d.code,
+        headName: head ? head.name : (isRev ? 'Dr. B. R. Ambedkar IAS' : (isEdu ? 'K. Sandhya Rani IAS' : `${d.name} Director IAS`)),
+        headEmail: head ? head.email : `head.${d.code.toLowerCase()}@${state.code.toLowerCase()}.gov.in`,
+        servicesCount: deptServices.length > 0 ? deptServices.length : 3,
+        officersCount: deptOfficersCount,
+        applicationsCount: deptTotalApps,
+        pendingCount: deptPending,
+        completedCount: deptCompleted,
+        revenue: deptTotalRev,
+        grievancesCount: deptTotalGrv,
+        resolutionRate,
+        status: d.status || 'Active',
+      };
+    });
 
     const recentActivity = db.auditLogs
       .filter((l) => l.details?.includes(state.name) || l.details?.includes(state.code) || l.actor?.includes(state.name))
       .slice(0, 10);
+
+    const monthlyTrend = [
+      { month: 'Jan', count: 1120 },
+      { month: 'Feb', count: 1240 },
+      { month: 'Mar', count: 1380 },
+      { month: 'Apr', count: 1460 },
+      { month: 'May', count: 1580 },
+      { month: 'Jun', count: 1640 + stateApplications.length },
+    ];
 
     return {
       state,
@@ -464,62 +514,73 @@ export class CentralService {
         totalDepartments: finalDepts,
         totalOfficers: finalOfficers,
         totalServices: finalServices,
-        totalGrievances: seed?.grievances || 0,
+        totalGrievances: finalGrievances,
       },
       jurisdiction: {
-        districtsCount: seed ? Math.max(districts.length, seed.districts) : districts.length,
-        subDivisionsCount: seed ? Math.max(subDivisions.length, seed.subDivisions) : subDivisions.length,
-        mandalsCount: seed ? Math.max(mandals.length, seed.mandals) : mandals.length,
-        villagesCount: seed ? Math.max(villages.length, seed.villages) : villages.length,
-        municipalitiesCount: seed ? Math.max(municipalities.length, seed.municipalities) : municipalities.length,
-        wardsCount: seed ? Math.max(wards.length, seed.wards) : wards.length,
+        districtsCount: districts.length,
+        subDivisionsCount: subDivisions.length,
+        mandalsCount: mandals.length,
+        villagesCount: villages.length,
+        municipalitiesCount: municipalities.length,
+        wardsCount: wards.length,
       },
-      departments: departmentsDetail.length > 0 ? departmentsDetail : (seed ? [
-        { id: `dept_rev_${state.code.toLowerCase()}`, name: 'Revenue & Disaster Management', code: 'REV', headName: 'Dr. B. R. Ambedkar IAS', headEmail: `director.rev@${state.code.toLowerCase()}.gov.in`, servicesCount: 8, officersCount: 120, status: 'Active' },
-        { id: `dept_trans_${state.code.toLowerCase()}`, name: 'Transport & Road Safety', code: 'TRANS', headName: 'Suresh Rao IAS', headEmail: `comm.trans@${state.code.toLowerCase()}.gov.in`, servicesCount: 5, officersCount: 80, status: 'Active' },
-        { id: `dept_mun_${state.code.toLowerCase()}`, name: 'Municipal Administration & Urban Development', code: 'MAUD', headName: 'Anil Kumar IAS', headEmail: `director.maud@${state.code.toLowerCase()}.gov.in`, servicesCount: 6, officersCount: 95, status: 'Active' },
-        { id: `dept_agri_${state.code.toLowerCase()}`, name: 'Agriculture & Farmers Welfare', code: 'AGRI', headName: 'P. Lakshmi Devi IAS', headEmail: `director.agri@${state.code.toLowerCase()}.gov.in`, servicesCount: 7, officersCount: 110, status: 'Active' },
-      ] : []),
+      departments: departmentsDetail,
       services: {
         total: finalServices,
-        active: seed ? 79 : stateServices.filter(s => (s as any).status !== 'INACTIVE').length,
-        suspended: seed ? 7 : stateServices.filter(s => (s as any).status === 'INACTIVE').length,
+        active: finalServices,
+        suspended: 0,
+        byDepartment: departmentsDetail.map((d) => ({
+          departmentId: d.id,
+          departmentName: d.name,
+          count: d.servicesCount,
+        })),
       },
       officers: {
         total: finalOfficers,
-        active: seed ? Math.round(finalOfficers * 0.93) : stateOfficers.filter(o => (o as any).status !== 'INACTIVE').length,
-        suspended: seed ? Math.round(finalOfficers * 0.07) : stateOfficers.filter(o => (o as any).status === 'INACTIVE').length,
-        designations: seed ? [
+        active: Math.round(finalOfficers * 0.95),
+        suspended: Math.round(finalOfficers * 0.05),
+        byDepartment: departmentsDetail.map((d) => ({
+          departmentId: d.id,
+          departmentName: d.name,
+          count: d.officersCount,
+        })),
+        designations: [
           { title: 'Village Revenue Officer (VRO)', count: 240 },
-          { title: 'Mandal Revenue Officer / Tahsildar (MRO)', count: 95 },
+          { title: 'Mandal Educational Officer (MEO)', count: 95 },
           { title: 'Revenue Divisional Officer (RDO)', count: 45 },
-          { title: 'Joint Collector / District Officer', count: 40 },
-        ] : [],
+          { title: 'District Educational Officer (DEO)', count: 40 },
+        ],
       },
       applications: {
         total: finalApps,
         submitted: finalApps,
-        inProgress: (seed?.inProgress || 0) + inProgress,
-        pending: (seed?.pending || 0) + pending,
-        completed: (seed?.completed || 0) + completed,
-        rejected: (seed?.rejected || 0) + rejected,
-        queryRaised: (seed?.queryRaised || 0) + queryRaised,
+        inProgress: (seed?.inProgress || 1095) + inProgress,
+        pending: (seed?.pending || 1650) + pending,
+        completed: (seed?.completed || 5900) + completed,
+        rejected: (seed?.rejected || 580) + rejected,
+        queryRaised: (seed?.queryRaised || 290) + queryRaised,
+        monthlyTrend,
       },
       grievances: {
-        total: seed?.grievances || 0,
-        pending: Math.round((seed?.grievances || 0) * 0.23),
-        inProgress: Math.round((seed?.grievances || 0) * 0.07),
-        resolved: Math.round((seed?.grievances || 0) * 0.65),
-        escalated: Math.round((seed?.grievances || 0) * 0.05),
+        total: finalGrievances,
+        pending: Math.round(finalGrievances * 0.25),
+        inProgress: Math.round(finalGrievances * 0.15),
+        resolved: Math.round(finalGrievances * 0.56),
+        escalated: Math.round(finalGrievances * 0.04),
+        reverificationCount: Math.round(finalGrievances * 0.08),
+        overruleCount: Math.round(finalGrievances * 0.03),
+        byDepartment: departmentsDetail.map((d) => ({
+          departmentId: d.id,
+          departmentName: d.name,
+          count: d.grievancesCount,
+        })),
       },
-      recentActivity: recentActivity.length > 0 ? recentActivity : (seed ? [
-        { id: 'ACT-1', action: 'STATE_ADMIN_LOGGED_IN', actor: 'State Admin', date: new Date(Date.now() - 3600000 * 2).toISOString(), details: 'State Admin updated Revenue Department configuration' },
-        { id: 'ACT-2', action: 'DEPARTMENT_CREATED', actor: 'State Admin', date: new Date(Date.now() - 86400000).toISOString(), details: 'New department Agriculture & Cooperation created' },
-        { id: 'ACT-3', action: 'WORKFLOW_UPDATED', actor: 'Department Head (REV)', date: new Date(Date.now() - 86400000 * 2).toISOString(), details: 'Integrated Caste & Income Certificate workflow updated' },
-        { id: 'ACT-4', action: 'JURISDICTION_TREE_SYNC', actor: 'State Admin', date: new Date(Date.now() - 86400000 * 3).toISOString(), details: 'Tirupati Revenue Division nodes validated' },
-      ] : [
-        { id: 'ACT-INIT', action: 'STATE_CREATED', actor: 'Central Admin', date: state.createdAt || new Date().toISOString(), details: `State Government '${state.name}' and State Administrator initialized` }
-      ]),
+      recentActivity: recentActivity.length > 0 ? recentActivity : [
+        { id: 'ACT-1', action: 'STATE_ADMIN_LOGGED_IN', actor: 'State Admin', date: new Date(Date.now() - 3600000 * 2).toISOString(), details: 'State Admin verified School Education Department configuration' },
+        { id: 'ACT-2', action: 'DEPARTMENT_VERIFIED', actor: 'State Admin', date: new Date(Date.now() - 86400000).toISOString(), details: 'Secretariat verified 2 active State Departments' },
+        { id: 'ACT-3', action: 'WORKFLOW_UPDATED', actor: 'Department Head (REV)', date: new Date(Date.now() - 86400000 * 2).toISOString(), details: 'Integrated Community & Nativity Certificate workflow active' },
+        { id: 'ACT-4', action: 'JURISDICTION_TREE_SYNC', actor: 'State Admin', date: new Date(Date.now() - 86400000 * 3).toISOString(), details: 'Tirupati Revenue Sub-Division nodes validated' },
+      ],
     };
   }
 
@@ -586,7 +647,7 @@ export class CentralService {
         totalApplications: finalApps,
         paidApplications: finalPaidCount,
         totalRevenue: finalRevenue,
-        departmentsCount: seed ? Math.max(db.departments.filter((d) => d.stateId === state.id).length, seed.departments) : db.departments.filter((d) => d.stateId === state.id).length,
+        departmentsCount: db.departments.filter((d) => d.stateId === state.id).length,
       };
     });
 
@@ -607,7 +668,7 @@ export class CentralService {
     const revenueData = this.getStateWiseRevenue();
     return {
       totalStates: db.states.length,
-      totalDepartments: db.departments.length || 24,
+      totalDepartments: db.departments.length,
       totalCitizens: db.users.filter((u) => u.role === Role.CITIZEN || (u.role as string) === 'citizen').length || 124560,
       totalOfficers: db.officers.length || 420,
       totalApplications: db.applications.length || 24200,
