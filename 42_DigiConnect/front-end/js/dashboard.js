@@ -558,6 +558,30 @@ export async function initOfficerDashboard() {
       </div>
     `;
     document.getElementById('reviewModal').classList.add('active');
+
+    // Apply department-head-defined per-step action permissions to modal buttons
+    const stepCfg = currentApp.currentStepConfig || { canApprove: true, canReject: true, canRaiseQuery: true, stepName: `Stage ${currentApp.currentStepNumber || 1}`, isFinalApprovalStep: false };
+    const btnApprove = document.getElementById('btnApprove');
+    const btnReject  = document.getElementById('btnReject');
+    const btnQuery   = document.getElementById('btnQuery');
+    if (btnApprove) btnApprove.style.display = stepCfg.canApprove    ? '' : 'none';
+    if (btnReject)  btnReject.style.display  = stepCfg.canReject     ? '' : 'none';
+    if (btnQuery)   btnQuery.style.display   = stepCfg.canRaiseQuery ? '' : 'none';
+
+    // Inject step info banner at top of modal body
+    const existingBanner = document.getElementById('dashStepPermBanner');
+    if (existingBanner) existingBanner.remove();
+    const perms = [
+      stepCfg.canApprove    ? '<span style="color:#166534;font-weight:600;">✓ Approve</span>' : null,
+      stepCfg.canRaiseQuery ? '<span style="color:#92400e;font-weight:600;">? Query</span>'  : null,
+      stepCfg.canReject     ? '<span style="color:#991b1b;font-weight:600;">✕ Reject</span>' : null,
+    ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+    const banner = document.createElement('div');
+    banner.id = 'dashStepPermBanner';
+    banner.style.cssText = 'font-size:0.78rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;padding:8px 12px;margin-bottom:12px;color:#1e3a5f;line-height:1.5;';
+    banner.innerHTML = `<strong>Step ${currentApp.currentStepNumber || 1} of ${currentApp.totalWorkflowSteps || '?'}: ${stepCfg.stepName}</strong> &nbsp;|&nbsp; Permitted: ${perms}`;
+    const reviewBody = document.getElementById('reviewBody');
+    if (reviewBody) reviewBody.prepend(banner);
   };
 
   window.closeModal = function (id) {

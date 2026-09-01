@@ -1919,8 +1919,31 @@ export async function initReviewApplication() {
         if (qCountSpan) qCountSpan.textContent = `${myApps.length} application${myApps.length === 1 ? '' : 's'}`;
       }
 
-      // Reset decision
-      window.selectDecision('approve');
+      // Apply department-head-defined per-step action permissions
+      const stepCfg = a.currentStepConfig || { canApprove: true, canReject: true, canRaiseQuery: true, stepName: `Stage ${a.currentStepNumber || 1}`, isFinalApprovalStep: false };
+
+      const decApprove = document.getElementById('dec-approve');
+      const decQuery   = document.getElementById('dec-query');
+      const decReject  = document.getElementById('dec-reject');
+      if (decApprove) decApprove.style.display = stepCfg.canApprove ? '' : 'none';
+      if (decQuery)   decQuery.style.display   = stepCfg.canRaiseQuery ? '' : 'none';
+      if (decReject)  decReject.style.display  = stepCfg.canReject ? '' : 'none';
+
+      // Show step info banner so officer knows their stage & permissions
+      const stepBanner = document.getElementById('stepPermBanner');
+      if (stepBanner) {
+        const perms = [
+          stepCfg.canApprove    ? '<span style="color:#166534;">✓ Approve</span>' : null,
+          stepCfg.canRaiseQuery ? '<span style="color:#92400e;">? Raise Query</span>' : null,
+          stepCfg.canReject     ? '<span style="color:#991b1b;">✕ Reject</span>' : null,
+        ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+        stepBanner.innerHTML = `<strong>Step ${a.currentStepNumber || 1} of ${a.totalWorkflowSteps || '?'}: ${stepCfg.stepName}</strong>&nbsp;&nbsp;|&nbsp;&nbsp;Permitted actions: ${perms}`;
+        stepBanner.style.display = 'flex';
+      }
+
+      // Reset to first permitted decision
+      const firstPermitted = stepCfg.canApprove ? 'approve' : stepCfg.canRaiseQuery ? 'query' : 'reject';
+      window.selectDecision(firstPermitted);
   };
 
   function buildServiceFields(a) {

@@ -451,6 +451,8 @@
                             <div class="action-panel-title">Officer Decision</div>
                         </div>
                         <div class="action-panel-body">
+                            <!-- Step permissions banner (populated by JS from department-head workflow config) -->
+                            <div id="stepPermBanner" style="display:none;align-items:center;gap:6px;font-size:0.78rem;background:var(--navy-50,#eff6ff);border:1px solid var(--navy-200,#bfdbfe);border-radius:var(--radius-md);padding:8px 12px;margin-bottom:var(--space-md);color:var(--navy-800);line-height:1.5;flex-wrap:wrap;"></div>
                             <!-- Decision Options -->
                             <div class="decision-cards">
                                 <div class="decision-card selected-approve" id="dec-approve" onclick="selectDecision('approve')">

@@ -672,6 +672,21 @@ export class ApplicationsService {
         ? 'XXXX XXXX ' + rawAadhaar.slice(-4)
         : rawAadhaar || 'XXXX XXXX XXXX';
 
+      // Resolve current step permissions defined by department head
+      const currentStepNum = Number((a as any).currentStepNumber) || 1;
+      const svcForStep = (db.dynamicServices || []).find((s: any) => s.id === a.serviceId) ||
+                         (db.services || []).find((s: any) => s.id === a.serviceId);
+      const wfSteps = (svcForStep as any)?.workflowSteps || [];
+      const resolvedStepConfig = wfSteps.find((s: any) => s.stepNumber === currentStepNum);
+      const currentStepConfig = resolvedStepConfig ? {
+        stepNumber: resolvedStepConfig.stepNumber,
+        stepName: resolvedStepConfig.stepName || `Stage ${currentStepNum}`,
+        canApprove: resolvedStepConfig.canApprove !== false,      // default true
+        canReject: resolvedStepConfig.canReject !== false,         // default true
+        canRaiseQuery: resolvedStepConfig.canRaiseQuery !== false, // default true
+        isFinalApprovalStep: !!resolvedStepConfig.isFinalApprovalStep,
+      } : { stepNumber: currentStepNum, stepName: `Stage ${currentStepNum}`, canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false };
+
       return {
         ...a,
         service: a.serviceName,
@@ -689,9 +704,11 @@ export class ApplicationsService {
           ? [citizenUser.address, citizenUser.mandal, citizenUser.district, citizenUser.state, citizenUser.pincode].filter(Boolean).join(', ')
           : '—',
         // Workflow info
-        currentStepNumber: (a as any).currentStepNumber || 1,
-        totalWorkflowSteps: (a as any).totalWorkflowSteps || 1,
+        currentStepNumber: currentStepNum,
+        totalWorkflowSteps: (a as any).totalWorkflowSteps || wfSteps.length || 1,
         queries: (a as any).queries || [],
+        // Per-step permissions set by department head — drives officer portal action buttons
+        currentStepConfig,
       };
     });
   }
