@@ -23,6 +23,8 @@ export interface User {
   gender?: string;
   address?: string;
   state?: string;
+  stateId?: string;
+  departmentId?: string;
   district?: string;
   mandal?: string;
   pincode?: string;

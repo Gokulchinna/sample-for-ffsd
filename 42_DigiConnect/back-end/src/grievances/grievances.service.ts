@@ -60,9 +60,15 @@ export class GrievancesService {
       try {
         officer = this.usersService.findById(userId);
       } catch(e) {}
-      if (officer && officer.role === 'grievance' && officer.jurisdiction && officer.jurisdiction !== 'All') {
+      if (officer && officer.role === 'grievance') {
         const jurisdiction = officer.jurisdiction;
-        filteredGrievances = db.grievances.filter(g => g.jurisdiction === jurisdiction);
+        filteredGrievances = db.grievances.filter(g =>
+          g.officerId === userId ||
+          (g as any).assignedOfficerId === userId ||
+          (officer.email && g.officerId === officer.email) ||
+          (jurisdiction && jurisdiction !== 'All' && (g.jurisdiction === jurisdiction || g.jurisdiction.startsWith(jurisdiction))) ||
+          (g.stateId && officer.stateId && g.stateId === officer.stateId && (g.departmentId === officer.dept || !officer.dept))
+        );
       }
     }
 
