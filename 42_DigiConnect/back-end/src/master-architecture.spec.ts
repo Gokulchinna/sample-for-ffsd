@@ -338,7 +338,7 @@ describe('DigiConnect Master Architecture Verification', () => {
       expect(Array.isArray(stateRev.departmentBreakdown)).toBe(true);
       const revDept = stateRev.departmentBreakdown.find((d: any) => d.departmentId === 'dept_rev_ap');
       expect(revDept).toBeDefined();
-      expect(revDept.platformFee).toBeGreaterThanOrEqual(0);
+      expect(revDept?.platformFee).toBeGreaterThanOrEqual(0);
     });
 
     it('Central Government national revenue aggregates per-state platform fee and national total', () => {
