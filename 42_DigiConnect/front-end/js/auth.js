@@ -66,32 +66,52 @@ export async function login(email, password, selectedRole) {
       const roleMap = {
         'citizen': 'citizen',
         'officer': 'officer',
-        'supervisor': 'supervisor',
-        'grievance': 'grievance',
+        'department_head': 'department_head',
+        'supervisor': 'department_head',
+        'state_admin': 'state_admin',
+        'central_admin': 'super_user',
         'super_user': 'super_user',
         'admin': 'super_user',
-        'super_admin': 'super_admin',
+        'super_admin': 'super_user',
+        'grievance': 'grievance',
       };
 
       const mappedRole = roleMap[selectedRole] || selectedRole;
 
-      // Check if user role matches selected role (admin can also be super_admin)
-      if (user.role !== mappedRole && !(mappedRole === 'super_user' && user.role === 'super_admin')) {
+      // Check if user role matches selected role (admin can also be super_user or central_admin)
+      const userRoleLower = (user.role || '').toLowerCase();
+      const isRoleMatch =
+        userRoleLower === mappedRole.toLowerCase() ||
+        (mappedRole === 'super_user' && (userRoleLower === 'central_admin' || userRoleLower === 'super_admin')) ||
+        (mappedRole === 'department_head' && userRoleLower === 'supervisor') ||
+        (mappedRole === 'grievance' && userRoleLower === 'grievance_officer');
+
+      if (!isRoleMatch) {
         return { success: false, message: `This account is not registered as ${selectedRole}. Please select the correct role.` };
       }
 
-      // Create session
+      // Create session with full state and department context
       const session = {
         id: user.id,
         email: user.email,
         name: user.name,
-        role: user.role === 'super_admin' ? 'super_user' : user.role,
+        role: user.role === 'super_user' || user.role === 'central_admin' ? 'central_admin' : user.role,
+        roleKey: user.role === 'super_user' || user.role === 'central_admin' ? 'central_admin' : user.role,
+        backendRole: user.backendRole || user.role,
         actualRole: user.role,
+        stateId: user.stateId || '',
+        departmentId: user.departmentId || '',
+        assignedNodeId: user.assignedNodeId || user.jurisdiction || '',
+        designationId: user.designationId || '',
+        title: user.title,
         phone: user.phone,
         loginTime: new Date().toISOString(),
       };
 
       setSession(session);
+      localStorage.setItem('active_role', session.roleKey);
+      localStorage.setItem('current_user', JSON.stringify(session));
+
 
       return { success: true, message: 'Login successful.', user: session };
   } catch(e) {

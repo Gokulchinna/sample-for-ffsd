@@ -32,8 +32,20 @@ export class ConfigureGrievanceCellDto {
   @IsString()
   cellName: string; // e.g. 'Revenue Redressal Cell'
 
+  @IsOptional()
+  @IsString()
+  jurisdictionTier?: string; // 'SUB_DIVISION' | 'DISTRICT' | 'STATE'
+
+  @IsOptional()
+  slaDays?: number;
+
+  @IsOptional()
+  @IsString()
+  deptName?: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => GrievanceWorkflowStepDto)
-  workflowSteps: GrievanceWorkflowStepDto[];
+  workflowSteps?: GrievanceWorkflowStepDto[];
 }

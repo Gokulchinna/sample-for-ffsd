@@ -27,2249 +27,1412 @@ export interface AuditLog {
   details: string;
   ip?: string;
 }
-export interface PendingOfficer {
-  id: string;
-  name: string;
-  title: string;
-  dept: string;
-  jurisdiction: string;
-  applied: string;
-  docs: string[];
-  email: string;
-  phone: string;
-  services: string[];
-}
-export interface OfficerQueueItem {
-  id: string;
-  service: string;
-  citizen: string;
-  phone: string;
-  submitted: string;
-  slaLeft: number;
-  slaTotal: number;
-  status: string;
-  aadhaar: string;
-  dob: string;
-  gender: string;
-  address: string;
-  income?: string;
-  community?: string;
-  religion?: string;
-  category?: string;
-  purpose?: string;
-  occupation?: string;
-  duration?: string;
-  residenceType?: string;
-  recordType?: string;
-  incorrect?: string;
-  correct?: string;
-  reason?: string;
-  docs: any[];
-  history: any[];
-  checklist: string[];
-  citizenResponse?: string;
-}
 
-// ═══════════════════════════════════════════
-// mock-data.js — Pre-populate localStorage with mock data
-// ═══════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. MOCK USERS (Central Admin, 4 State Admins, 8 Dept Heads, Officers, Grievance Officers, Citizens)
+// ═══════════════════════════════════════════════════════════════════════════
 
-const MOCK_USERS = [
+const MOCK_USERS: any[] = [
+  // ─── CENTRAL ADMIN (1 Master Super User) ───
   {
-    "id": "ADM-1001",
-    "name": "Super User",
-    "role": "super_user",
-    "title": "Super User",
-    "email": "superuser@gov.in",
-    "phone": "9876543299",
-    "aadhaar": "895421678001",
-    "joined": "01 Jan 2020",
-    "status": "Active",
-    "dept": "IT Admin",
-    "jurisdiction": "All",
-    "password": "password123",
-    "services": [],
-    "cases": 0,
-    "sla": 100,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "IT Secretariat, Masab Tank",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Masab Tank",
-    "pincode": "500028",
-    "dob": "1975-06-01",
-    "gender": "Male"
-  },
-  // ─── 4 REAL STATE ADMINISTRATORS ───
-  {
-    "id": "USR-SA-AP",
-    "name": "Sri K. Vijayanand IAS",
-    "role": "state_admin",
-    "title": "Special Chief Secretary & State Administrator",
-    "email": "admin@ap.gov.in",
-    "phone": "9876543201",
-    "aadhaar": "895421671001",
-    "joined": "01 Jan 2023",
-    "status": "Active",
-    "dept": "General Administration Department",
-    "jurisdiction": "state_ap",
-    "state": "Andhra Pradesh",
-    "password": "password123"
-  },
-  {
-    "id": "USR-SA-TN",
-    "name": "Thiru Shiv Das Meena IAS",
-    "role": "state_admin",
-    "title": "Chief Secretary & State Administrator",
-    "email": "admin@tn.gov.in",
-    "phone": "9876543202",
-    "aadhaar": "895421671002",
-    "joined": "01 Jan 2023",
-    "status": "Active",
-    "dept": "Public Department (Government of Tamil Nadu)",
-    "jurisdiction": "state_tn",
-    "state": "Tamil Nadu",
-    "password": "password123"
-  },
-  {
-    "id": "USR-SA-KA",
-    "name": "Smt. Vandita Sharma IAS",
-    "role": "state_admin",
-    "title": "Chief Secretary & State Administrator",
-    "email": "admin@ka.gov.in",
-    "phone": "9876543203",
-    "aadhaar": "895421671003",
-    "joined": "01 Jan 2023",
-    "status": "Active",
-    "dept": "Department of Personnel & Administrative Reforms (DPAR)",
-    "jurisdiction": "state_ka",
-    "state": "Karnataka",
-    "password": "password123"
-  },
-  {
-    "id": "USR-SA-KL",
-    "name": "Dr. V. Venu IAS",
-    "role": "state_admin",
-    "title": "Chief Secretary & State Administrator",
-    "email": "admin@kl.gov.in",
-    "phone": "9876543204",
-    "aadhaar": "895421671004",
-    "joined": "01 Jan 2023",
-    "status": "Active",
-    "dept": "General Administration Department (Kerala)",
-    "jurisdiction": "state_kl",
-    "state": "Kerala",
-    "password": "password123"
+    id: 'ADM-1001',
+    name: 'Super User (Central Administrator)',
+    role: 'super_user',
+    backendRole: Role.CENTRAL_ADMIN,
+    title: 'Chief Secretary & Central Administrator',
+    email: 'superuser@gov.in',
+    phone: '9876543299',
+    aadhaar: '895421678001',
+    joined: '01 Jan 2020',
+    status: 'Active',
+    dept: 'Ministry of Electronics & IT (MeitY)',
+    jurisdiction: 'All',
+    password: 'password123',
+    services: [],
+    cases: 0,
+    sla: 100,
   },
 
-  // ─── 8 REAL DEPARTMENT HEADS ───
+  // ─── 4 STATE ADMINS ───
   {
-    "id": "USR-DH-REV-AP",
-    "name": "Dr. B. R. Ambedkar IAS",
-    "role": "department_head",
-    "title": "Principal Secretary (Revenue)",
-    "email": "head.rev@ap.gov.in",
-    "phone": "9876543211",
-    "aadhaar": "895421672001",
-    "status": "Active",
-    "dept": "Revenue, Registration & Stamps Department",
-    "jurisdiction": "state_ap",
-    "state": "Andhra Pradesh",
-    "password": "password123"
+    id: 'USR-SA-AP',
+    name: 'Dr. K. S. Jawahar Reddy IAS',
+    role: 'state_admin',
+    backendRole: Role.STATE_ADMIN,
+    title: 'Chief Secretary & State Administrator',
+    email: 'admin@ap.gov.in',
+    phone: '9876543201',
+    aadhaar: '895421671001',
+    joined: '01 Jan 2023',
+    status: 'Active',
+    dept: 'General Administration Department (Andhra Pradesh)',
+    jurisdiction: 'node_ap',
+    stateId: 'state_ap',
+    state: 'Andhra Pradesh',
+    password: 'password123',
   },
   {
-    "id": "USR-DH-MUN-AP",
-    "name": "Sri K. Praveen Kumar IAS",
-    "role": "department_head",
-    "title": "Commissioner & Director of Municipal Administration",
-    "email": "head.mun@ap.gov.in",
-    "phone": "9876543212",
-    "aadhaar": "895421672002",
-    "status": "Active",
-    "dept": "Municipal Administration & Urban Development (MA&UD)",
-    "jurisdiction": "state_ap",
-    "state": "Andhra Pradesh",
-    "password": "password123"
+    id: 'USR-SA-KA',
+    name: 'Dr. Shalini Rajneesh IAS',
+    role: 'state_admin',
+    backendRole: Role.STATE_ADMIN,
+    title: 'Chief Secretary & State Administrator',
+    email: 'admin@ka.gov.in',
+    phone: '9876543202',
+    aadhaar: '895421671002',
+    joined: '01 Jan 2023',
+    status: 'Active',
+    dept: 'Department of Personnel & Administrative Reforms (Karnataka)',
+    jurisdiction: 'node_ka',
+    stateId: 'state_ka',
+    state: 'Karnataka',
+    password: 'password123',
   },
   {
-    "id": "USR-DH-REV-TN",
-    "name": "Thiru Kumar Jayant IAS",
-    "role": "department_head",
-    "title": "Principal Secretary (Revenue & Disaster Management)",
-    "email": "head.rev@tn.gov.in",
-    "phone": "9876543213",
-    "aadhaar": "895421672003",
-    "status": "Active",
-    "dept": "Revenue & Disaster Management Department",
-    "jurisdiction": "state_tn",
-    "state": "Tamil Nadu",
-    "password": "password123"
+    id: 'USR-SA-KL',
+    name: 'Dr. V. Venu IAS',
+    role: 'state_admin',
+    backendRole: Role.STATE_ADMIN,
+    title: 'Chief Secretary & State Administrator',
+    email: 'admin@kl.gov.in',
+    phone: '9876543203',
+    aadhaar: '895421671003',
+    joined: '01 Jan 2023',
+    status: 'Active',
+    dept: 'General Administration Department (Kerala)',
+    jurisdiction: 'node_kl',
+    stateId: 'state_kl',
+    state: 'Kerala',
+    password: 'password123',
   },
   {
-    "id": "USR-DH-MAWS-TN",
-    "name": "Thiru D. Karthikeyan IAS",
-    "role": "department_head",
-    "title": "Principal Secretary (MAWS)",
-    "email": "head.maws@tn.gov.in",
-    "phone": "9876543214",
-    "aadhaar": "895421672004",
-    "status": "Active",
-    "dept": "Municipal Administration & Water Supply (MAWS)",
-    "jurisdiction": "state_tn",
-    "state": "Tamil Nadu",
-    "password": "password123"
-  },
-  {
-    "id": "USR-DH-REV-KA",
-    "name": "Sri Rajender Kumar Kataria IAS",
-    "role": "department_head",
-    "title": "Principal Secretary (Revenue - Kandaya Ilakhe)",
-    "email": "head.rev@ka.gov.in",
-    "phone": "9876543215",
-    "aadhaar": "895421672005",
-    "status": "Active",
-    "dept": "Revenue Department (Kandaya Ilakhe)",
-    "jurisdiction": "state_ka",
-    "state": "Karnataka",
-    "password": "password123"
-  },
-  {
-    "id": "USR-DH-UDD-KA",
-    "name": "Dr. R. Vishal IAS",
-    "role": "department_head",
-    "title": "Secretary (Urban Development Department)",
-    "email": "head.udd@ka.gov.in",
-    "phone": "9876543216",
-    "aadhaar": "895421672006",
-    "status": "Active",
-    "dept": "Urban Development Department (UDD / BBMP)",
-    "jurisdiction": "state_ka",
-    "state": "Karnataka",
-    "password": "password123"
-  },
-  {
-    "id": "USR-DH-REV-KL",
-    "name": "Dr. A. Jayathilak IAS",
-    "role": "department_head",
-    "title": "Additional Chief Secretary (Revenue)",
-    "email": "head.rev@kl.gov.in",
-    "phone": "9876543217",
-    "aadhaar": "895421672007",
-    "status": "Active",
-    "dept": "Revenue & Disaster Management Department",
-    "jurisdiction": "state_kl",
-    "state": "Kerala",
-    "password": "password123"
-  },
-  {
-    "id": "USR-DH-LSGD-KL",
-    "name": "Smt. Sarada Muraleedharan IAS",
-    "role": "department_head",
-    "title": "Additional Chief Secretary (LSGD)",
-    "email": "head.lsgd@kl.gov.in",
-    "phone": "9876543218",
-    "aadhaar": "895421672008",
-    "status": "Active",
-    "dept": "Local Self Government Department (LSGD)",
-    "jurisdiction": "state_kl",
-    "state": "Kerala",
-    "password": "password123"
+    id: 'USR-SA-TN',
+    name: 'Thiru N. Muruganandam IAS',
+    role: 'state_admin',
+    backendRole: Role.STATE_ADMIN,
+    title: 'Chief Secretary & State Administrator',
+    email: 'admin@tn.gov.in',
+    phone: '9876543204',
+    aadhaar: '895421671004',
+    joined: '01 Jan 2023',
+    status: 'Active',
+    dept: 'Personnel and Administrative Reforms (Tamil Nadu)',
+    jurisdiction: 'node_tn',
+    stateId: 'state_tn',
+    state: 'Tamil Nadu',
+    password: 'password123',
   },
 
-  // ─── MULTI-STATE CITIZENS ───
+  // ─── 8 ISOLATED DEPARTMENT HEADS (2 per State) ───
   {
-    "id": "CIT-TN-01",
-    "name": "K. Muthukrishnan",
-    "role": "citizen",
-    "email": "muthu.k@gmail.com",
-    "phone": "9876543399",
-    "aadhaar": "895421674401",
-    "joined": "15 Feb 2024",
-    "status": "Active",
-    "dept": "-",
-    "jurisdiction": "node_pollachi_vil",
-    "address": "12, Sannathi Street, Anaimalai",
-    "state": "Tamil Nadu",
-    "district": "Coimbatore",
-    "mandal": "Pollachi Taluk",
-    "pincode": "642104",
-    "dob": "1990-06-15",
-    "gender": "Male",
-    "password": "password123"
+    id: 'USR-DH-REV-AP',
+    name: 'Dr. B. R. Ambedkar IAS',
+    role: 'department_head',
+    backendRole: Role.DEPARTMENT_HEAD,
+    title: 'Principal Secretary (Revenue)',
+    email: 'head.rev@ap.gov.in',
+    phone: '9876543211',
+    aadhaar: '895421672001',
+    status: 'Active',
+    dept: 'Revenue, Registration & Stamps Department',
+    departmentId: 'dept_rev_ap',
+    jurisdiction: 'node_ap',
+    stateId: 'state_ap',
+    state: 'Andhra Pradesh',
+    password: 'password123',
   },
   {
-    "id": "CIT-KA-01",
-    "name": "H. Chethan Gowda",
-    "role": "citizen",
-    "email": "chethan.gowda@gmail.com",
-    "phone": "9876543499",
-    "aadhaar": "895421674402",
-    "joined": "20 Feb 2024",
-    "status": "Active",
-    "dept": "-",
-    "jurisdiction": "node_bilikere_vil",
-    "address": "Main Road, Bilikere",
-    "state": "Karnataka",
-    "district": "Mysuru",
-    "mandal": "Hunsur Taluk",
-    "pincode": "571103",
-    "dob": "1988-11-22",
-    "gender": "Male",
-    "password": "password123"
+    id: 'USR-DH-WEL-AP',
+    name: 'Sri K. Harshavardhan IAS',
+    role: 'department_head',
+    backendRole: Role.DEPARTMENT_HEAD,
+    title: 'Secretary (Social Welfare & Empowerment)',
+    email: 'head.wel@ap.gov.in',
+    phone: '9876543212',
+    aadhaar: '895421672002',
+    status: 'Active',
+    dept: 'Social Welfare & Empowerment Department',
+    departmentId: 'dept_wel_ap',
+    jurisdiction: 'node_ap',
+    stateId: 'state_ap',
+    state: 'Andhra Pradesh',
+    password: 'password123',
   },
   {
-    "id": "CIT-KL-01",
-    "name": "V. Sreekumar",
-    "role": "citizen",
-    "email": "sreekumar.v@gmail.com",
-    "phone": "9876543599",
-    "aadhaar": "895421674403",
-    "joined": "01 Mar 2024",
-    "status": "Active",
-    "dept": "-",
-    "jurisdiction": "node_nedumangad_vil",
-    "address": "Kavuvila House, Vembayam",
-    "state": "Kerala",
-    "district": "Thiruvananthapuram",
-    "mandal": "Nedumangad Taluk",
-    "pincode": "695615",
-    "dob": "1983-03-10",
-    "gender": "Male",
-    "password": "password123"
+    id: 'USR-DH-REV-KA',
+    name: 'Sri Rajender Kumar Kataria IAS',
+    role: 'department_head',
+    backendRole: Role.DEPARTMENT_HEAD,
+    title: 'Principal Secretary (Revenue - Kandaya Ilakhe)',
+    email: 'head.rev@ka.gov.in',
+    phone: '9876543213',
+    aadhaar: '895421672003',
+    status: 'Active',
+    dept: 'Revenue Department (Kandaya Ilakhe)',
+    departmentId: 'dept_rev_ka',
+    jurisdiction: 'node_ka',
+    stateId: 'state_ka',
+    state: 'Karnataka',
+    password: 'password123',
+  },
+  {
+    id: 'USR-DH-WEL-KA',
+    name: 'Dr. R. Vishal IAS',
+    role: 'department_head',
+    backendRole: Role.DEPARTMENT_HEAD,
+    title: 'Secretary (Social Welfare & Backward Classes)',
+    email: 'head.wel@ka.gov.in',
+    phone: '9876543214',
+    aadhaar: '895421672004',
+    status: 'Active',
+    dept: 'Social Welfare & Backward Classes Department',
+    departmentId: 'dept_wel_ka',
+    jurisdiction: 'node_ka',
+    stateId: 'state_ka',
+    state: 'Karnataka',
+    password: 'password123',
+  },
+  {
+    id: 'USR-DH-REV-KL',
+    name: 'Dr. A. Jayathilak IAS',
+    role: 'department_head',
+    backendRole: Role.DEPARTMENT_HEAD,
+    title: 'Additional Chief Secretary (Revenue & Disaster Mgmt)',
+    email: 'head.rev@kl.gov.in',
+    phone: '9876543215',
+    aadhaar: '895421672005',
+    status: 'Active',
+    dept: 'Revenue Department (Keralam E-District)',
+    departmentId: 'dept_rev_kl',
+    jurisdiction: 'node_kl',
+    stateId: 'state_kl',
+    state: 'Kerala',
+    password: 'password123',
+  },
+  {
+    id: 'USR-DH-WEL-KL',
+    name: 'Dr. Sharmila Mary Joseph IAS',
+    role: 'department_head',
+    backendRole: Role.DEPARTMENT_HEAD,
+    title: 'Principal Secretary (Social Justice & SC/ST)',
+    email: 'head.wel@kl.gov.in',
+    phone: '9876543216',
+    aadhaar: '895421672006',
+    status: 'Active',
+    dept: 'SC/ST Development & Social Justice Department',
+    departmentId: 'dept_wel_kl',
+    jurisdiction: 'node_kl',
+    stateId: 'state_kl',
+    state: 'Kerala',
+    password: 'password123',
+  },
+  {
+    id: 'USR-DH-REV-TN',
+    name: 'Thiru Kumar Jayant IAS',
+    role: 'department_head',
+    backendRole: Role.DEPARTMENT_HEAD,
+    title: 'Principal Secretary (Revenue & Disaster Management)',
+    email: 'head.rev@tn.gov.in',
+    phone: '9876543217',
+    aadhaar: '895421672007',
+    status: 'Active',
+    dept: 'Revenue & Disaster Management Department',
+    departmentId: 'dept_rev_tn',
+    jurisdiction: 'node_tn',
+    stateId: 'state_tn',
+    state: 'Tamil Nadu',
+    password: 'password123',
+  },
+  {
+    id: 'USR-DH-WEL-TN',
+    name: 'Thiru Laxmi Narayan IAS',
+    role: 'department_head',
+    backendRole: Role.DEPARTMENT_HEAD,
+    title: 'Secretary (Adi Dravidar & Tribal Welfare)',
+    email: 'head.wel@tn.gov.in',
+    phone: '9876543218',
+    aadhaar: '895421672008',
+    status: 'Active',
+    dept: 'Adi Dravidar & Tribal Welfare Department',
+    departmentId: 'dept_wel_tn',
+    jurisdiction: 'node_tn',
+    stateId: 'state_tn',
+    state: 'Tamil Nadu',
+    password: 'password123',
   },
 
+  // ─── OFFICERS & GRIEVANCE OFFICERS (Imported from MASTER_OFFICERS) ───
+  ...MASTER_OFFICERS.map((off) => ({
+    id: off.id,
+    name: off.name,
+    role: off.id.includes('GRV') ? 'grievance' : 'officer',
+    backendRole: off.id.includes('GRV') ? Role.GRIEVANCE_OFFICER : Role.OFFICER,
+    title: off.designationTitle,
+    email: off.email,
+    phone: off.phone || '9876543000',
+    aadhaar: `895421${off.id.replace(/[^0-9]/g, '').padStart(6, '0')}`,
+    joined: '01 Jan 2024',
+    status: off.status,
+    dept: MASTER_DEPARTMENTS.find((d) => d.id === off.departmentId)?.name || 'Government Department',
+    departmentId: off.departmentId,
+    designationId: off.designationId,
+    assignedNodeId: off.assignedNodeId,
+    jurisdiction: off.assignedNodeId,
+    password: 'password123',
+    services: [],
+    cases: 12,
+    sla: 94,
+  })),
+
+  // ─── CITIZENS (From AP, KA, KL, TN - Rural & Urban) ───
   {
-    "id": "CIT-1001",
-    "name": "Ravi Kumar",
-    "role": "citizen",
-    "email": "ravi.k@gmail.com",
-    "phone": "9876543200",
-    "aadhaar": "895421674301",
-    "joined": "10 Jan 2024",
-    "status": "Active",
-    "dept": "-",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Plot 45, MG Road",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1985-04-12",
-    "gender": "Male"
+    id: 'CIT-AP-001',
+    name: 'Ravi Kumar (AP Rural)',
+    role: 'citizen',
+    backendRole: Role.CITIZEN,
+    email: 'ravi.ap@gmail.com',
+    phone: '9876540001',
+    aadhaar: '895421990001',
+    status: 'Active',
+    jurisdiction: 'node_cg_vil',
+    stateId: 'state_ap',
+    state: 'Andhra Pradesh',
+    address: '1-45, Main Bazar, Chandragiri Village, Tirupati - 517101',
+    password: 'password123',
   },
   {
-    "id": "CIT-1002",
-    "name": "Sunita Verma",
-    "role": "citizen",
-    "email": "sunita.v@gmail.com",
-    "phone": "9876543203",
-    "aadhaar": "895421674304",
-    "joined": "18 Jan 2024",
-    "status": "Active",
-    "dept": "-",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Street 4, Tarnaka",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500017",
-    "dob": "1988-02-14",
-    "gender": "Female"
+    id: 'CIT-AP-002',
+    name: 'Lakshmi Devi (AP Urban)',
+    role: 'citizen',
+    backendRole: Role.CITIZEN,
+    email: 'lakshmi.ap@gmail.com',
+    phone: '9876540002',
+    aadhaar: '895421990002',
+    status: 'Active',
+    jurisdiction: 'node_w14',
+    stateId: 'state_ap',
+    state: 'Andhra Pradesh',
+    address: 'Flat 302, Bhavani Nagar, Tirupati - 517501',
+    password: 'password123',
   },
   {
-    "id": "CIT-1003",
-    "name": "Kaveri Devi",
-    "role": "citizen",
-    "email": "kaveri.d@gmail.com",
-    "phone": "9876543209",
-    "aadhaar": "895421674310",
-    "joined": "05 Feb 2024",
-    "status": "Active",
-    "dept": "-",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1985-09-05",
-    "gender": "Female"
+    id: 'CIT-KA-001',
+    name: 'Basavaraju K (KA Rural)',
+    role: 'citizen',
+    backendRole: Role.CITIZEN,
+    email: 'basava.ka@gmail.com',
+    phone: '9876540003',
+    aadhaar: '895421990003',
+    status: 'Active',
+    jurisdiction: 'node_bilikere_vil',
+    stateId: 'state_ka',
+    state: 'Karnataka',
+    address: 'Post Bilikere, Hunsur Taluk, Mysuru - 571103',
+    password: 'password123',
   },
   {
-    "id": "GRV-1001",
-    "name": "Nalini Rao",
-    "role": "grievance",
-    "title": "Grievance Officer",
-    "email": "n.rao@gov.in",
-    "phone": "9876543230",
-    "aadhaar": "895421677001",
-    "joined": "10 Mar 2022",
-    "status": "Active",
-    "dept": "Grievance Cell",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [],
-    "cases": 0,
-    "sla": 100,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1986-08-25",
-    "gender": "Female"
+    id: 'CIT-KA-002',
+    name: 'Ananya Rao (KA Urban)',
+    role: 'citizen',
+    backendRole: Role.CITIZEN,
+    email: 'ananya.ka@gmail.com',
+    phone: '9876540004',
+    aadhaar: '895421990004',
+    status: 'Active',
+    jurisdiction: 'node_bbmp_w150',
+    stateId: 'state_ka',
+    state: 'Karnataka',
+    address: '4th Cross, Green Glen Layout, Bellandur, Bengaluru - 560103',
+    password: 'password123',
   },
   {
-    "id": "SUP-1001",
-    "name": "Deepak Verma",
-    "role": "supervisor",
-    "title": "MRO",
-    "email": "d.verma@gov.in",
-    "phone": "9876543220",
-    "aadhaar": "895421676001",
-    "joined": "01 Jan 2022",
-    "status": "Active",
-    "dept": "Revenue Department",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [],
-    "cases": 0,
-    "sla": 100,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1980-09-30",
-    "gender": "Male"
+    id: 'CIT-KL-001',
+    name: 'Sreejith Menon (KL Rural)',
+    role: 'citizen',
+    backendRole: Role.CITIZEN,
+    email: 'sreejith.kl@gmail.com',
+    phone: '9876540005',
+    aadhaar: '895421990005',
+    status: 'Active',
+    jurisdiction: 'node_nedumangad_vil',
+    stateId: 'state_kl',
+    state: 'Kerala',
+    address: 'TC 14/204, Vembayam, Nedumangad, Thiruvananthapuram - 695615',
+    password: 'password123',
   },
   {
-    "id": "EMP-1001",
-    "name": "Suresh Reddy",
-    "role": "officer",
-    "title": "VRO",
-    "email": "s.reddy@gov.in",
-    "phone": "9876543210",
-    "aadhaar": "895421675001",
-    "joined": "15 Mar 2023",
-    "status": "Active",
-    "dept": "Revenue Department",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Income Certificate",
-      "Caste Certificate",
-      "Residence Certificate",
-      "Record Correction"
-    ],
-    "cases": 28,
-    "sla": 91,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1988-06-15",
-    "gender": "Male"
+    id: 'CIT-KL-002',
+    name: 'Fathima Beevi (KL Urban)',
+    role: 'citizen',
+    backendRole: Role.CITIZEN,
+    email: 'fathima.kl@gmail.com',
+    phone: '9876540006',
+    aadhaar: '895421990006',
+    status: 'Active',
+    jurisdiction: 'node_tvm_w12',
+    stateId: 'state_kl',
+    state: 'Kerala',
+    address: 'House No 45, Palayam, Thiruvananthapuram - 695034',
+    password: 'password123',
   },
   {
-    "id": "EMP-1002",
-    "name": "Anita Sharma",
-    "role": "officer",
-    "title": "VRO",
-    "email": "a.sharma@gov.in",
-    "phone": "9876543211",
-    "aadhaar": "895421675002",
-    "joined": "20 Jan 2023",
-    "status": "Active",
-    "dept": "Revenue Department",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Income Certificate",
-      "Caste Certificate",
-      "Residence Certificate",
-      "Record Correction"
-    ],
-    "cases": 34,
-    "sla": 87,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1990-03-22",
-    "gender": "Female"
+    id: 'CIT-TN-001',
+    name: 'Muruganathan P (TN Rural)',
+    role: 'citizen',
+    backendRole: Role.CITIZEN,
+    email: 'murugan.tn@gmail.com',
+    phone: '9876540007',
+    aadhaar: '895421990007',
+    status: 'Active',
+    jurisdiction: 'node_valayankulam_vil',
+    stateId: 'state_tn',
+    state: 'Tamil Nadu',
+    address: 'South Street, Valayankulam, Thiruparankundram, Madurai - 625022',
+    password: 'password123',
   },
   {
-    "id": "EMP-1003",
-    "name": "Ravi Teja",
-    "role": "officer",
-    "title": "VRO",
-    "email": "r.teja@gov.in",
-    "phone": "9876543240",
-    "aadhaar": "895421675007",
-    "joined": "10 Jan 2024",
-    "status": "Active",
-    "dept": "Revenue Department",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Income Certificate",
-      "Caste Certificate",
-      "Residence Certificate",
-      "Record Correction"
-    ],
-    "cases": 15,
-    "sla": 90,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1995-01-01",
-    "gender": "Male"
+    id: 'CIT-TN-002',
+    name: 'Kavitha Soundar (TN Urban)',
+    role: 'citizen',
+    backendRole: Role.CITIZEN,
+    email: 'kavitha.tn@gmail.com',
+    phone: '9876540008',
+    aadhaar: '895421990008',
+    status: 'Active',
+    jurisdiction: 'node_gcc_w50',
+    stateId: 'state_tn',
+    state: 'Tamil Nadu',
+    address: 'Old No. 12, New No. 28, Royapuram, Chennai - 600013',
+    password: 'password123',
   },
-  {
-    "id": "SUP-1002",
-    "name": "Kavitha Reddy",
-    "role": "supervisor",
-    "title": "DWO",
-    "email": "k.reddy@gov.in",
-    "phone": "9876543221",
-    "aadhaar": "895421676002",
-    "joined": "15 Feb 2022",
-    "status": "Active",
-    "dept": "Welfare Department",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [],
-    "cases": 0,
-    "sla": 100,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1982-04-12",
-    "gender": "Female"
-  },
-  {
-    "id": "EMP-1004",
-    "name": "Priya Nair",
-    "role": "officer",
-    "title": "Welfare Officer",
-    "email": "p.nair@gov.in",
-    "phone": "9876543213",
-    "aadhaar": "895421675004",
-    "joined": "01 Aug 2022",
-    "status": "Active",
-    "dept": "Welfare Department",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Welfare / Subsidy Scheme",
-      "Scholarship Application"
-    ],
-    "cases": 22,
-    "sla": 93,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1992-07-04",
-    "gender": "Female"
-  },
-  {
-    "id": "EMP-1005",
-    "name": "Kiran Babu",
-    "role": "officer",
-    "title": "Welfare Officer",
-    "email": "k.babu@gov.in",
-    "phone": "9876543214",
-    "aadhaar": "895421675005",
-    "joined": "05 Nov 2023",
-    "status": "Active",
-    "dept": "Welfare Department",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Welfare / Subsidy Scheme",
-      "Scholarship Application"
-    ],
-    "cases": 31,
-    "sla": 88,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1993-02-17",
-    "gender": "Male"
-  },
-  {
-    "id": "EMP-1006",
-    "name": "Aruna Kumari",
-    "role": "officer",
-    "title": "Welfare Officer",
-    "email": "a.kumari@gov.in",
-    "phone": "9876543246",
-    "aadhaar": "895421675013",
-    "joined": "25 Jan 2024",
-    "status": "Active",
-    "dept": "Welfare Department",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Welfare / Subsidy Scheme",
-      "Scholarship Application"
-    ],
-    "cases": 25,
-    "sla": 94,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1989-07-07",
-    "gender": "Female"
-  },
-  {
-    "id": "SUP-1003",
-    "name": "Lakshmi Narayana",
-    "role": "supervisor",
-    "title": "Zonal Commissioner",
-    "email": "l.narayana@gov.in",
-    "phone": "9876543222",
-    "aadhaar": "895421676003",
-    "joined": "22 May 2021",
-    "status": "Active",
-    "dept": "Municipal Corporation",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [],
-    "cases": 0,
-    "sla": 100,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1978-12-05",
-    "gender": "Male"
-  },
-  {
-    "id": "EMP-1007",
-    "name": "Mohan Das",
-    "role": "officer",
-    "title": "Sanitary Inspector",
-    "email": "m.das@gov.in",
-    "phone": "9876543215",
-    "aadhaar": "895421675006",
-    "joined": "10 Feb 2023",
-    "status": "Active",
-    "dept": "Municipal Corporation",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Event Permission",
-      "Vendor License",
-      "Death Certificate"
-    ],
-    "cases": 14,
-    "sla": 92,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1991-05-20",
-    "gender": "Male"
-  },
-  {
-    "id": "EMP-1008",
-    "name": "Praveen Kumar",
-    "role": "officer",
-    "title": "Sanitary Inspector",
-    "email": "p.kumar@gov.in",
-    "phone": "9876543254",
-    "aadhaar": "895421675021",
-    "joined": "01 Mar 2024",
-    "status": "Active",
-    "dept": "Municipal Corporation",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Event Permission",
-      "Vendor License",
-      "Death Certificate"
-    ],
-    "cases": 10,
-    "sla": 98,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1995-03-15",
-    "gender": "Male"
-  },
-  {
-    "id": "EMP-1009",
-    "name": "Rekha Singh",
-    "role": "officer",
-    "title": "Sanitary Inspector",
-    "email": "r.singh@gov.in",
-    "phone": "9876543255",
-    "aadhaar": "895421675022",
-    "joined": "05 Mar 2024",
-    "status": "Active",
-    "dept": "Municipal Corporation",
-    "jurisdiction": "Secunderabad",
-    "password": "password123",
-    "services": [
-      "Event Permission",
-      "Vendor License",
-      "Death Certificate"
-    ],
-    "cases": 11,
-    "sla": 96,
-    "securityQuestion": "In what city were you born?",
-    "securityAnswer": "Hyderabad",
-    "address": "Secunderabad",
-    "state": "Telangana",
-    "district": "Hyderabad",
-    "mandal": "Secunderabad",
-    "pincode": "500003",
-    "dob": "1994-04-16",
-    "gender": "Female"
-  }
 ];
 
-const MOCK_PENDING_OFFICERS = [
-  { id: 'EMP-039', name: 'Vijay Teja', title: 'VRO', dept: 'Revenue Department', jurisdiction: 'Malkajgiri', applied: '24 Jan 2025', docs: ['Employee ID', 'Appointment Order'], email: 'v.teja@gov.in', phone: '9876549901', services: ['Income Certificate'] },
-  { id: 'EMP-040', name: 'Lakshmi Devi', title: 'Welfare Officer', dept: 'Welfare Department', jurisdiction: 'Warangal', applied: '25 Jan 2025', docs: ['Employee ID', 'Training Certificate'], email: 'l.devi@gov.in', phone: '9876549902', services: ['Welfare / Subsidy Scheme'] },
-  { id: 'EMP-041', name: 'Arjun Reddy', title: 'VRO', dept: 'Revenue Department', jurisdiction: 'Karimnagar', applied: '26 Jan 2025', docs: ['Employee ID', 'Appointment Order', 'NOC'], email: 'a.reddy@gov.in', phone: '9876549903', services: ['Caste Certificate'] },
-];
+// ═══════════════════════════════════════════════════════════════════════════
+// 2. 16 DYNAMIC SERVICES (2 per Department, all 8 Departments across 4 States)
+// ═══════════════════════════════════════════════════════════════════════════
 
-const MOCK_SERVICES = [
-  { id: 'SVC-001', name: 'Income Certificate', cat: 'Certificate', dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap', sla: 7, fee: 50, feeLabel: '₹50', desc: 'Certificate proving annual family income.', docs: ['Aadhaar Card', 'Ration Card', 'Salary Slip / Income Proof'], icon: 'cert', stages: 3, status: 'Active', apps: 892, color: 'var(--navy-500)' },
-  { id: 'SVC-002', name: 'Caste Certificate', cat: 'Certificate', dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap', sla: 7, fee: 50, feeLabel: '₹50', desc: 'Official certificate proving caste for reservations.', docs: ['Aadhaar Card', 'Ration Card', 'Father\'s Caste Certificate', 'School Certificate'], icon: 'cert', stages: 3, status: 'Active', apps: 674, color: 'var(--navy-400)' },
-  { id: 'SVC-003', name: 'Residence Certificate', cat: 'Certificate', dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap', sla: 7, fee: 30, feeLabel: '₹30', desc: 'Proof of domicile / residence.', docs: ['Aadhaar Card', 'Electricity Bill / Rent Agreement'], icon: 'cert', stages: 3, status: 'Active', apps: 408, color: 'var(--navy-300)' },
-  { id: 'SVC-EDU-001', name: 'School Transfer Certificate & Verification', cat: 'Certificate', dept: 'School Education & Literacy Department', departmentId: 'dept_edu_ap', sla: 5, fee: 0, feeLabel: 'Free', desc: 'Authentication and issuance of student transfer record.', docs: ['Student Aadhaar', 'Previous School TC', 'Bonafide Certificate'], icon: 'cert', stages: 2, status: 'Active', apps: 320, color: '#3b82f6' },
-  { id: 'SVC-EDU-002', name: 'Student Merit Scholarship Endorsement', cat: 'Welfare', dept: 'School Education & Literacy Department', departmentId: 'dept_edu_ap', sla: 7, fee: 0, feeLabel: 'Free', desc: 'State scholarship verification for pre/post-matric students.', docs: ['Aadhaar Card', 'Income Certificate', 'Mark Sheets', 'Bank Passbook'], icon: 'welfare', stages: 3, status: 'Active', apps: 280, color: '#22c55e' },
-  { id: 'SVC-EDU-003', name: 'Duplicate Secondary School SSC Memo', cat: 'Certificate', dept: 'School Education & Literacy Department', departmentId: 'dept_edu_ap', sla: 10, fee: 100, feeLabel: '₹100', desc: 'Official duplicate copy of secondary school marks memo.', docs: ['Aadhaar Card', 'Police Lost Property FIR / Self-Declaration', 'Affidavit'], icon: 'cert', stages: 2, status: 'Active', apps: 190, color: '#8b5cf6' },
-];
-
-const MOCK_WORKFLOW_CONFIG = [
-  {
-    id: 1,
-    service: 'Income Certificate',
-    dept: 'Revenue Department',
-    status: 'Active',
-    stages: [
-      { name: 'Document Verification', role: 'Dept. Officer (VRO)', days: 2, type: 'officer' },
-      { name: 'Field Verification', role: 'Dept. Officer (RI)', days: 3, type: 'officer' },
-      { name: 'Final Approval', role: 'Dept. Supervisor (MRO)', days: 2, type: 'supervisor' },
-    ]
-  },
-  {
-    id: 2,
-    service: 'Caste Certificate',
-    dept: 'Revenue Department',
-    status: 'Active',
-    stages: [
-      { name: 'Document Verification', role: 'Dept. Officer (VRO)', days: 2, type: 'officer' },
-      { name: 'Field Verification', role: 'Dept. Officer (RI)', days: 3, type: 'officer' },
-      { name: 'Final Approval', role: 'Dept. Supervisor (MRO)', days: 2, type: 'supervisor' },
-    ]
-  },
-  {
-    id: 3,
-    service: 'Residence Certificate',
-    dept: 'Revenue Department',
-    status: 'Active',
-    stages: [
-      { name: 'Document Verification', role: 'Dept. Officer (VRO)', days: 2, type: 'officer' },
-      { name: 'Field Verification', role: 'Dept. Officer (RI)', days: 3, type: 'officer' },
-      { name: 'Final Approval', role: 'Dept. Supervisor (MRO)', days: 2, type: 'supervisor' },
-    ]
-  },
-  {
-    id: 4,
-    service: 'Welfare / Subsidy Scheme',
-    dept: 'Welfare Department',
-    status: 'Active',
-    stages: [
-      { name: 'Eligibility Check', role: 'Welfare Officer', days: 3, type: 'officer' },
-      { name: 'Document Verification', role: 'Welfare Officer', days: 3, type: 'officer' },
-      { name: 'Field Verification', role: 'Dept. Officer (RI)', days: 4, type: 'officer' },
-      { name: 'Final Approval & Disbursement', role: 'Dept. Supervisor (MRO)', days: 4, type: 'supervisor' },
-    ]
-  },
-  {
-    id: 5,
-    service: 'Scholarship Application',
-    dept: 'Welfare Department',
-    status: 'Active',
-    stages: [
-      { name: 'Eligibility Screening', role: 'Welfare Officer', days: 5, type: 'officer' },
-      { name: 'Document Review', role: 'Welfare Officer', days: 5, type: 'officer' },
-      { name: 'Institute Verification', role: 'Dept. Officer (RI)', days: 5, type: 'officer' },
-      { name: 'Scholarship Approval', role: 'Dept. Supervisor (MRO)', days: 6, type: 'supervisor' },
-    ]
-  },
-  {
-    id: 6,
-    service: 'Event Permission',
-    dept: 'Municipal Corporation',
-    status: 'Active',
-    stages: [
-      { name: 'Application Review', role: 'Dept. Officer (VRO)', days: 2, type: 'officer' },
-      { name: 'Approval & Issue', role: 'Dept. Supervisor (MRO)', days: 3, type: 'supervisor' },
-    ]
-  },
-  {
-    id: 7,
-    service: 'Vendor License',
-    dept: 'Municipal Corporation',
-    status: 'Active',
-    stages: [
-      { name: 'Application Review', role: 'Dept. Officer (VRO)', days: 2, type: 'officer' },
-      { name: 'Premises Inspection', role: 'Dept. Officer (RI)', days: 3, type: 'officer' },
-      { name: 'License Approval', role: 'Dept. Supervisor (MRO)', days: 2, type: 'supervisor' },
-    ]
-  },
-  {
-    id: 8,
-    service: 'Record Correction',
-    dept: 'Revenue Department',
-    status: 'Active',
-    stages: [
-      { name: 'Document Verification', role: 'Dept. Officer (VRO)', days: 3, type: 'officer' },
-      { name: 'Gazette Verification', role: 'Dept. Officer (RI)', days: 4, type: 'officer' },
-      { name: 'Record Update Approval', role: 'Dept. Supervisor (MRO)', days: 3, type: 'supervisor' },
-    ]
-  },
-  {
-    id: 9,
-    service: 'Marriage Certificate',
-    dept: 'Revenue Department',
-    status: 'Draft',
-    stages: [
-      { name: 'Document Verification', role: 'Dept. Officer (VRO)', days: 2, type: 'officer' },
-      { name: 'Witness Verification', role: 'Dept. Officer (RI)', days: 3, type: 'officer' },
-      { name: 'Certificate Approval', role: 'Dept. Supervisor (MRO)', days: 2, type: 'supervisor' },
-    ]
-  },
+const DYNAMIC_SERVICES = [
+  // ─── 1. AP REVENUE (2 Services) ───
   {
     id: 'srv_caste_income_ap',
-    service: 'Integrated Community, Nativity & Date of Birth Certificate',
-    name: 'Integrated Community, Nativity & Date of Birth Certificate',
-    dept: 'Revenue Department',
     departmentId: 'dept_rev_ap',
-    status: 'Active',
-    fee: 50,
-    sla: 7,
-    docs: ['Aadhaar Card Proof'],
-    stages: 3,
+    stateId: 'state_ap',
+    name: 'Integrated Community, Nativity & Date of Birth Certificate',
+    code: 'CASTE_CERT_AP',
+    description: 'Official statutory certificate verifying caste, nativity, and parental ancestry in Andhra Pradesh.',
+    status: 'ACTIVE',
+    serviceFee: 35,
+    platformFee: 15,
+    totalFee: 50,
+    termsAndConditions: 'I hereby declare that the caste and nativity details submitted are authentic.',
+    fields: [
+      { id: 'applicant_name', label: 'Full Name of Applicant', type: 'TEXT', required: true },
+      { id: 'aadhaar_number', label: 'Aadhaar Card Number', type: 'TEXT', required: true },
+      { id: 'caste_category', label: 'Social Category / Caste', type: 'DROPDOWN', required: true, constraints: { options: ['SC', 'ST', 'BC-A', 'BC-B', 'BC-C', 'BC-D', 'BC-E', 'OC / General'] } },
+      { id: 'annual_income', label: 'Annual Family Income (INR)', type: 'NUMBER', required: true },
+      { id: 'dob', label: 'Date of Birth', type: 'DATE', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
+      { id: 'doc_school_cert', name: 'School Transfer Certificate / Study Proof', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Desk Verification (VRO / WRS)', requiredDesignationId: 'desig_vro_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'Field Inspection (Revenue Inspector)', requiredDesignationId: 'desig_ri_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 3, stepName: 'Tahsildar Digital Signature & Issuance', requiredDesignationId: 'desig_tah_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'srv_trade_license_ap',
-    service: 'Municipal Trade & Commercial License',
-    name: 'Municipal Trade & Commercial License',
-    dept: 'Municipal Corporation',
-    departmentId: 'dept_mun_ap',
-    status: 'Active',
-    fee: 175,
-    sla: 14,
-    docs: ['Property Tax Receipt'],
-    stages: 2,
+    id: 'srv_land_mutation_ap',
+    departmentId: 'dept_rev_ap',
+    stateId: 'state_ap',
+    name: 'Agricultural Land Mutation & Pattadar Passbook',
+    code: 'LAND_MUTATION_AP',
+    description: 'Title deed transfer and revenue record title passbook endorsement for agricultural land.',
+    status: 'ACTIVE',
+    serviceFee: 75,
+    platformFee: 25,
+    totalFee: 100,
+    termsAndConditions: 'I declare that the agricultural land parcel is free of civil litigation.',
+    fields: [
+      { id: 'survey_number', label: 'Survey Number / Sub-division', type: 'TEXT', required: true },
+      { id: 'land_extent_acres', label: 'Land Extent (Acres / Cents)', type: 'NUMBER', required: true },
+      { id: 'registered_deed_no', label: 'Registered Document / Sale Deed No.', type: 'TEXT', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_sale_deed', name: 'Registered Sale Deed Copy', required: true },
+      { id: 'doc_pattadar_book', name: 'Existing Pattadar Passbook Copy', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Revenue Inspector Spot Survey', requiredDesignationId: 'desig_ri_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'Tahsildar Record Mutation & Issue', requiredDesignationId: 'desig_tah_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 2. AP WELFARE (2 Services) ───
+  {
+    id: 'srv_vidya_deevena_ap',
+    departmentId: 'dept_wel_ap',
+    stateId: 'state_ap',
+    name: 'Jagananna Vidya Deevena Full Fee Reimbursement',
+    code: 'VIDYA_DEEVENA_AP',
+    description: 'Post-matric 100% tuition fee reimbursement for students belonging to SC/ST/BC/EBC communities.',
+    status: 'ACTIVE',
+    serviceFee: 0,
+    platformFee: 0,
+    totalFee: 0,
+    termsAndConditions: 'I verify that student attendance is above 75% and family income does not exceed ₹2.5 Lakhs.',
+    fields: [
+      { id: 'student_name', label: 'Student Name', type: 'TEXT', required: true },
+      { id: 'college_code', label: 'College / Institution Code', type: 'TEXT', required: true },
+      { id: 'course_name', label: 'Course / Degree Name', type: 'TEXT', required: true },
+      { id: 'annual_income', label: 'Annual Family Income (INR)', type: 'NUMBER', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_college_id', name: 'College Admission Allotment Order', required: true },
+      { id: 'doc_income_cert', name: 'Valid Income Certificate', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Welfare Assistant College Attendance Audit', requiredDesignationId: 'desig_wea_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'ASWO Scrutiny & Sanction', requiredDesignationId: 'desig_aswo_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 3, stepName: 'DSWO Final DBT Disbursement Order', requiredDesignationId: 'desig_dswo_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'srv_cheyutha_ap',
+    departmentId: 'dept_wel_ap',
+    stateId: 'state_ap',
+    name: 'YSR Cheyutha Women Livelihood Grant',
+    code: 'CHEYUTHA_AP',
+    description: 'Annual ₹18,750 financial grant for women aged 45-60 belonging to minority and backward communities.',
+    status: 'ACTIVE',
+    serviceFee: 0,
+    platformFee: 0,
+    totalFee: 0,
+    termsAndConditions: 'Beneficiary must be a female resident of AP aged 45 to 60 years.',
+    fields: [
+      { id: 'beneficiary_name', label: 'Woman Beneficiary Full Name', type: 'TEXT', required: true },
+      { id: 'age', label: 'Age (Years)', type: 'NUMBER', required: true },
+      { id: 'bank_account_no', label: 'Aadhaar Seeded Bank Account No.', type: 'TEXT', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
+      { id: 'doc_bank_passbook', name: 'Bank Passbook First Page Copy', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Welfare Assistant Field Eligibility Audit', requiredDesignationId: 'desig_wea_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'DSWO Sanction & Direct Credit', requiredDesignationId: 'desig_dswo_ap', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 3. KA REVENUE (2 Services) ───
+  {
+    id: 'srv_caste_income_ka',
+    departmentId: 'dept_rev_ka',
+    stateId: 'state_ka',
+    name: 'Caste & Income Certificate (Nadakacheri / AJSK)',
+    code: 'CASTE_CERT_KA',
+    description: 'Official statutory caste & income certificate under Atalji Janasnehi Kendra (Nadakacheri).',
+    status: 'ACTIVE',
+    serviceFee: 40,
+    platformFee: 10,
+    totalFee: 50,
+    termsAndConditions: 'Declared under Karnataka Land Revenue and Caste Verification Acts.',
+    fields: [
+      { id: 'applicant_name', label: 'Applicant Name', type: 'TEXT', required: true },
+      { id: 'aadhaar_number', label: 'Aadhaar Number', type: 'TEXT', required: true },
+      { id: 'category', label: 'Category (Cat-1 / 2A / 2B / 3A / 3B / SC / ST)', type: 'DROPDOWN', required: true, constraints: { options: ['Cat-1', '2A', '2B', '3A', '3B', 'SC', 'ST', 'General'] } },
+      { id: 'annual_income', label: 'Annual Income (INR)', type: 'NUMBER', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
+      { id: 'doc_ration_card', name: 'Karnataka Ration Card Copy', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'VAO / ARO Desk Scrutiny', requiredDesignationId: 'desig_vao_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'Hobli Revenue Inspector Inquiry', requiredDesignationId: 'desig_ri_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 3, stepName: 'Tahsildar Approval & Nadakacheri Issuance', requiredDesignationId: 'desig_tah_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'srv_bhoomi_rtc_ka',
+    departmentId: 'dept_rev_ka',
+    stateId: 'state_ka',
+    name: 'Bhoomi RTC Land Record Mutation & Extract',
+    code: 'BHOOMI_RTC_KA',
+    description: 'Land Rights, Tenancy and Crops (RTC / Pahani) mutation and certified digitally signed extract.',
+    status: 'ACTIVE',
+    serviceFee: 50,
+    platformFee: 15,
+    totalFee: 65,
+    termsAndConditions: 'Valid extract generated through Karnataka Bhoomi Land Records Gateway.',
+    fields: [
+      { id: 'hissa_no', label: 'Hissa / Survey Number', type: 'TEXT', required: true },
+      { id: 'hobli_name', label: 'Hobli / Taluk Name', type: 'TEXT', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_id_proof', name: 'Applicant Identity Proof', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Hobli Revenue Inspector Verification', requiredDesignationId: 'desig_ri_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'Tahsildar Final Bhoomi Endorsement', requiredDesignationId: 'desig_tah_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 4. KA WELFARE (2 Services) ───
+  {
+    id: 'srv_vidyasiri_ka',
+    departmentId: 'dept_wel_ka',
+    stateId: 'state_ka',
+    name: 'Vidyasiri Post-Matric Student Scholarship',
+    code: 'VIDYASIRI_KA',
+    description: 'State scholarship and hostel fee assistance for post-matric students of backward classes.',
+    status: 'ACTIVE',
+    serviceFee: 0,
+    platformFee: 0,
+    totalFee: 0,
+    termsAndConditions: 'Applicant must be enrolled in recognized college in Karnataka.',
+    fields: [
+      { id: 'student_name', label: 'Student Name', type: 'TEXT', required: true },
+      { id: 'college_registration_no', label: 'College Registration / USN Number', type: 'TEXT', required: true },
+      { id: 'annual_income', label: 'Annual Income (INR)', type: 'NUMBER', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_income_caste', name: 'Nadakacheri Income & Caste Certificate', required: true },
+      { id: 'doc_fee_receipt', name: 'College Fee Receipt', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Taluk Welfare Officer Scrutiny', requiredDesignationId: 'desig_two_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'District Welfare Officer Sanction Order', requiredDesignationId: 'desig_dwo_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'srv_gruha_lakshmi_ka',
+    departmentId: 'dept_wel_ka',
+    stateId: 'state_ka',
+    name: 'Gruha Lakshmi Monthly Financial Grant',
+    code: 'GRUHA_LAKSHMI_KA',
+    description: 'Direct benefit transfer of ₹2,000 monthly to female heads of eligible households in Karnataka.',
+    status: 'ACTIVE',
+    serviceFee: 0,
+    platformFee: 0,
+    totalFee: 0,
+    termsAndConditions: 'Woman must be the head of family mentioned on BPL / Antyodaya Ration Card.',
+    fields: [
+      { id: 'woman_head_name', label: 'Name of Woman Head', type: 'TEXT', required: true },
+      { id: 'ration_card_no', label: 'Ration Card Number (BPL / AAY)', type: 'TEXT', required: true },
+      { id: 'bank_account_no', label: 'Bank Account Number for DBT', type: 'TEXT', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_ration_card', name: 'Ration Card Copy', required: true },
+      { id: 'doc_bank_passbook', name: 'Bank Passbook Copy', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Taluk Welfare Officer Eligibility Verification', requiredDesignationId: 'desig_two_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'District Welfare Officer DBT Sanction', requiredDesignationId: 'desig_dwo_ka', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 5. KL REVENUE (2 Services) ───
+  {
+    id: 'srv_caste_income_kl',
+    departmentId: 'dept_rev_kl',
+    stateId: 'state_kl',
+    name: 'E-District Caste, Community & Income Certificate',
+    code: 'CASTE_CERT_KL',
+    description: 'Official revenue certificate for caste and annual income issued via Kerala e-District.',
+    status: 'ACTIVE',
+    serviceFee: 30,
+    platformFee: 10,
+    totalFee: 40,
+    termsAndConditions: 'Issued pursuant to Kerala Land Revenue and Civil Administration Rules.',
+    fields: [
+      { id: 'applicant_name', label: 'Applicant Name', type: 'TEXT', required: true },
+      { id: 'aadhaar_number', label: 'Aadhaar Number', type: 'TEXT', required: true },
+      { id: 'community', label: 'Community / Religion', type: 'TEXT', required: true },
+      { id: 'annual_income', label: 'Annual Income (INR)', type: 'NUMBER', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
+      { id: 'doc_sslc_book', name: 'SSLC Book Copy (Religion / Caste page)', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Village Officer Desk Verification', requiredDesignationId: 'desig_vo_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'Deputy Tahsildar Endorsement', requiredDesignationId: 'desig_dtah_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 3, stepName: 'Tahsildar Digital Signature & e-District Issue', requiredDesignationId: 'desig_tah_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'srv_possession_cert_kl',
+    departmentId: 'dept_rev_kl',
+    stateId: 'state_kl',
+    name: 'Possession & Non-Attachment Certificate',
+    code: 'POSSESSION_CERT_KL',
+    description: 'Statutory proof of physical possession and encumbrance-free title of landed property in Kerala.',
+    status: 'ACTIVE',
+    serviceFee: 60,
+    platformFee: 15,
+    totalFee: 75,
+    termsAndConditions: 'Land title must be free of pending revenue recovery proceedings.',
+    fields: [
+      { id: 'survey_resurvey_no', label: 'Re-survey / Survey Number', type: 'TEXT', required: true },
+      { id: 'thandaper_no', label: 'Thandaper Number', type: 'TEXT', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_land_tax_receipt', name: 'Latest Land Tax Receipt', required: true },
+      { id: 'doc_title_deed', name: 'Registered Title Deed Copy', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Village Officer Spot Inquiry', requiredDesignationId: 'desig_vo_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'Tahsildar Final Possession Certificate', requiredDesignationId: 'desig_tah_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 6. KL WELFARE (2 Services) ───
+  {
+    id: 'srv_vidyakiranam_kl',
+    departmentId: 'dept_wel_kl',
+    stateId: 'state_kl',
+    name: 'Vidyakiranam Educational Assistance Scheme',
+    code: 'VIDYAKIRANAM_KL',
+    description: 'Educational scholarship grant for children of disabled or economically backward parents in Kerala.',
+    status: 'ACTIVE',
+    serviceFee: 0,
+    platformFee: 0,
+    totalFee: 0,
+    termsAndConditions: 'Beneficiary must be pursuing regular studies in an approved institution.',
+    fields: [
+      { id: 'student_name', label: 'Student Name', type: 'TEXT', required: true },
+      { id: 'school_college_name', label: 'School / College Name', type: 'TEXT', required: true },
+      { id: 'annual_income', label: 'Family Annual Income (INR)', type: 'NUMBER', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_disability_cert', name: 'Parent Disability Certificate / Income Proof', required: true },
+      { id: 'doc_study_cert', name: 'Institution Study Certificate', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Taluk Social Justice Officer Scrutiny', requiredDesignationId: 'desig_tsjo_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'District Social Justice Officer Sanction Order', requiredDesignationId: 'desig_dsjo_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'srv_karunya_kl',
+    departmentId: 'dept_wel_kl',
+    stateId: 'state_kl',
+    name: 'Karunya Benevolent Health Care Scheme',
+    code: 'KARUNYA_KL',
+    description: 'Financial assistance for critical medical treatments and surgeries for underprivileged families.',
+    status: 'ACTIVE',
+    serviceFee: 0,
+    platformFee: 0,
+    totalFee: 0,
+    termsAndConditions: 'Medical treatment must be at empanelled government/private super-speciality hospitals.',
+    fields: [
+      { id: 'patient_name', label: 'Patient Name', type: 'TEXT', required: true },
+      { id: 'ailment_details', label: 'Critical Illness / Treatment Details', type: 'TEXT', required: true },
+      { id: 'estimated_cost', label: 'Estimated Hospital Treatment Cost (INR)', type: 'NUMBER', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_hospital_estimate', name: 'Government Hospital Treatment Estimate', required: true },
+      { id: 'doc_income_cert', name: 'Income Certificate', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'TSJO Medical Record Scrutiny', requiredDesignationId: 'desig_tsjo_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'DSJO Sanction & Hospital Release', requiredDesignationId: 'desig_dsjo_kl', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 7. TN REVENUE (2 Services) ───
+  {
+    id: 'srv_community_cert_tn',
+    departmentId: 'dept_rev_tn',
+    stateId: 'state_tn',
+    name: 'Community & Nativity Certificate (e-Sevai)',
+    code: 'COMMUNITY_CERT_TN',
+    description: 'Official statutory community and nativity certificate issued through Tamil Nadu e-Sevai portal.',
+    status: 'ACTIVE',
+    serviceFee: 35,
+    platformFee: 15,
+    totalFee: 50,
+    termsAndConditions: 'I declare all family caste records and parental nativity proofs are true.',
+    fields: [
+      { id: 'applicant_name', label: 'Applicant Name', type: 'TEXT', required: true },
+      { id: 'aadhaar_number', label: 'Aadhaar Number', type: 'TEXT', required: true },
+      { id: 'community', label: 'Community (BC / MBC / SC / ST / OC)', type: 'DROPDOWN', required: true, constraints: { options: ['BC', 'BCM', 'MBC / DNC', 'SC', 'SC(A)', 'ST', 'OC'] } },
+      { id: 'father_caste', label: 'Father Community / Caste', type: 'TEXT', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
+      { id: 'doc_parent_community', name: 'Parent Community Certificate Copy', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'VAO / Urban VAO Verification', requiredDesignationId: 'desig_vao_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'Revenue Inspector Spot Inquiry', requiredDesignationId: 'desig_ri_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 3, stepName: 'Zonal Deputy Tahsildar e-Sevai Signature', requiredDesignationId: 'desig_tah_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'srv_legal_heir_tn',
+    departmentId: 'dept_rev_tn',
+    stateId: 'state_tn',
+    name: 'Legal Heir Certificate (Varisu Sanrithu)',
+    code: 'LEGAL_HEIR_TN',
+    description: 'Statutory certificate declaring surviving legal heirs of a deceased person in Tamil Nadu.',
+    status: 'ACTIVE',
+    serviceFee: 50,
+    platformFee: 10,
+    totalFee: 60,
+    termsAndConditions: 'All surviving legal heirs must be declared without omission.',
+    fields: [
+      { id: 'deceased_name', label: 'Deceased Person Full Name', type: 'TEXT', required: true },
+      { id: 'date_of_death', label: 'Date of Death', type: 'DATE', required: true },
+      { id: 'number_of_heirs', label: 'Total Number of Surviving Legal Heirs', type: 'NUMBER', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_death_cert', name: 'Original Death Certificate', required: true },
+      { id: 'doc_legal_heir_affidavit', name: 'Notarized Legal Heir Affidavit', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'VAO Heir Scrutiny & Family Tree Inquiry', requiredDesignationId: 'desig_vao_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'Revenue Inspector Inquiry Report', requiredDesignationId: 'desig_ri_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 3, stepName: 'Tahsildar Legal Heir Certificate Issuance', requiredDesignationId: 'desig_tah_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── 8. TN WELFARE (2 Services) ───
+  {
+    id: 'srv_pudhumai_penn_tn',
+    departmentId: 'dept_wel_tn',
+    stateId: 'state_tn',
+    name: 'Moovalur Ramamirtham Ammaiyar Pudhumai Penn Scheme',
+    code: 'PUDHUMAI_PENN_TN',
+    description: 'Monthly ₹1,000 higher education financial grant for female students who studied in government schools.',
+    status: 'ACTIVE',
+    serviceFee: 0,
+    platformFee: 0,
+    totalFee: 0,
+    termsAndConditions: 'Girl student must have studied from Class 6 to 12 in Tamil Nadu government schools.',
+    fields: [
+      { id: 'student_name', label: 'Girl Student Name', type: 'TEXT', required: true },
+      { id: 'emis_number', label: 'School EMIS Number', type: 'TEXT', required: true },
+      { id: 'college_name', label: 'Present College / University Name', type: 'TEXT', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_school_bonafide', name: 'Govt School Study Certificate (Classes 6-12)', required: true },
+      { id: 'doc_college_id', name: 'Current College ID / Admission Proof', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Special Tahsildar EMIS School Record Scrutiny', requiredDesignationId: 'desig_st_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'District Welfare Officer Sanction & DBT Credit', requiredDesignationId: 'desig_dadwo_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'srv_adw_scholarship_tn',
+    departmentId: 'dept_wel_tn',
+    stateId: 'state_tn',
+    name: 'Post-Matric Adi Dravidar Welfare Scholarship',
+    code: 'ADW_SCHOLARSHIP_TN',
+    description: 'Tuition and maintenance scholarship for SC/ST students enrolled in undergraduate and postgraduate programs.',
+    status: 'ACTIVE',
+    serviceFee: 0,
+    platformFee: 0,
+    totalFee: 0,
+    termsAndConditions: 'Parental annual income must be within government prescribed limits.',
+    fields: [
+      { id: 'student_name', label: 'Student Full Name', type: 'TEXT', required: true },
+      { id: 'college_roll_no', label: 'College Roll No. / Admission No.', type: 'TEXT', required: true },
+      { id: 'annual_income', label: 'Annual Income (INR)', type: 'NUMBER', required: true },
+    ],
+    documentRequirements: [
+      { id: 'doc_community_cert', name: 'Community Certificate Copy', required: true },
+      { id: 'doc_fee_receipt', name: 'College Fee Receipt', required: true },
+    ],
+    workflowSteps: [
+      { stepNumber: 1, stepName: 'Special Tahsildar College Verification', requiredDesignationId: 'desig_st_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
+      { stepNumber: 2, stepName: 'District Adi Dravidar Welfare Officer Sanction', requiredDesignationId: 'desig_dadwo_tn', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
+    ],
+    createdAt: '2026-01-01T00:00:00.000Z',
   },
 ];
-// Helper: ISO dates relative to now (recalculated on each server restart)
-function daysAgo(n: number): string { return new Date(Date.now() - n * 86400000).toISOString(); }
-function daysFromNow(n: number): string { return new Date(Date.now() + n * 86400000).toISOString(); }
 
-const MOCK_APPLICATIONS = [
-  // ═══════════════════════════════════════════════════════════════
-  // STEP 1: PENDING AT VRO (Village Revenue Officer — OFF-VRO-01)
-  // ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. MOCK APPLICATIONS (Distributed Across All 4 States & 16 Services)
+// ═══════════════════════════════════════════════════════════════════════════
+
+const MOCK_APPLICATIONS: any[] = [
+  // ─── AP APPLICATIONS ───
   {
-    id: 'APP-2001', serviceId: 'srv_caste_income_ap',
+    id: 'APP-AP-1001',
+    serviceId: 'srv_caste_income_ap',
     serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'pending', remarks: '', fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831001A',
-    currentStepNumber: 1, totalWorkflowSteps: 3, queries: [] as any[],
+    departmentId: 'dept_rev_ap',
+    departmentName: 'Revenue, Registration & Stamps Department',
+    stateId: 'state_ap',
+    state: 'Andhra Pradesh',
+    citizenId: 'CIT-AP-001',
+    citizenName: 'Ravi Kumar (AP Rural)',
+    jurisdiction: 'node_cg_vil',
+    status: AppStatus.CERTIFICATE_GENERATED,
+    appliedDate: '2026-04-10T10:00:00.000Z',
+    lastUpdated: '2026-04-15T16:00:00.000Z',
+    slaTotal: 15,
+    slaRemaining: 10,
+    currentStep: 3,
+    formData: { applicant_name: 'Ravi Kumar', aadhaar_number: '895421990001', caste_category: 'BC-A', annual_income: '85000', dob: '1995-05-12' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(2), status: 'uploaded' },
-      { name: 'Ration_Card.pdf', type: 'Address Proof', date: daysAgo(2), status: 'uploaded' },
-      { name: 'School_Leaving_Certificate.pdf', type: 'DOB Proof', date: daysAgo(2), status: 'uploaded' },
+      { id: 'doc_1', name: 'Aadhaar_Card.pdf', size: '240 KB', type: 'Identity Proof', status: 'verified', url: '#' },
+      { id: 'doc_2', name: 'School_TC.pdf', size: '310 KB', type: 'School TC', status: 'verified', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(2), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(2), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-7831001A' },
+      { stepName: 'Application Submitted', completedDate: '2026-04-10T10:00:00.000Z', actor: 'Ravi Kumar', status: 'COMPLETED', remarks: 'Fee ₹50 paid successfully' },
+      { stepName: 'Desk Verification (VRO)', completedDate: '2026-04-12T11:30:00.000Z', actor: 'Suresh Reddy (VRO)', status: 'COMPLETED', remarks: 'Original TC verified' },
+      { stepName: 'Field Inspection (RI)', completedDate: '2026-04-14T15:00:00.000Z', actor: 'M. Jagadeesh (RI)', status: 'COMPLETED', remarks: 'Spot inquiry confirmed residence in Chandragiri' },
+      { stepName: 'Tahsildar Digital Signature', completedDate: '2026-04-15T16:00:00.000Z', actor: 'D. Prabhakar Rao (Tahsildar)', status: 'COMPLETED', remarks: 'Approved & Signed via DSC' },
     ],
-    submittedDate: daysAgo(2), slaDate: daysFromNow(5),
   },
   {
-    id: 'APP-2002', serviceId: 'srv_income_ap',
-    serviceName: 'Income & Asset Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1002', citizenName: 'Sunita Verma',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'pending', remarks: '', fee: 35, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831002B',
-    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    id: 'APP-AP-1002',
+    serviceId: 'srv_land_mutation_ap',
+    serviceName: 'Agricultural Land Mutation & Pattadar Passbook',
+    departmentId: 'dept_rev_ap',
+    departmentName: 'Revenue, Registration & Stamps Department',
+    stateId: 'state_ap',
+    state: 'Andhra Pradesh',
+    citizenId: 'CIT-AP-001',
+    citizenName: 'Ravi Kumar (AP Rural)',
+    jurisdiction: 'node_cg_vil',
+    status: AppStatus.PENDING_OFFICER_REVIEW,
+    appliedDate: '2026-05-01T09:30:00.000Z',
+    lastUpdated: '2026-05-01T09:30:00.000Z',
+    slaTotal: 30,
+    slaRemaining: 26,
+    currentStep: 1,
+    assignedOfficerId: 'OFF-AP-REV-RI-01',
+    assignedOfficerName: 'M. Jagadeesh (RI)',
+    formData: { survey_number: '142/3B', land_extent_acres: '2.50', registered_deed_no: 'DOC-2026-4412' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(3), status: 'uploaded' },
-      { name: 'Salary_Slip_2026.pdf', type: 'Income Proof', date: daysAgo(3), status: 'uploaded' },
-      { name: 'Bank_Passbook.pdf', type: 'Bank Proof', date: daysAgo(3), status: 'uploaded' },
+      { id: 'doc_1', name: 'Registered_Sale_Deed.pdf', size: '1.2 MB', type: 'Sale Deed', status: 'uploaded', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(3), actor: 'Sunita Verma', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(3), actor: 'System', note: 'Payment of ₹35 received. TXN: TXN-7831002B' },
+      { stepName: 'Application Submitted', completedDate: '2026-05-01T09:30:00.000Z', actor: 'Ravi Kumar', status: 'COMPLETED', remarks: 'Submitted online' },
+      { stepName: 'Revenue Inspector Spot Survey', completedDate: null, actor: 'M. Jagadeesh (RI)', status: 'IN_PROGRESS', remarks: 'Spot survey scheduled' },
     ],
-    submittedDate: daysAgo(3), slaDate: daysFromNow(4),
   },
   {
-    id: 'APP-2003', serviceId: 'srv_residence_ap',
-    serviceName: 'Residence & Domicile Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1003', citizenName: 'Kaveri Devi',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'pending', remarks: '', fee: 30, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831003C',
-    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    id: 'APP-AP-1003',
+    serviceId: 'srv_vidya_deevena_ap',
+    serviceName: 'Jagananna Vidya Deevena Full Fee Reimbursement',
+    departmentId: 'dept_wel_ap',
+    departmentName: 'Social Welfare & Empowerment Department',
+    stateId: 'state_ap',
+    state: 'Andhra Pradesh',
+    citizenId: 'CIT-AP-002',
+    citizenName: 'Lakshmi Devi (AP Urban)',
+    jurisdiction: 'node_w14',
+    status: AppStatus.QUERY_RAISED,
+    appliedDate: '2026-04-20T11:00:00.000Z',
+    lastUpdated: '2026-04-28T14:20:00.000Z',
+    slaTotal: 21,
+    slaRemaining: 13,
+    currentStep: 1,
+    queryMessage: 'Please upload the latest semester attendance bonafide from your college principal.',
+    formData: { student_name: 'P. Sai Teja', college_code: 'SVU-042', course_name: 'B.Tech CSE', annual_income: '110000' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(1), status: 'uploaded' },
-      { name: 'Electricity_Bill.pdf', type: 'Address Proof', date: daysAgo(1), status: 'uploaded' },
+      { id: 'doc_1', name: 'Allotment_Order.pdf', size: '480 KB', type: 'Allotment Order', status: 'verified', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(1), actor: 'Kaveri Devi', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(1), actor: 'System', note: 'Payment of ₹30 received. TXN: TXN-7831003C' },
+      { stepName: 'Application Submitted', completedDate: '2026-04-20T11:00:00.000Z', actor: 'Lakshmi Devi', status: 'COMPLETED', remarks: 'Submitted' },
+      { stepName: 'Attendance Audit', completedDate: null, actor: 'N. Rajesh Babu (Urban Secretary)', status: 'QUERY_RAISED', remarks: 'Attendance clarification requested' },
     ],
-    submittedDate: daysAgo(1), slaDate: daysFromNow(6),
-  },
-  {
-    id: 'APP-2004', serviceId: 'srv_caste_income_ap',
-    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'query', remarks: 'Please upload a clear photo of your Aadhaar card. Current upload is blurry.',
-    fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831004D',
-    currentStepNumber: 1, totalWorkflowSteps: 3,
-    queries: [{
-      queryId: 'QRY-001001', officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
-      queryText: 'Please upload a clear photo of your Aadhaar card. Current upload is blurry.',
-      timestamp: daysAgo(1), status: 'OPEN',
-    }],
-    documents: [
-      { name: 'Aadhaar_blurry.jpg', type: 'Identity Proof', date: daysAgo(4), status: 'uploaded' },
-    ],
-    timeline: [
-      { action: 'Application Submitted', date: daysAgo(4), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(4), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-7831004D' },
-      { action: 'Clarification Query Raised (Workflow Paused)', date: daysAgo(1), actor: 'Gokul Rao (VRO)', note: 'Please upload a clear photo of your Aadhaar card. Current upload is blurry.' },
-    ],
-    submittedDate: daysAgo(4), slaDate: daysFromNow(3),
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // STEP 2: PENDING AT MRO (Mandal Revenue Officer — OFF-MRO-01)
-  // ═══════════════════════════════════════════════════════════════
+  // ─── KA APPLICATIONS ───
   {
-    id: 'APP-2005', serviceId: 'srv_caste_income_ap',
-    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1002', citizenName: 'Sunita Verma',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-MRO-01', officerName: 'Sunita Sharma (MRO)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'under-review', remarks: 'VRO village verification completed and verified. Awaiting Mandal endorsement.',
-    fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831005E',
-    currentStepNumber: 2, totalWorkflowSteps: 3, queries: [] as any[],
+    id: 'APP-KA-2001',
+    serviceId: 'srv_caste_income_ka',
+    serviceName: 'Caste & Income Certificate (Nadakacheri / AJSK)',
+    departmentId: 'dept_rev_ka',
+    departmentName: 'Revenue Department (Kandaya Ilakhe)',
+    stateId: 'state_ka',
+    state: 'Karnataka',
+    citizenId: 'CIT-KA-001',
+    citizenName: 'Basavaraju K (KA Rural)',
+    jurisdiction: 'node_bilikere_vil',
+    status: AppStatus.UNDER_REVIEW,
+    appliedDate: '2026-04-25T14:00:00.000Z',
+    lastUpdated: '2026-04-28T10:15:00.000Z',
+    slaTotal: 14,
+    slaRemaining: 8,
+    currentStep: 2,
+    assignedOfficerId: 'OFF-KA-REV-RI-01',
+    assignedOfficerName: 'Kumaraswamy H. S. (RI)',
+    formData: { applicant_name: 'Basavaraju K', aadhaar_number: '895421990003', category: '3A', annual_income: '90000' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(5), status: 'verified' },
-      { name: 'Ration_Card.pdf', type: 'Address Proof', date: daysAgo(5), status: 'verified' },
-      { name: 'School_Leaving_Certificate.pdf', type: 'DOB Proof', date: daysAgo(5), status: 'uploaded' },
+      { id: 'doc_1', name: 'Aadhaar_Basavaraju.pdf', size: '320 KB', type: 'Aadhaar', status: 'verified', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(5), actor: 'Sunita Verma', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(5), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-7831005E' },
-      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(2), actor: 'Gokul Rao (VRO)', note: 'Field survey completed. Ancestry verified.' },
+      { stepName: 'Application Submitted', completedDate: '2026-04-25T14:00:00.000Z', actor: 'Basavaraju K', status: 'COMPLETED', remarks: 'Fee ₹50 paid' },
+      { stepName: 'VAO Desk Scrutiny', completedDate: '2026-04-28T10:15:00.000Z', actor: 'Basavaraj Shivappa (VAO)', status: 'COMPLETED', remarks: 'Endorsed for Hobli RI' },
+      { stepName: 'Hobli RI Spot Inquiry', completedDate: null, actor: 'Kumaraswamy H. S. (RI)', status: 'IN_PROGRESS', remarks: 'Under field inspection' },
     ],
-    submittedDate: daysAgo(5), slaDate: daysFromNow(8),
   },
   {
-    id: 'APP-2006', serviceId: 'srv_residence_ap',
-    serviceName: 'Residence & Domicile Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1003', citizenName: 'Kaveri Devi',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-MRO-01', officerName: 'Sunita Sharma (MRO)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'under-review', remarks: 'VRO verified physical residence. Awaiting final Mandal approval & DSC.',
-    fee: 30, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831006F',
-    currentStepNumber: 2, totalWorkflowSteps: 2, queries: [] as any[],
+    id: 'APP-KA-2002',
+    serviceId: 'srv_gruha_lakshmi_ka',
+    serviceName: 'Gruha Lakshmi Monthly Financial Grant',
+    departmentId: 'dept_wel_ka',
+    departmentName: 'Social Welfare & Backward Classes Department',
+    stateId: 'state_ka',
+    state: 'Karnataka',
+    citizenId: 'CIT-KA-002',
+    citizenName: 'Ananya Rao (KA Urban)',
+    jurisdiction: 'node_bbmp_w150',
+    status: AppStatus.CERTIFICATE_GENERATED,
+    appliedDate: '2026-04-05T09:00:00.000Z',
+    lastUpdated: '2026-04-12T17:00:00.000Z',
+    slaTotal: 15,
+    slaRemaining: 8,
+    currentStep: 2,
+    formData: { woman_head_name: 'Ananya Rao', ration_card_no: 'RC-KA-991204', bank_account_no: 'SBIN0004120991' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(4), status: 'verified' },
-      { name: 'Electricity_Bill.pdf', type: 'Address Proof', date: daysAgo(4), status: 'verified' },
+      { id: 'doc_1', name: 'RationCard.pdf', size: '420 KB', type: 'Ration Card', status: 'verified', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(4), actor: 'Kaveri Devi', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(4), actor: 'System', note: 'Payment of ₹30 received. TXN: TXN-7831006F' },
-      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(2), actor: 'Gokul Rao (VRO)', note: 'Continuous residence confirmed by local inquiry.' },
+      { stepName: 'Submitted', completedDate: '2026-04-05T09:00:00.000Z', actor: 'Ananya Rao', status: 'COMPLETED', remarks: 'Form submitted' },
+      { stepName: 'Eligibility Verification', completedDate: '2026-04-08T12:00:00.000Z', actor: 'Ramesh H. B. (TWO)', status: 'COMPLETED', remarks: 'Verified with Food & Civil Supplies' },
+      { stepName: 'DBT Sanction Order', completedDate: '2026-04-12T17:00:00.000Z', actor: 'Dr. Chandrashekar B. (DWO)', status: 'COMPLETED', remarks: 'Approved & Scheduled for monthly DBT' },
     ],
-    submittedDate: daysAgo(4), slaDate: daysFromNow(4),
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // STEP 3: PENDING AT TAHSILDAR (Final Approval & DSC — OFF-TAH-01)
-  // ═══════════════════════════════════════════════════════════════
+  // ─── KL APPLICATIONS ───
   {
-    id: 'APP-2007', serviceId: 'srv_caste_income_ap',
-    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-TAH-01', officerName: 'K. V. Reddy (Tahsildar)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'under-review', remarks: 'VRO and MRO stages successfully verified and endorsed. Ready for Tahsildar digital signature.',
-    fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831007G',
-    currentStepNumber: 3, totalWorkflowSteps: 3, queries: [] as any[],
+    id: 'APP-KL-3001',
+    serviceId: 'srv_caste_income_kl',
+    serviceName: 'E-District Caste, Community & Income Certificate',
+    departmentId: 'dept_rev_kl',
+    departmentName: 'Revenue Department (Keralam E-District)',
+    stateId: 'state_kl',
+    state: 'Kerala',
+    citizenId: 'CIT-KL-001',
+    citizenName: 'Sreejith Menon (KL Rural)',
+    jurisdiction: 'node_nedumangad_vil',
+    status: AppStatus.CERTIFICATE_GENERATED,
+    appliedDate: '2026-04-15T10:00:00.000Z',
+    lastUpdated: '2026-04-20T15:30:00.000Z',
+    slaTotal: 10,
+    slaRemaining: 5,
+    currentStep: 3,
+    formData: { applicant_name: 'Sreejith Menon', aadhaar_number: '895421990005', community: 'Hindu - Nair', annual_income: '120000' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(7), status: 'verified' },
-      { name: 'Ration_Card.pdf', type: 'Address Proof', date: daysAgo(7), status: 'verified' },
-      { name: 'School_Leaving_Certificate.pdf', type: 'DOB Proof', date: daysAgo(7), status: 'verified' },
+      { id: 'doc_1', name: 'Aadhaar_Sreejith.pdf', size: '210 KB', type: 'Aadhaar', status: 'verified', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(7), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(7), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-7831007G' },
-      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(5), actor: 'Gokul Rao (VRO)', note: 'Village verification clear.' },
-      { action: 'Stage 2 Approved -> Advanced to Step 3', date: daysAgo(2), actor: 'Sunita Sharma (MRO)', note: 'Mandal records verified. Forwarded to Tahsildar.' },
+      { stepName: 'Application Submitted', completedDate: '2026-04-15T10:00:00.000Z', actor: 'Sreejith Menon', status: 'COMPLETED', remarks: 'e-District payment ₹40 confirmed' },
+      { stepName: 'Village Officer Verification', completedDate: '2026-04-17T11:00:00.000Z', actor: 'Sajeev Kumar (VO)', status: 'COMPLETED', remarks: 'Verified family register' },
+      { stepName: 'Deputy Tahsildar Endorsement', completedDate: '2026-04-19T14:00:00.000Z', actor: 'Reshma Nair (Deputy Tahsildar)', status: 'COMPLETED', remarks: 'Passed to Tahsildar' },
+      { stepName: 'Tahsildar Digital Signature', completedDate: '2026-04-20T15:30:00.000Z', actor: 'Gopalan Nambiar (Tahsildar)', status: 'COMPLETED', remarks: 'Certificate digitally signed' },
     ],
-    submittedDate: daysAgo(7), slaDate: daysFromNow(7),
   },
   {
-    id: 'APP-2008', serviceId: 'srv_income_ap',
-    serviceName: 'Income & Asset Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1003', citizenName: 'Kaveri Devi',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-TAH-01', officerName: 'K. V. Reddy (Tahsildar)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'under-review', remarks: 'VRO income inquiry completed. Awaiting Tahsildar approval & DSC.',
-    fee: 35, paymentStatus: 'paid', paymentTransactionId: 'TXN-7831008H',
-    currentStepNumber: 2, totalWorkflowSteps: 2, queries: [] as any[],
+    id: 'APP-KL-3002',
+    serviceId: 'srv_karunya_kl',
+    serviceName: 'Karunya Benevolent Health Care Scheme',
+    departmentId: 'dept_wel_kl',
+    departmentName: 'SC/ST Development & Social Justice Department',
+    stateId: 'state_kl',
+    state: 'Kerala',
+    citizenId: 'CIT-KL-002',
+    citizenName: 'Fathima Beevi (KL Urban)',
+    jurisdiction: 'node_tvm_w12',
+    status: AppStatus.UNDER_REVIEW,
+    appliedDate: '2026-04-28T09:30:00.000Z',
+    lastUpdated: '2026-05-02T11:00:00.000Z',
+    slaTotal: 14,
+    slaRemaining: 10,
+    currentStep: 1,
+    assignedOfficerId: 'OFF-KL-WEL-TSJO-01',
+    assignedOfficerName: 'Mini Thomas (TSJO)',
+    formData: { patient_name: 'Fathima Beevi', ailment_details: 'Cardiac Bypass Surgery', estimated_cost: '185000' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(6), status: 'verified' },
-      { name: 'Salary_Certificate.pdf', type: 'Income Proof', date: daysAgo(6), status: 'verified' },
+      { id: 'doc_1', name: 'Hospital_Estimate_MCH.pdf', size: '550 KB', type: 'Medical Estimate', status: 'verified', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(6), actor: 'Kaveri Devi', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(6), actor: 'System', note: 'Payment of ₹35 received. TXN: TXN-7831008H' },
-      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(3), actor: 'Gokul Rao (VRO)', note: 'Income records checked and verified.' },
+      { stepName: 'Application Submitted', completedDate: '2026-04-28T09:30:00.000Z', actor: 'Fathima Beevi', status: 'COMPLETED', remarks: 'Submitted under emergency quota' },
+      { stepName: 'TSJO Medical Record Scrutiny', completedDate: null, actor: 'Mini Thomas (TSJO)', status: 'IN_PROGRESS', remarks: 'Under doctor panel review' },
     ],
-    submittedDate: daysAgo(6), slaDate: daysFromNow(2),
   },
 
-  // ═══════════════════════════════════════════════════════════════
-  // TERMINAL RECORDS (Completed / Rejected — for citizen tracking history)
-  // ═══════════════════════════════════════════════════════════════
+  // ─── TN APPLICATIONS ───
   {
-    id: 'APP-1001', serviceId: 'srv_caste_income_ap',
-    serviceName: 'Integrated Community, Nativity & Date of Birth Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-TAH-01', officerName: 'K. V. Reddy (Tahsildar)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'completed', remarks: 'All documents verified. Certificate issued.',
-    fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-6001001A',
-    currentStepNumber: 3, totalWorkflowSteps: 3, queries: [] as any[],
-    certificateId: 'CERT-AP-2001', certificateIssuedDate: daysAgo(10),
-    certificateDownloadUrl: '/certificates/CERT-AP-2001.pdf',
+    id: 'APP-TN-4001',
+    serviceId: 'srv_community_cert_tn',
+    serviceName: 'Community & Nativity Certificate (e-Sevai)',
+    departmentId: 'dept_rev_tn',
+    departmentName: 'Revenue & Disaster Management Department',
+    stateId: 'state_tn',
+    state: 'Tamil Nadu',
+    citizenId: 'CIT-TN-001',
+    citizenName: 'Muruganathan P (TN Rural)',
+    jurisdiction: 'node_valayankulam_vil',
+    status: AppStatus.CERTIFICATE_GENERATED,
+    appliedDate: '2026-04-12T11:00:00.000Z',
+    lastUpdated: '2026-04-18T16:00:00.000Z',
+    slaTotal: 15,
+    slaRemaining: 9,
+    currentStep: 3,
+    formData: { applicant_name: 'Muruganathan P', aadhaar_number: '895421990007', community: 'MBC / DNC', father_caste: 'Maravar' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(20), status: 'verified' },
-      { name: 'Ration_Card.pdf', type: 'Address Proof', date: daysAgo(20), status: 'verified' },
+      { id: 'doc_1', name: 'Aadhaar_Murugan.pdf', size: '290 KB', type: 'Aadhaar', status: 'verified', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(20), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(20), actor: 'System', note: 'Payment of ₹50 received. TXN: TXN-6001001A' },
-      { action: 'Stage 1 Approved -> Advanced to Step 2', date: daysAgo(18), actor: 'Gokul Rao (VRO)', note: 'Village-level verification passed.' },
-      { action: 'Stage 2 Approved -> Advanced to Step 3', date: daysAgo(15), actor: 'Sunita Sharma (MRO)', note: 'Mandal records match.' },
-      { action: 'Final Approval & Digital Certificate Issued', date: daysAgo(10), actor: 'K. V. Reddy (Tahsildar)', note: 'Certificate CERT-AP-2001 generated.' },
+      { stepName: 'Submitted via e-Sevai', completedDate: '2026-04-12T11:00:00.000Z', actor: 'Muruganathan P', status: 'COMPLETED', remarks: 'Paid ₹50 fee' },
+      { stepName: 'VAO Verification', completedDate: '2026-04-14T10:30:00.000Z', actor: 'Senthil Murugan (VAO)', status: 'COMPLETED', remarks: 'Verified native land records' },
+      { stepName: 'Revenue Inspector Spot Inquiry', completedDate: '2026-04-16T15:00:00.000Z', actor: 'K. Anbazhagan (RI)', status: 'COMPLETED', remarks: 'Inquiry report submitted' },
+      { stepName: 'Zonal Deputy Tahsildar Signature', completedDate: '2026-04-18T16:00:00.000Z', actor: 'P. Muthuraman (Tahsildar)', status: 'COMPLETED', remarks: 'e-Sevai QR Certificate Generated' },
     ],
-    submittedDate: daysAgo(20), slaDate: daysAgo(13),
   },
   {
-    id: 'APP-1002', serviceId: 'srv_income_ap',
-    serviceName: 'Income & Asset Certificate',
-    serviceType: 'certificate', citizenId: 'CIT-1001', citizenName: 'Ravi Kumar',
-    jurisdiction: 'node_cg_vil', selectedJurisdictionNodeId: 'node_cg_vil',
-    jurisdictionPath: 'Andhra Pradesh > Tirupati District > Tirupati Revenue Sub-Division > Chandragiri Mandal > Chandragiri Village',
-    officerId: 'OFF-VRO-01', officerName: 'Gokul Rao (VRO)',
-    dept: 'Revenue, Registration & Stamps Department', departmentId: 'dept_rev_ap',
-    status: 'rejected', remarks: 'Income declaration does not match bank statements. Please re-apply.',
-    fee: 35, paymentStatus: 'paid', paymentTransactionId: 'TXN-6001002B',
-    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
+    id: 'APP-TN-4002',
+    serviceId: 'srv_pudhumai_penn_tn',
+    serviceName: 'Moovalur Ramamirtham Ammaiyar Pudhumai Penn Scheme',
+    departmentId: 'dept_wel_tn',
+    departmentName: 'Adi Dravidar & Tribal Welfare Department',
+    stateId: 'state_tn',
+    state: 'Tamil Nadu',
+    citizenId: 'CIT-TN-002',
+    citizenName: 'Kavitha Soundar (TN Urban)',
+    jurisdiction: 'node_gcc_w50',
+    status: AppStatus.CERTIFICATE_GENERATED,
+    appliedDate: '2026-04-02T10:00:00.000Z',
+    lastUpdated: '2026-04-08T17:00:00.000Z',
+    slaTotal: 15,
+    slaRemaining: 9,
+    currentStep: 2,
+    formData: { student_name: 'Kavitha Soundar', emis_number: 'EMIS-TN-2018-99120', college_name: 'Queen Marys College, Chennai' },
     documents: [
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(14), status: 'verified' },
-      { name: 'Income_Declaration.pdf', type: 'Income Proof', date: daysAgo(14), status: 'rejected' },
+      { id: 'doc_1', name: 'Govt_School_Bonafide.pdf', size: '410 KB', type: 'School Certificate', status: 'verified', url: '#' },
     ],
     timeline: [
-      { action: 'Application Submitted', date: daysAgo(14), actor: 'Ravi Kumar', note: 'Submitted via DigiConnect portal' },
-      { action: 'Payment Confirmed', date: daysAgo(14), actor: 'System', note: 'Payment of ₹35 received. TXN: TXN-6001002B' },
-      { action: 'Application Rejected', date: daysAgo(11), actor: 'Gokul Rao (VRO)', note: 'Income declaration does not match bank statements.' },
+      { stepName: 'Application Submitted', completedDate: '2026-04-02T10:00:00.000Z', actor: 'Kavitha Soundar', status: 'COMPLETED', remarks: 'EMIS matched with database' },
+      { stepName: 'Special Tahsildar Record Scrutiny', completedDate: '2026-04-05T12:00:00.000Z', actor: 'S. Vijayalakshmi (Special Tahsildar)', status: 'COMPLETED', remarks: 'School records verified' },
+      { stepName: 'Sanction Order & DBT Enrollment', completedDate: '2026-04-08T17:00:00.000Z', actor: 'Dr. K. Manimaran (DADWO)', status: 'COMPLETED', remarks: 'Enrolled in monthly ₹1,000 DBT' },
     ],
-    submittedDate: daysAgo(14), slaDate: daysAgo(9),
-  },
-
-  // ═══════════════════════════════════════════════════════════════
-  // MULTI-STATE APPLICATIONS (TN, KA, KL)
-  // ═══════════════════════════════════════════════════════════════
-  {
-    id: 'APP-TN-001', serviceId: 'SVC-TN-01',
-    serviceName: 'Community & Nativity Certificate', serviceType: 'certificate',
-    citizenId: 'CIT-TN-01', citizenName: 'K. Muthukrishnan',
-    jurisdiction: 'node_pollachi_vil', selectedJurisdictionNodeId: 'node_pollachi_vil',
-    jurisdictionPath: 'Tamil Nadu > Coimbatore District > Pollachi Revenue Division > Pollachi Taluk > Anaimalai Revenue Village',
-    officerId: 'OFF-VAO-TN-01', officerName: 'M. Selvakumar (VAO)',
-    dept: 'Revenue & Disaster Management Department', departmentId: 'dept_rev_tn',
-    status: 'pending', remarks: '', fee: 60, paymentStatus: 'paid', paymentTransactionId: 'TXN-TN-001A',
-    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
-    documents: [
-      { name: 'Family_Ration_Card.pdf', type: 'Address Proof', date: daysAgo(3), status: 'uploaded' },
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(3), status: 'uploaded' },
-    ],
-    timeline: [{ action: 'Application Submitted', date: daysAgo(3), actor: 'K. Muthukrishnan', note: 'Submitted via e-Sevai portal' }],
-    submittedDate: daysAgo(3), slaDate: daysFromNow(11),
-  },
-  {
-    id: 'APP-KA-001', serviceId: 'SVC-KA-01',
-    serviceName: 'Caste & Income Certificate (Nadakacheri)', serviceType: 'certificate',
-    citizenId: 'CIT-KA-01', citizenName: 'H. Chethan Gowda',
-    jurisdiction: 'node_bilikere_vil', selectedJurisdictionNodeId: 'node_bilikere_vil',
-    jurisdictionPath: 'Karnataka > Mysuru District > Hunsur Sub-Division > Hunsur Taluk > Bilikere Revenue Village',
-    officerId: 'OFF-VA-KA-01', officerName: 'Basavaraj Patil (Village Accountant)',
-    dept: 'Revenue Department (Kandaya Ilakhe)', departmentId: 'dept_rev_ka',
-    status: 'pending', remarks: '', fee: 40, paymentStatus: 'paid', paymentTransactionId: 'TXN-KA-001A',
-    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
-    documents: [
-      { name: 'RTC_Pahani.pdf', type: 'Land Record', date: daysAgo(2), status: 'uploaded' },
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(2), status: 'uploaded' },
-    ],
-    timeline: [{ action: 'Application Submitted', date: daysAgo(2), actor: 'H. Chethan Gowda', note: 'Nadakacheri service application' }],
-    submittedDate: daysAgo(2), slaDate: daysFromNow(12),
-  },
-  {
-    id: 'APP-KL-001', serviceId: 'SVC-KL-01',
-    serviceName: 'Land Possession & Valuation Certificate', serviceType: 'certificate',
-    citizenId: 'CIT-KL-01', citizenName: 'V. Sreekumar',
-    jurisdiction: 'node_nedumangad_vil', selectedJurisdictionNodeId: 'node_nedumangad_vil',
-    jurisdictionPath: 'Kerala > Thiruvananthapuram District > Nedumangad Revenue Division > Nedumangad Taluk > Vembayam Revenue Village',
-    officerId: 'OFF-VO-KL-01', officerName: 'Sajeev Kumar (Village Officer)',
-    dept: 'Revenue & Disaster Management Department', departmentId: 'dept_rev_kl',
-    status: 'pending', remarks: '', fee: 50, paymentStatus: 'paid', paymentTransactionId: 'TXN-KL-001A',
-    currentStepNumber: 1, totalWorkflowSteps: 2, queries: [] as any[],
-    documents: [
-      { name: 'Land_Tax_Receipt.pdf', type: 'Tax Receipt', date: daysAgo(4), status: 'uploaded' },
-      { name: 'Aadhaar_Card.pdf', type: 'Identity Proof', date: daysAgo(4), status: 'uploaded' },
-    ],
-    timeline: [{ action: 'Application Submitted', date: daysAgo(4), actor: 'V. Sreekumar', note: 'Submitted via e-District Kerala' }],
-    submittedDate: daysAgo(4), slaDate: daysFromNow(10),
   },
 ];
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. MOCK GRIEVANCES (Multi-Tier Escalation Across All 8 Departmental Cells)
+// ═══════════════════════════════════════════════════════════════════════════
 
-// ── Grievance statuses ──
-// Active  : 'open'  (NEW_GRIEVANCE) | 'investigating' (UNDER_INVESTIGATION) | 'escalated' (GRIEVANCE_ESCALATED — pending supervisor)
-// Terminal: 'resolved' (GRIEVANCE_RESOLVED) | 'rejected' (GRIEVANCE_REJECTED) | 'escalated-resolved' (Supervisor closed)
-// ── Categories ──
-// 'delay' | 'rejection' | 'payment' | 'misconduct'
-// ── SLA status (stored, since dates age) ──
-// 'safe' | 'warn' | 'breach'
+const MOCK_GRIEVANCES: any[] = [
+  // ─── AP GRIEVANCES ───
+  {
+    id: 'GRV-AP-001',
+    subject: 'Unjust Delay in Land Mutation Spot Survey',
+    category: 'delay',
+    citizenId: 'CIT-AP-001',
+    citizenName: 'Ravi Kumar (AP Rural)',
+    relatedAppId: 'APP-AP-1002',
+    description: 'Submitted land mutation application 25 days ago. Revenue Inspector has not visited site for spot survey.',
+    filedDate: '2026-05-01T08:00:00.000Z',
+    lastUpdated: '2026-05-02T10:00:00.000Z',
+    status: GrievanceStatus.INVESTIGATING,
+    priority: 'high',
+    slaStatus: 'warn',
+    departmentId: 'dept_rev_ap',
+    stateId: 'state_ap',
+    jurisdiction: 'node_cg_vil',
+    officerId: 'OFF-AP-REV-GRV1-01',
+    officerName: 'C. Hemalatha (GRO AP Revenue)',
+    history: [
+      { action: 'Grievance Filed', date: '2026-05-01T08:00:00.000Z', actor: 'Ravi Kumar', note: 'Citizen filed delay complaint' },
+      { action: 'Assigned to Cell', date: '2026-05-01T08:30:00.000Z', actor: 'System', note: 'Auto-routed to AP Revenue Grievance Cell' },
+      { action: 'Investigation Initiated', date: '2026-05-02T10:00:00.000Z', actor: 'C. Hemalatha', note: 'Called RI M. Jagadeesh for explanations' },
+    ],
+  },
+  {
+    id: 'GRV-AP-002',
+    subject: 'Attendance Query Discrepancy on Vidya Deevena',
+    category: 'rejection',
+    citizenId: 'CIT-AP-002',
+    citizenName: 'Lakshmi Devi (AP Urban)',
+    relatedAppId: 'APP-AP-1003',
+    description: 'College uploaded attendance sheet showing 82% attendance, but officer raised duplicate query.',
+    filedDate: '2026-04-29T09:00:00.000Z',
+    lastUpdated: '2026-05-03T11:00:00.000Z',
+    status: GrievanceStatus.ESCALATED,
+    priority: 'high',
+    slaStatus: 'breach',
+    departmentId: 'dept_wel_ap',
+    stateId: 'state_ap',
+    jurisdiction: 'node_w14',
+    officerId: 'OFF-AP-WEL-GRV2-01',
+    officerName: 'P. Venkatrami Reddy (Appellate Authority)',
+    history: [
+      { action: 'Grievance Filed', date: '2026-04-29T09:00:00.000Z', actor: 'Lakshmi Devi', note: 'Query dispute filed' },
+      { action: 'Escalated to Appellate Authority', date: '2026-05-03T11:00:00.000Z', actor: 'V. Sumathi (GRO)', note: 'Tier 1 unresolved within SLA limit, escalated to Appellate tier' },
+    ],
+  },
 
-const MOCK_GRIEVANCES = [
+  // ─── KA GRIEVANCES ───
   {
-    "id": "GRV-1001",
-    "subject": "Payment Receipt Missing",
-    "category": "payment",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "relatedAppId": "APP-1003",
-    "description": "Amount deducted but receipt not generated.",
-    "filedDate": "2026-05-03T18:45:19.670Z",
-    "status": "investigating",
-    "priority": "low",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-05-03T18:45:19.670Z",
-        "note": "Payment dispute"
-      },
-      {
-        "action": "Investigating",
-        "date": "2026-05-04T00:45:19.670Z",
-        "note": "Checking payment logs"
-      }
-    ]
+    id: 'GRV-KA-001',
+    subject: 'Bhoomi RTC Mutation Document Portal Glitch',
+    category: 'portal_error',
+    citizenId: 'CIT-KA-001',
+    citizenName: 'Basavaraju K (KA Rural)',
+    relatedAppId: 'APP-KA-2001',
+    description: 'Portal was giving server error while downloading certified RTC copy.',
+    filedDate: '2026-04-20T10:00:00.000Z',
+    lastUpdated: '2026-04-22T15:00:00.000Z',
+    status: GrievanceStatus.RESOLVED,
+    priority: 'medium',
+    slaStatus: 'safe',
+    daysTaken: 2,
+    departmentId: 'dept_rev_ka',
+    stateId: 'state_ka',
+    jurisdiction: 'node_bilikere_vil',
+    officerId: 'OFF-KA-REV-GRV1-01',
+    officerName: 'Geetha Shivanand (GRO KA Revenue)',
+    resolvedBy: 'Geetha Shivanand (GRO)',
+    resolutionNote: 'Nadakacheri Bhoomi document sync re-triggered. Citizen downloaded copy successfully.',
+    history: [
+      { action: 'Grievance Filed', date: '2026-04-20T10:00:00.000Z', actor: 'Basavaraju K', note: 'Technical issue reported' },
+      { action: 'Resolved', date: '2026-04-22T15:00:00.000Z', actor: 'Geetha Shivanand', note: 'Sync bug cleared and verified' },
+    ],
   },
+
+  // ─── KL GRIEVANCES ───
   {
-    "id": "GRV-1002",
-    "subject": "Severe SLA Delay",
-    "category": "delay",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "relatedAppId": "APP-1007",
-    "description": "Application is overdue by several days.",
-    "filedDate": "2026-05-03T06:45:19.670Z",
-    "status": "investigating",
-    "priority": "high",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-05-03T06:45:19.670Z",
-        "note": "Delay complaint"
-      },
-      {
-        "action": "Investigating",
-        "date": "2026-05-03T18:45:19.671Z",
-        "note": "Validating SLA"
-      }
-    ]
+    id: 'GRV-KL-001',
+    subject: 'Karunya Health Scheme Hospital Emissary Inquiry',
+    category: 'delay',
+    citizenId: 'CIT-KL-002',
+    citizenName: 'Fathima Beevi (KL Urban)',
+    relatedAppId: 'APP-KL-3002',
+    description: 'Critical surgery scheduled next week, TSJO desk approval pending for 5 days.',
+    filedDate: '2026-05-02T14:00:00.000Z',
+    lastUpdated: '2026-05-03T09:00:00.000Z',
+    status: GrievanceStatus.OPEN,
+    priority: 'high',
+    slaStatus: 'safe',
+    departmentId: 'dept_wel_kl',
+    stateId: 'state_kl',
+    jurisdiction: 'node_tvm_w12',
+    officerId: 'OFF-KL-WEL-GRV1-01',
+    officerName: 'Subhadra Amma (GRO KL Welfare)',
+    history: [
+      { action: 'Grievance Filed', date: '2026-05-02T14:00:00.000Z', actor: 'Fathima Beevi', note: 'Emergency health complaint submitted' },
+      { action: 'Assigned to Cell', date: '2026-05-03T09:00:00.000Z', actor: 'System', note: 'Marked high priority and assigned to Subhadra Amma' },
+    ],
   },
+
+  // ─── TN GRIEVANCES ───
   {
-    "id": "GRV-1003",
-    "subject": "Processing is slow",
-    "category": "delay",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "relatedAppId": "APP-1004",
-    "description": "Officer is taking too much time.",
-    "filedDate": "2026-05-03T18:45:19.671Z",
-    "status": "investigating",
-    "priority": "medium",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-05-03T18:45:19.671Z",
-        "note": "Delay complaint"
-      },
-      {
-        "action": "Investigating",
-        "date": "2026-05-04T04:45:19.671Z",
-        "note": "Validating SLA - Within limits"
-      }
-    ]
+    id: 'GRV-TN-001',
+    subject: 'Community Certificate e-Sevai QR Code Verification Error',
+    category: 'portal_error',
+    citizenId: 'CIT-TN-001',
+    citizenName: 'Muruganathan P (TN Rural)',
+    relatedAppId: 'APP-TN-4001',
+    description: 'Downloaded certificate QR code was showing verification timeout initially.',
+    filedDate: '2026-04-19T08:00:00.000Z',
+    lastUpdated: '2026-04-20T12:00:00.000Z',
+    status: GrievanceStatus.RESOLVED,
+    priority: 'low',
+    slaStatus: 'safe',
+    daysTaken: 1,
+    departmentId: 'dept_rev_tn',
+    stateId: 'state_tn',
+    jurisdiction: 'node_valayankulam_vil',
+    officerId: 'OFF-TN-REV-GRV1-01',
+    officerName: 'Selvi Meenakshi (GRO TN Revenue)',
+    resolvedBy: 'Selvi Meenakshi (GRO)',
+    resolutionNote: 'TNeGA QR verification endpoint caching refreshed. Certificate verified.',
+    history: [
+      { action: 'Grievance Filed', date: '2026-04-19T08:00:00.000Z', actor: 'Muruganathan P', note: 'QR verification issue' },
+      { action: 'Resolved', date: '2026-04-20T12:00:00.000Z', actor: 'Selvi Meenakshi', note: 'Cache cleared and tested' },
+    ],
   },
-  {
-    "id": "GRV-1004",
-    "subject": "Unfair Rejection",
-    "category": "rejection",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "relatedAppId": "APP-1002",
-    "description": "Officer incorrectly calculated my income.",
-    "filedDate": "2026-05-02T06:45:19.671Z",
-    "status": "investigating",
-    "priority": "medium",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-05-02T06:45:19.671Z",
-        "note": "Rejection dispute"
-      },
-      {
-        "action": "Investigating",
-        "date": "2026-05-03T06:45:19.671Z",
-        "note": "Verified documents."
-      }
-    ]
-  },
-  {
-    "id": "GRV-1005",
-    "subject": "Officer asked for bribe",
-    "category": "misconduct",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "relatedAppId": "APP-1006",
-    "description": "Officer asked for a bribe for vendor license.",
-    "filedDate": "2026-05-01T06:45:19.671Z",
-    "status": "investigating",
-    "priority": "high",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-05-01T06:45:19.671Z",
-        "note": "Misconduct complaint"
-      },
-      {
-        "action": "Investigating",
-        "date": "2026-05-02T06:45:19.671Z",
-        "note": "Gathering internal logs"
-      }
-    ]
-  },
-  {
-    "id": "GRV-006",
-    "subject": "Portal Error Resolved",
-    "category": "other",
-    "citizenId": "CIT-1001",
-    "citizenName": "Ravi Kumar",
-    "relatedAppId": "APP-1001",
-    "description": "I was not able to download my certificate.",
-    "filedDate": "2026-04-24T06:45:19.671Z",
-    "status": "resolved",
-    "priority": "low",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "daysTaken": 3,
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-04-24T06:45:19.671Z",
-        "note": "Technical issue"
-      },
-      {
-        "action": "Resolved",
-        "date": "2026-04-27T06:45:19.671Z",
-        "note": "Fixed download bug"
-      }
-    ]
-  },
-  {
-    "id": "GRV-007",
-    "subject": "Corruption Allegation",
-    "category": "misconduct",
-    "citizenId": "CIT-1003",
-    "citizenName": "Kaveri Devi",
-    "relatedAppId": "APP-1009",
-    "description": "Officer demanded money.",
-    "filedDate": "2026-04-30T06:45:19.671Z",
-    "status": "escalated",
-    "priority": "high",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-04-30T06:45:19.671Z",
-        "note": "Misconduct complaint"
-      },
-      {
-        "action": "Escalated to Supervisor",
-        "date": "2026-05-03T06:45:19.671Z",
-        "note": "Serious allegation, sent to MRO"
-      }
-    ]
-  },
-  {
-    "id": "GRV-008",
-    "subject": "Application not moving",
-    "category": "delay",
-    "citizenId": "CIT-1002",
-    "citizenName": "Sunita Verma",
-    "relatedAppId": "APP-1008",
-    "description": "My application is breached and officer is ignoring.",
-    "filedDate": "2026-05-04T05:45:19.671Z",
-    "status": "open",
-    "priority": "high",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-05-04T05:45:19.671Z",
-        "note": "Citizen filed grievance."
-      },
-      {
-        "action": "Assigned to Officer",
-        "date": "2026-05-04T06:15:19.671Z",
-        "note": "System assigned to Nalini Rao."
-      }
-    ]
-  },
-  {
-    "id": "GRV-009",
-    "subject": "Unfair scheme rejection",
-    "category": "rejection",
-    "citizenId": "CIT-1002",
-    "citizenName": "Sunita Verma",
-    "relatedAppId": "APP-1002",
-    "description": "I have all docs but got rejected.",
-    "filedDate": "2026-05-04T04:45:19.671Z",
-    "status": "open",
-    "priority": "medium",
-    "officerId": "GRV-1001",
-    "officerName": "Nalini Rao",
-    "jurisdiction": "Secunderabad",
-    "history": [
-      {
-        "action": "Grievance Filed",
-        "date": "2026-05-04T04:45:19.671Z",
-        "note": "Citizen filed grievance."
-      },
-      {
-        "action": "Assigned to Officer",
-        "date": "2026-05-04T05:45:19.671Z",
-        "note": "System assigned to Nalini Rao."
-      }
-    ]
-  }
 ];
 
-const MOCK_NOTIFICATIONS = [
+// ═══════════════════════════════════════════════════════════════════════════
+// 5. NOTIFICATIONS & AUDIT LOGS
+// ═══════════════════════════════════════════════════════════════════════════
+
+const MOCK_NOTIFICATIONS: Notification[] = [
   {
-    "id": "NOT-001",
-    "userId": "CIT-1001",
-    "title": "Application Approved!",
-    "message": "Your Income Certificate (APP-1001) has been approved. Download now.",
-    "type": "success",
-    "read": false,
-    "date": "2026-05-04T06:45:19.671Z",
-    "link": "citizen/track-application.html?id=APP-1001"
+    id: 'NOT-001',
+    userId: 'CIT-AP-001',
+    title: 'Certificate Issued!',
+    message: 'Your Integrated Community & Nativity Certificate (APP-AP-1001) is ready to download.',
+    type: 'success',
+    read: false,
+    date: '2026-04-15T16:00:00.000Z',
+    link: 'citizen/track-application.html?id=APP-AP-1001',
   },
   {
-    "id": "NOT-002",
-    "userId": "CIT-1001",
-    "title": "Query Raised",
-    "message": "Officer has requested additional documents for APP-1005. Please respond.",
-    "type": "warning",
-    "read": false,
-    "date": "2026-05-04T05:45:19.671Z",
-    "link": "citizen/track-application.html?id=APP-1005"
+    id: 'NOT-002',
+    userId: 'CIT-AP-002',
+    title: 'Clarification Query Raised',
+    message: 'Officer has requested attendance bonafide on Vidya Deevena application (APP-AP-1003).',
+    type: 'warning',
+    read: false,
+    date: '2026-04-28T14:20:00.000Z',
+    link: 'citizen/track-application.html?id=APP-AP-1003',
   },
   {
-    "id": "NOT-002b",
-    "userId": "CIT-1001",
-    "title": "Query Raised",
-    "message": "Officer has requested a shop photo for APP-1006. Please respond.",
-    "type": "warning",
-    "read": false,
-    "date": "2026-04-24T06:45:19.671Z",
-    "link": "citizen/track-application.html?id=APP-1006"
+    id: 'NOT-003',
+    userId: 'OFF-AP-REV-RI-01',
+    title: 'New Land Mutation Application Assigned',
+    message: 'Agricultural Land Mutation APP-AP-1002 in Chandragiri assigned for spot survey.',
+    type: 'info',
+    read: false,
+    date: '2026-05-01T09:30:00.000Z',
+    link: 'officer/officer-dashboard.html',
   },
-  {
-    "id": "NOT-002c",
-    "userId": "CIT-1001",
-    "title": "Application Rejected",
-    "message": "Your Scholarship Application (APP-1002) has been rejected.",
-    "type": "danger",
-    "read": false,
-    "date": "2026-05-02T06:45:19.671Z",
-    "link": "citizen/track-application.html?id=APP-1002"
-  },
-  {
-    "id": "NOT-002d",
-    "userId": "CIT-1001",
-    "title": "SLA Breach",
-    "message": "Your Record Correction (APP-1007) is delayed. Escalated to higher authorities.",
-    "type": "info",
-    "read": false,
-    "date": "2026-05-02T06:45:19.671Z",
-    "link": "citizen/track-application.html?id=APP-1007"
-  },
-  {
-    "id": "NOT-003",
-    "userId": "CIT-1001",
-    "title": "New Scheme Available",
-    "message": "PM Kisan Scholarship 2026 applications are now open. Check eligibility.",
-    "type": "info",
-    "read": false,
-    "date": "2026-05-03T06:45:19.671Z",
-    "link": "citizen/apply-service.html"
-  },
-  {
-    "id": "NOT-004",
-    "userId": "EMP-1007",
-    "title": "New Application Assigned",
-    "message": "Event Permission application (APP-1003) assigned to you.",
-    "type": "info",
-    "read": false,
-    "date": "2026-05-03T06:45:19.671Z",
-    "link": "officer/review-application.html"
-  },
-  {
-    "id": "NOT-005",
-    "userId": "SUP-1001",
-    "title": "SLA Breach Auto-Escalation",
-    "message": "Application APP-1007 has breached SLA and is escalated to you.",
-    "type": "danger",
-    "read": false,
-    "date": "2026-05-02T06:45:19.671Z",
-    "link": "supervisor/escalated-cases.html"
-  },
-  {
-    "id": "NOT-006",
-    "userId": "GRV-1001",
-    "title": "New Grievance Assigned",
-    "message": "Grievance GRV-008 regarding application delay assigned to you.",
-    "type": "info",
-    "read": false,
-    "date": "2026-05-04T05:45:19.671Z",
-    "link": "grievance/grievance-detail.html?id=GRV-008"
-  },
-  {
-    "id": "NOT-007",
-    "userId": "SUP-1003",
-    "title": "Grievance Escalation Alert",
-    "message": "Grievance GRV-006 (Misconduct) has been escalated to you by GO.",
-    "type": "danger",
-    "read": false,
-    "date": "2026-05-03T06:45:19.671Z",
-    "link": "supervisor/supervisor-dashboard.html"
-  },
-  {
-    "id": "NOT-008",
-    "userId": "SUP-1002",
-    "title": "SLA Breach Auto-Escalation",
-    "message": "Application APP-1008 has breached SLA.",
-    "type": "danger",
-    "read": false,
-    "date": "2026-04-30T06:45:19.671Z",
-    "link": "supervisor/escalated-cases.html"
-  },
-  {
-    "id": "NOT-009",
-    "userId": "SUP-1001",
-    "title": "Approval Required",
-    "message": "Officer approved APP-1004. Awaiting your final signature.",
-    "type": "info",
-    "read": false,
-    "date": "2026-05-04T05:45:19.671Z",
-    "link": "supervisor/supervisor-dashboard.html"
-  }
 ];
 
-const _nowMs = Date.now();
-const _hAgo = (h: number) => new Date(_nowMs - h * 3600000).toISOString();
-const MOCK_AUDIT_LOGS = [
+const MOCK_AUDIT_LOGS: AuditLog[] = [
   {
-    "id": "LOG-001",
-    "action": "User Login",
-    "actor": "superuser@gov.in",
-    "role": "super_user",
-    "date": "2026-05-04T08:00:00Z",
-    "details": "Super User logged in from Hyderabad, Telangana."
+    id: 'LOG-001',
+    action: 'State Onboarded',
+    actor: 'superuser@gov.in',
+    role: 'super_user',
+    date: '2026-01-01T00:00:00.000Z',
+    details: 'Central Admin verified and activated 4 state instances: AP, KA, KL, TN.',
   },
   {
-    "id": "LOG-002",
-    "action": "Application Approved",
-    "actor": "s.reddy@gov.in",
-    "role": "officer",
-    "date": "2026-05-04T07:00:00Z",
-    "details": "Officer Suresh Reddy approved APP-1001 (Income Certificate) for citizen Ravi Kumar."
+    id: 'LOG-002',
+    action: 'Dynamic Service Deployed',
+    actor: 'head.rev@ap.gov.in',
+    role: 'department_head',
+    date: '2026-01-05T10:00:00.000Z',
+    details: 'AP Revenue Principal Secretary published CASTE_CERT_AP with 3-tier workflow.',
   },
   {
-    "id": "LOG-003",
-    "action": "Supervisor Final Approval",
-    "actor": "d.verma@gov.in",
-    "role": "supervisor",
-    "date": "2026-05-04T06:00:00Z",
-    "details": "Supervisor Deepak Verma issued final approval for APP-1001. Certificate issued to Ravi Kumar."
+    id: 'LOG-003',
+    action: 'Certificate Digitally Signed',
+    actor: 'prabhakar.tah@ap.gov.in',
+    role: 'officer',
+    date: '2026-04-15T16:00:00.000Z',
+    details: 'Tahsildar approved & digitally signed Certificate for APP-AP-1001.',
   },
-  {
-    "id": "LOG-004",
-    "action": "Grievance Filed",
-    "actor": "ravi.k@gmail.com",
-    "role": "citizen",
-    "date": "2026-05-04T05:00:00Z",
-    "details": "Citizen Ravi Kumar filed grievance regarding delay in Income Certificate (APP-1007)."
-  },
-  {
-    "id": "LOG-005",
-    "action": "SLA Breach Auto-Escalation",
-    "actor": "System Daemon",
-    "role": "system",
-    "date": "2026-05-04T04:00:00Z",
-    "details": "APP-1007 auto-escalated to Supervisor Deepak Verma after SLA breach."
-  },
-  {
-    "id": "LOG-006",
-    "action": "Grievance Escalated",
-    "actor": "n.rao@gov.in",
-    "role": "grievance",
-    "date": "2026-05-04T03:00:00Z",
-    "details": "Grievance Officer Nalini Rao escalated GRV-1004 (Wrongful Rejection) to Supervisor."
-  },
-  {
-    "id": "LOG-007",
-    "action": "Warning Issued to Officer",
-    "actor": "d.verma@gov.in",
-    "role": "supervisor",
-    "date": "2026-05-04T02:00:00Z",
-    "details": "Supervisor Deepak Verma issued SLA warning to Officer Suresh Reddy for APP-1007."
-  },
-  {
-    "id": "LOG-008",
-    "action": "Application Rejected",
-    "actor": "p.nair@gov.in",
-    "role": "officer",
-    "date": "2026-05-04T01:00:00Z",
-    "details": "Officer Priya Nair rejected APP-1002 (Scholarship) - Income exceeds limit."
-  },
-  {
-    "id": "LOG-009",
-    "action": "Officer Onboarded",
-    "actor": "superuser@gov.in",
-    "role": "super_user",
-    "date": "2026-05-03T08:00:00Z",
-    "details": "Super User onboarded Officer Rekha Singh (EMP-1009) for Municipal Corporation, Secunderabad."
-  },
-  {
-    "id": "LOG-010",
-    "action": "Service Deactivated",
-    "actor": "superuser@gov.in",
-    "role": "super_user",
-    "date": "2026-05-02T08:00:00Z",
-    "details": "Super User deactivated SVC-010 (Death Certificate) pending workflow review."
-  },
-  {
-    "id": "LOG-011",
-    "action": "Query Raised",
-    "actor": "p.nair@gov.in",
-    "role": "officer",
-    "date": "2026-05-01T08:00:00Z",
-    "details": "Officer Priya Nair raised document query on APP-1005 (Subsidy Scheme) for Citizen Ravi Kumar."
-  },
-  {
-    "id": "LOG-012",
-    "action": "Citizen Query Response",
-    "actor": "ravi.k@gmail.com",
-    "role": "citizen",
-    "date": "2026-05-01T09:00:00Z",
-    "details": "Citizen Ravi Kumar responded to officer query on APP-1005. SLA timer reset."
-  },
-  {
-    "id": "LOG-013",
-    "action": "Grievance Investigating",
-    "actor": "n.rao@gov.in",
-    "role": "grievance",
-    "date": "2026-05-01T10:00:00Z",
-    "details": "Grievance Officer Nalini Rao investigating GRV-1001 - Checking payment gateway logs."
-  },
-  {
-    "id": "LOG-014",
-    "action": "Supervisor Override",
-    "actor": "l.narayana@gov.in",
-    "role": "supervisor",
-    "date": "2026-04-30T08:00:00Z",
-    "details": "Supervisor Lakshmi Narayana overrode officer decision on APP-1003, approving Event Permission."
-  },
-  {
-    "id": "LOG-015",
-    "action": "Workflow Config Updated",
-    "actor": "superuser@gov.in",
-    "role": "super_user",
-    "date": "2026-04-20T08:00:00Z",
-    "details": "Super User updated workflow stages for Income Certificate - added Field Verification step."
-  }
 ];
 
-/**
- * Initialize localStorage with mock data if not already present
- */
-export function initializeMockData() {
-  if (!localStorage.getItem('DigiConnect_initialized_v24')) {
-    localStorage.clear();
-    localStorage.setItem('DigiConnect_users', JSON.stringify(MOCK_USERS));
-    localStorage.setItem('DigiConnect_services', JSON.stringify(MOCK_SERVICES));
-    localStorage.setItem('DigiConnect_applications', JSON.stringify(MOCK_APPLICATIONS));
-    localStorage.setItem('DigiConnect_grievances', JSON.stringify(MOCK_GRIEVANCES));
-    localStorage.setItem('DigiConnect_notifications', JSON.stringify(MOCK_NOTIFICATIONS));
-    localStorage.setItem('DigiConnect_audit_logs', JSON.stringify(MOCK_AUDIT_LOGS));
-    localStorage.setItem('DigiConnect_pending_officers', JSON.stringify(MOCK_PENDING_OFFICERS));
-    localStorage.setItem('DigiConnect_officer_queue', JSON.stringify(OFFICER_QUEUE));
-    localStorage.setItem('DigiConnect_officer_queries', JSON.stringify(OFFICER_QUERIES));
-    localStorage.setItem('DigiConnect_super_approvals', JSON.stringify(SUPER_OFFICER_APPROVED));
-    localStorage.setItem('DigiConnect_super_approved_today', '42');
-    localStorage.setItem('DigiConnect_super_esc_sla_cases', JSON.stringify([...SUPER_ESC_SLA_CASES, ...SUPER_ESC_GRIEVANCE_CASES]));
-    localStorage.setItem('DigiConnect_super_pending_apps', JSON.stringify(SUPER_PENDING_APPS));
-    localStorage.setItem('DigiConnect_settings', JSON.stringify(MOCK_SETTINGS));
-    localStorage.setItem('DigiConnect_initialized_v24', 'true');
-  }
-}
+const MOCK_SERVICES: GovtService[] = DYNAMIC_SERVICES.map((s) => ({
+  id: s.id,
+  name: s.name,
+  cat: s.id.includes('caste') || s.id.includes('community') || s.id.includes('heir') || s.id.includes('possession') ? 'Certificate' : 'Welfare',
+  dept: MASTER_DEPARTMENTS.find((d) => d.id === s.departmentId)?.name || 'Government Department',
+  sla: 15,
+  fee: s.totalFee,
+  desc: s.description,
+  docs: s.documentRequirements.map((d: any) => d.name),
+  stages: s.workflowSteps.length,
+  status: 'Active',
+  apps: 1,
+}));
 
-/**
- * Reset all mock data (useful for testing)
- */
-export function resetMockData() {
-  localStorage.removeItem('DigiConnect_initialized_v4');
-  localStorage.removeItem('DigiConnect_users');
-  localStorage.removeItem('DigiConnect_services');
-  localStorage.removeItem('DigiConnect_applications');
-  localStorage.removeItem('DigiConnect_grievances');
-  localStorage.removeItem('DigiConnect_notifications');
-  localStorage.removeItem('DigiConnect_audit_logs');
-  localStorage.removeItem('DigiConnect_pending_officers');
-  localStorage.removeItem('DigiConnect_officer_queue');
-  localStorage.removeItem('DigiConnect_officer_queries');
-  localStorage.removeItem('DigiConnect_super_approvals');
-  localStorage.removeItem('DigiConnect_super_approved_today');
-  localStorage.removeItem('DigiConnect_super_esc_sla_cases');
-  localStorage.removeItem('DigiConnect_super_pending_apps');
-  localStorage.removeItem('DigiConnect_settings');
-  localStorage.removeItem('DigiConnect_session');
-  initializeMockData();
-}
-
-// ── Dashboard Layout Specific Mock Data ──
-const OFFICER_QUEUE = [
-  {
-    id: 'APP-2501', service: 'Income Certificate', citizen: 'Arjun Mehta', phone: '9876540001',
-    submitted: '23 Jan 2025', slaLeft: 5, slaTotal: 7, status: 'new',
-    aadhaar: 'XXXX XXXX 7721', dob: '12 Mar 1989', gender: 'Male',
-    address: '15-2-301, Malakpet, Hyderabad – 500036',
-    income: '1,60,000', purpose: 'Scholarship Application', occupation: 'Salaried – IT Sector',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Ration_Card.jpg', size: '420 KB', type: 'Address Proof', icon: 'img' },
-      { name: 'Salary_Slip_Dec24.pdf', size: '640 KB', type: 'Income Proof', icon: 'pdf' },
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '23 Jan 2025, 10:22 AM', detail: 'Submitted online via Citizen Portal. Payment ₹50 via UPI confirmed.', dot: 'submitted' },
-      { label: 'Assigned to Officer', ts: '23 Jan 2025, 10:45 AM', detail: 'Auto-assigned to Suresh Reddy (VRO) based on queue rotation.', dot: 'assign' },
-    ],
-    checklist: ['Aadhaar identity verified against database', 'Address matches submitted documents', 'Income amount is consistent across all proofs', 'Occupation and income source are plausible', 'No duplicate application found in system'],
-  },
-  {
-    id: 'APP-2498', service: 'Caste Certificate', citizen: 'Sunita Devi', phone: '9876540002',
-    submitted: '21 Jan 2025', slaLeft: 2, slaTotal: 7, status: 'review',
-    aadhaar: 'XXXX XXXX 4432', dob: '05 Jun 1975', gender: 'Female',
-    address: '8-3-22, Ameerpet, Hyderabad – 500016',
-    community: 'Scheduled Caste (SC)', religion: 'Hindu', category: 'SC', purpose: 'Govt. Scheme Eligibility',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Ration_Card.jpg', size: '512 KB', type: 'Address Proof', icon: 'img' },
-      { name: 'Community_Decl.pdf', size: '220 KB', type: 'Community Declaration', icon: 'pdf' },
-      { name: 'School_Certificate.pdf', size: '890 KB', type: 'School Records', icon: 'pdf' },
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '21 Jan 2025, 09:10 AM', detail: 'Submitted online. Payment ₹50 confirmed.', dot: 'submitted' },
-      { label: 'Assigned to Officer', ts: '21 Jan 2025, 09:30 AM', detail: 'Assigned to Suresh Reddy.', dot: 'assign' },
-      { label: 'Under Review', ts: '22 Jan 2025, 02:00 PM', detail: 'Officer began document review.', dot: 'review' },
-    ],
-    checklist: ['Aadhaar identity verified', 'Community/caste matches declaration letter', 'School certificate confirms community', 'No inconsistency in submitted records', 'Applicant is not already holding a valid certificate'],
-  },
-  {
-    id: 'APP-2495', service: 'Residence Certificate', citizen: 'Gopal Sharma', phone: '9876540003',
-    submitted: '20 Jan 2025', slaLeft: 1, slaTotal: 5, status: 'urgent',
-    aadhaar: 'XXXX XXXX 9910', dob: '28 Sep 1968', gender: 'Male',
-    address: 'H.No 4-2-8, Uppal, Hyderabad – 500039',
-    duration: '12 years', residenceType: 'Own House', purpose: 'Domicile Proof',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Electricity_Bill.pdf', size: '480 KB', type: 'Address Proof', icon: 'pdf' },
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '20 Jan 2025, 11:00 AM', detail: 'Submitted online.', dot: 'submitted' },
-      { label: 'Assigned', ts: '20 Jan 2025, 11:20 AM', detail: 'Assigned to Suresh Reddy.', dot: 'assign' },
-      { label: 'Under Review', ts: '21 Jan 2025, 10:00 AM', detail: 'Documents under verification.', dot: 'review' },
-    ],
-    checklist: ['Aadhaar address matches stated address', 'Utility bill is recent (within 3 months)', 'Duration of stay is consistent with records', 'No conflicting address in other applications', 'Field verification completed if required'],
-  },
-  {
-    id: 'APP-2490', service: 'Income Certificate', citizen: 'Gopal Rao', phone: '9876540004',
-    submitted: '22 Jan 2025', slaLeft: 4, slaTotal: 7, status: 'new',
-    aadhaar: 'XXXX XXXX 6603', dob: '14 Feb 1992', gender: 'Female',
-    address: 'Plot 22, Kondapur, Hyderabad – 500084',
-    income: '95,000', purpose: 'Bank Loan', occupation: 'Agriculture',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Land_Records.pdf', size: '1.2 MB', type: 'Land Proof', icon: 'pdf' },
-      { name: 'Income_Affidavit.pdf', size: '380 KB', type: 'Income Proof', icon: 'pdf' },
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '22 Jan 2025', detail: null, dot: 'submitted' },
-      { label: 'Assigned', ts: '22 Jan 2025', detail: 'Assigned to Suresh Reddy.', dot: 'assign' },
-    ],
-    checklist: ['Aadhaar identity verified', 'Land records confirm agricultural occupation', 'Income figure is consistent', 'No prior income certificate conflict', 'Purpose is valid for certificate use'],
-  },
-  {
-    id: 'APP-2487', service: 'Caste Certificate', citizen: 'Meena Reddy', phone: '9876540005',
-    submitted: '19 Jan 2025', slaLeft: 3, slaTotal: 7, status: 'new',
-    aadhaar: 'XXXX XXXX 2281', dob: '03 Nov 1988', gender: 'Female',
-    address: '5-8-999, Dilsukhnagar, Hyderabad – 500060',
-    community: 'OBC', religion: 'Hindu', category: 'OBC', purpose: 'Education Reservation',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Ration_Card.jpg', size: '495 KB', type: 'Address Proof', icon: 'img' },
-      { name: 'Community_Cert_Old.pdf', size: '640 KB', type: 'Old Certificate', icon: 'pdf' },
-      { name: 'School_Certificate.pdf', size: '720 KB', type: 'School Records', icon: 'pdf' },
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '19 Jan 2025', detail: null, dot: 'submitted' },
-      { label: 'Assigned', ts: '19 Jan 2025', detail: null, dot: 'assign' },
-    ],
-    checklist: ['Identity verified via Aadhaar', 'Community OBC consistent across documents', 'Old certificate cross-verified', 'No duplicate found', 'School records support community claim'],
-  },
-  {
-    id: 'APP-2483', service: 'Record Correction', citizen: 'Kiran Bose', phone: '9876540006',
-    submitted: '18 Jan 2025', slaLeft: 4, slaTotal: 10, status: 'new',
-    aadhaar: 'XXXX XXXX 5507', dob: '22 Jul 1980', gender: 'Male',
-    address: '3-4-567, Secunderabad – 500015',
-    recordType: 'Ration Card', incorrect: 'Kiran K. Bose', correct: 'Kiran Bose', reason: 'Spelling error in surname initial',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Affidavit_Correction.pdf', size: '560 KB', type: 'Affidavit', icon: 'pdf' },
-      { name: 'Ration_Card_Original.jpg', size: '680 KB', type: 'Original Record', icon: 'img' },
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '18 Jan 2025', detail: null, dot: 'submitted' },
-      { label: 'Assigned', ts: '18 Jan 2025', detail: null, dot: 'assign' },
-    ],
-    checklist: ['Aadhaar identity verified', 'Affidavit is properly notarized', 'Original record submitted correctly', 'Correction is minor clerical in nature', 'No fraud indicators present'],
-  },
-  {
-    id: 'APP-2415', service: 'Income Certificate', citizen: 'Venkat Rao', phone: '9876540007',
-    submitted: '13 Jan 2025', slaLeft: -5, slaTotal: 7, status: 'breach',
-    aadhaar: 'XXXX XXXX 8839', dob: '09 Dec 1972', gender: 'Male',
-    address: '2-1-88, Secunderabad – 500003',
-    income: '2,10,000', purpose: 'Education Admission', occupation: 'Salaried – Govt.',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Ration_Card.jpg', size: '490 KB', type: 'Address Proof', icon: 'img' },
-      { name: 'Salary_Slip.pdf', size: '720 KB', type: 'Income Proof', icon: 'pdf' },
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '13 Jan 2025', detail: null, dot: 'submitted' },
-      { label: 'Assigned', ts: '13 Jan 2025', detail: null, dot: 'assign' },
-      { label: 'SLA Warning (Day 5)', ts: '18 Jan 2025', detail: 'System auto-reminder sent to officer.', dot: 'warning' },
-      { label: 'SLA Breached (Day 7)', ts: '20 Jan 2025', detail: 'SLA deadline passed. Escalation pending.', dot: 'breach' },
-    ],
-    checklist: ['Aadhaar identity verified', 'Salary slip is current', 'Income figure cross-verified with Form 16', 'Purpose aligns with salary level', 'No duplicate detected'],
-  },
-  {
-    id: 'APP-2389', service: 'Caste Certificate', citizen: 'Lalitha M.', phone: '9876540008',
-    submitted: '11 Jan 2025', slaLeft: -7, slaTotal: 7, status: 'breach',
-    aadhaar: 'XXXX XXXX 3344', dob: '17 Mar 1990', gender: 'Female',
-    address: '9-5-44, LB Nagar, Hyderabad – 500074',
-    community: 'Scheduled Tribe (ST)', religion: 'Hindu', category: 'ST', purpose: 'Reservation Benefit',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Ration_Card.jpg', size: '510 KB', type: 'Address Proof', icon: 'img' },
-      { name: 'Tribe_Decl.pdf', size: '340 KB', type: 'Tribe Declaration', icon: 'pdf' },
-      { name: 'School_Certificate.pdf', size: '660 KB', type: 'School Records', icon: 'pdf' },
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '11 Jan 2025', detail: null, dot: 'submitted' },
-      { label: 'Assigned', ts: '11 Jan 2025', detail: null, dot: 'assign' },
-      { label: 'SLA Breached', ts: '18 Jan 2025', detail: '7-day SLA exceeded. Auto-escalation triggered.', dot: 'breach' },
-    ],
-    checklist: ['Aadhaar identity verified', 'ST community document verified', 'School records confirm ST status', 'No duplicate', 'Declaration letter is notarized'],
-  },
-  {
-    id: 'APP-2463', service: 'Residence Certificate', citizen: 'Arun Nair', phone: '9876540021',
-    submitted: '20 Jan 2025', slaLeft: 3, slaTotal: 7, status: 'review',
-    aadhaar: 'XXXX XXXX 1122', dob: '10 Oct 1985', gender: 'Male',
-    address: 'Plot 10, Jubilee Hills, Hyderabad – 500033',
-    duration: '5 years', residenceType: 'Rented', purpose: 'Passport Application',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Rental_Agreement.pdf', size: '880 KB', type: 'Address Proof', icon: 'pdf' },
-      { name: 'Aadhaar_Updated.pdf', size: '320 KB', type: 'Address Proof (New)', icon: 'pdf' }
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '20 Jan 2025', detail: null, dot: 'submitted' },
-      { label: 'Assigned', ts: '20 Jan 2025', detail: null, dot: 'assign' },
-      { label: 'Query Raised', ts: '21 Jan 2025', detail: 'Address in Aadhaar does not match address stated in application. Clarify or upload supporting document.', dot: 'warning' },
-      { label: 'Response Received', ts: '22 Jan 2025', detail: 'Citizen uploaded new document.', dot: 'review' }
-    ],
-    checklist: ['Aadhaar address matches stated address', 'Utility bill is recent (within 3 months)', 'Duration of stay is consistent with records', 'No conflicting address in other applications', 'Field verification completed if required'],
-    citizenResponse: 'I have updated my Aadhaar card with the correct address and uploaded the new copy. Please review.'
-  },
-  {
-    id: 'APP-2451', service: 'Caste Certificate', citizen: 'Suma Reddy', phone: '9876540022',
-    submitted: '18 Jan 2025', slaLeft: 2, slaTotal: 7, status: 'review',
-    aadhaar: 'XXXX XXXX 3344', dob: '05 May 1990', gender: 'Female',
-    address: 'Flat 202, Madhapur, Hyderabad – 500081',
-    community: 'OBC', religion: 'Hindu', category: 'OBC', purpose: 'Job Application',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Community_Decl_Old.pdf', size: '220 KB', type: 'Community Declaration', icon: 'pdf' },
-      { name: 'Community_Decl_Attested.pdf', size: '300 KB', type: 'Community Declaration (New)', icon: 'pdf' }
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '18 Jan 2025', detail: null, dot: 'submitted' },
-      { label: 'Assigned', ts: '18 Jan 2025', detail: null, dot: 'assign' },
-      { label: 'Query Raised', ts: '20 Jan 2025', detail: 'Community declaration not self-attested. Please upload attested copy.', dot: 'warning' },
-      { label: 'Response Received', ts: '21 Jan 2025', detail: 'Citizen uploaded new document.', dot: 'review' }
-    ],
-    checklist: ['Identity verified via Aadhaar', 'Community OBC consistent across documents', 'Old certificate cross-verified', 'No duplicate found', 'School records support community claim'],
-    citizenResponse: 'I mistakenly uploaded the un-attested copy earlier. The self-attested document has now been uploaded.'
-  },
-  {
-    id: 'APP-2489', service: 'Caste Certificate', citizen: 'Ravi Kumar', phone: '9876540023',
-    submitted: '21 Jan 2025', slaLeft: 4, slaTotal: 7, status: 'review',
-    aadhaar: 'XXXX XXXX 5566', dob: '15 Aug 2000', gender: 'Male',
-    address: 'Door 1, Kukatpally, Hyderabad – 500072',
-    community: 'SC', religion: 'Hindu', category: 'SC', purpose: 'Education Admissions',
-    docs: [
-      { name: 'Aadhaar_Card.pdf', size: '310 KB', type: 'Identity Proof', icon: 'pdf' },
-      { name: 'Ration_Card.pdf', size: '220 KB', type: 'Address Proof', icon: 'pdf' }
-    ],
-    history: [
-      { label: 'Application Submitted', ts: '21 Jan 2025', detail: null, dot: 'submitted' },
-      { label: 'Assigned', ts: '21 Jan 2025', detail: null, dot: 'assign' },
-      { label: 'Query Raised', ts: '23 Jan 2025', detail: 'Please upload self-attested community cert from school records or local sarpanch.', dot: 'warning' },
-    ],
-    checklist: ['Identity verified via Aadhaar', 'Community SC consistent across documents', 'Old certificate cross-verified', 'No duplicate found', 'School records support community claim'],
-  }
+const OFFICER_WEEK_CHART = [
+  { day: 'Mon', approved: 8, rejected: 1, query: 2 },
+  { day: 'Tue', approved: 12, rejected: 2, query: 3 },
+  { day: 'Wed', approved: 15, rejected: 1, query: 4 },
+  { day: 'Thu', approved: 10, rejected: 3, query: 1 },
+  { day: 'Fri', approved: 14, rejected: 0, query: 2 },
+  { day: 'Sat', approved: 6, rejected: 1, query: 0 },
+  { day: 'Sun', approved: 0, rejected: 0, query: 0 },
 ];
-
-const OFFICER_QUERIES = [
-  { id: 'APP-2489', service: 'Caste Certificate', citizen: 'Ravi Kumar', query: 'Please upload self-attested community cert from school records or local sarpanch.', sent: '23 Jan', deadline: '26 Jan', responded: false },
-  { id: 'APP-2477', service: 'Income Certificate', citizen: 'Priya Sharma', query: 'Salary slip provided is older than 6 months. Please submit current salary slip or Form 16.', sent: '22 Jan', deadline: '25 Jan', responded: false },
-  { id: 'APP-2463', service: 'Residence Certificate', citizen: 'Arun Nair', query: 'Address in Aadhaar does not match address stated in application. Clarify or upload supporting document.', sent: '21 Jan', deadline: '24 Jan', responded: true },
-  { id: 'APP-2451', service: 'Caste Certificate', citizen: 'Suma Reddy', query: 'Community declaration not self-attested. Please upload attested copy.', sent: '20 Jan', deadline: '23 Jan', responded: true },
-  { id: 'APP-2438', service: 'Income Certificate', citizen: 'Venkat Pillai', query: 'Form 16 has unclear watermark. Please upload higher quality scan.', sent: '19 Jan', deadline: '22 Jan', responded: false },
-];
-
-const OFFICER_ACTIVITY = [
-  { icon: 'check', color: 'var(--green-500)', msg: 'Approved APP-2480 — Income Certificate for Ravi Kumar', time: '4:52 PM' },
-  { icon: 'query', color: 'var(--amber-500)', msg: 'Raised query on APP-2489 — Requested updated community certificate from Ravi Kumar', time: '3:10 PM' },
-  { icon: 'reject', color: 'var(--red-500)', msg: 'Rejected APP-2471 — Duplicate application detected (APP-2392 already processed)', time: '1:45 PM' },
-  { icon: 'check', color: 'var(--green-500)', msg: 'Approved APP-2468 — Residence Certificate for Gopal Sharma', time: '11:20 AM' },
-  { icon: 'check', color: 'var(--green-500)', msg: 'Approved APP-2461 — Income Certificate for Priya Sharma', time: '10:05 AM' },
-  { icon: 'login', color: 'var(--navy-400)', msg: 'Logged in. 28 applications in queue.', time: '9:02 AM' },
-];
-
-const OFFICER_SLA_RISKS = [
-  { id: 'APP-2498', label: 'Caste Cert — Sunita Devi', pct: 71, status: 'warn' },
-  { id: 'APP-2495', label: 'Residence Cert — Gopal Sharma', pct: 80, status: 'warn' },
-  { id: 'APP-2489', label: 'Caste Cert — Ravi Kumar', pct: 71, status: 'warn' },
-  { id: 'APP-2415', label: 'Income Cert — Venkat Rao', pct: 100, status: 'breach' }
-];
-
-const OFFICER_WEEK_CHART = {
-  days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-  vals: [12, 18, 8, 22, 14, 0, 0]
-};
 
 const SUPER_OFFICER_APPROVED = [
-  { id: 'APP-2521', service: 'Income Certificate', citizen: 'Ravi Shankar', officer: 'Suresh Reddy', role: 'VRO', submitted: '22 Jan', slaLeft: 3, docs: ['Aadhaar Card.pdf', 'Salary Slip.pdf', 'Form 16.pdf'], officerNote: 'All documents verified. Income ₹1,40,000 — within limit. Recommend approval.', timeline: [{ d: '22 Jan', e: 'Application submitted', t: 'info' }, { d: '23 Jan', e: 'Assigned to Suresh Reddy (VRO)', t: 'info' }, { d: '24 Jan', e: 'Documents verified by officer', t: 'info' }, { d: '25 Jan', e: 'Officer approved — awaiting supervisor final decision', t: 'success' }] },
-  { id: 'APP-2519', service: 'Caste Certificate', citizen: 'Asha Devi', officer: 'Anita Sharma', role: 'RI', submitted: '21 Jan', slaLeft: 4, docs: ['Aadhaar Card.pdf', 'Community Declaration.pdf', 'School Certificate.pdf'], officerNote: 'Community SC verified via school records and Aadhaar. Documents genuine. Recommend approval.', timeline: [{ d: '21 Jan', e: 'Application submitted', t: 'info' }, { d: '22 Jan', e: 'Assigned to Anita Sharma (RI)', t: 'info' }, { d: '23 Jan', e: 'Officer raised query — additional doc requested', t: 'warn' }, { d: '24 Jan', e: 'Citizen responded with supplementary doc', t: 'info' }, { d: '25 Jan', e: 'Officer approved — awaiting supervisor final decision', t: 'success' }] },
-  { id: 'APP-2517', service: 'Residence Certificate', citizen: 'Prakash Nair', officer: 'Ramesh Kumar', role: 'MRO', submitted: '20 Jan', slaLeft: 2, docs: ['Aadhaar Card.pdf', 'Rent Agreement.pdf', 'Utility Bill.pdf'], officerNote: 'Address verified via Aadhaar and utility bills. 3+ year residency confirmed.', timeline: [{ d: '20 Jan', e: 'Application submitted', t: 'info' }, { d: '21 Jan', e: 'Assigned to Ramesh Kumar (MRO)', t: 'info' }, { d: '22 Jan', e: 'Field verification done', t: 'info' }, { d: '23 Jan', e: 'Officer approved — awaiting supervisor final decision', t: 'success' }] },
-  { id: 'APP-2514', service: 'Welfare Scheme', citizen: 'Gopal Rao', officer: 'Priya Nair', role: 'Welfare Officer', submitted: '19 Jan', slaLeft: 5, docs: ['Aadhaar Card.pdf', 'Income Certificate.pdf', 'Ration Card.jpg'], officerNote: 'Income ₹68,000 — below scheme threshold of ₹1,50,000. All eligibility criteria met.', timeline: [{ d: '19 Jan', e: 'Application submitted', t: 'info' }, { d: '20 Jan', e: 'Assigned to Priya Nair (Welfare Officer)', t: 'info' }, { d: '22 Jan', e: 'Eligibility verified', t: 'info' }, { d: '24 Jan', e: 'Officer approved — awaiting supervisor final decision', t: 'success' }] },
-  { id: 'APP-2511', service: 'Income Certificate', citizen: 'Santosh Pillai', officer: 'Suresh Reddy', role: 'VRO', submitted: '19 Jan', slaLeft: 1, docs: ['Aadhaar Card.pdf', 'Form 16.pdf'], officerNote: 'Income ₹95,000. Documents authentic.', timeline: [{ d: '19 Jan', e: 'Application submitted', t: 'info' }, { d: '20 Jan', e: 'Assigned to officer', t: 'info' }, { d: '24 Jan', e: 'Officer approved', t: 'success' }] },
-  { id: 'APP-2508', service: 'Caste Certificate', citizen: 'Rekha Kumari', officer: 'Anita Sharma', role: 'RI', submitted: '18 Jan', slaLeft: 3, docs: ['Aadhaar Card.pdf', 'Community Declaration.pdf'], officerNote: 'Community OBC verified. Documents consistent.', timeline: [{ d: '18 Jan', e: 'Application submitted', t: 'info' }, { d: '19 Jan', e: 'Assigned to officer', t: 'info' }, { d: '23 Jan', e: 'Officer approved', t: 'success' }] },
-  { id: 'APP-2503', service: 'Welfare Scheme', citizen: 'Gopal Varma', officer: 'Priya Nair', role: 'Welfare Officer', submitted: '17 Jan', slaLeft: 6, docs: ['Aadhaar.pdf', 'Income.pdf'], officerNote: 'Application okay.', timeline: [{ d: '17 Jan', e: 'Application submitted', t: 'info' }] },
-  { id: 'APP-2499', service: 'Record Correction', citizen: 'Sunita Bose', officer: 'Ramesh Kumar', role: 'MRO', submitted: '16 Jan', slaLeft: 4, docs: ['Aadhaar.pdf'], officerNote: 'Verified.', timeline: [{ d: '16 Jan', e: 'Application submitted', t: 'info' }] }
-];
-
-const SUPER_SLA_BREACHES = [
-  { id: 'APP-2415', service: 'Income Certificate', citizen: 'Venkat Rao', officer: 'Suresh Reddy', overdue: '5 days', on: '20 Jan' },
-  { id: 'APP-2389', service: 'Caste Certificate', citizen: 'Lalitha M.', officer: 'Anita Sharma', overdue: '7 days', on: '18 Jan' },
-  { id: 'APP-2356', service: 'Income Certificate', citizen: 'Raju Pillai', officer: 'Anita Sharma', overdue: '3 days', on: '22 Jan' },
-  { id: 'APP-2341', service: 'Caste Certificate', citizen: 'Uma Shankar', officer: 'Ramesh Kumar', overdue: '4 days', on: '21 Jan' },
-  { id: 'APP-2329', service: 'Residence Certificate', citizen: 'Kavya Nair', officer: 'Anita Sharma', overdue: '2 days', on: '23 Jan' },
-  { id: 'APP-2301', service: 'Income Certificate', citizen: 'Sanjay Gupta', officer: 'Suresh Reddy', overdue: '9 days', on: '16 Jan' },
-];
-
-const SUPER_GRIEVANCES = [
-  { id: 'APP-2498', service: 'Caste Certificate', citizen: 'Arjun Mehta', officer: 'Suresh Reddy', subtype: 'Misconduct Complaint', badge: 'badge-danger', go: 'Renu Verma', on: '24', summary: 'Citizen alleges officer requested unofficial payment to expedite processing. Grievance Officer investigated and escalated for supervisor disciplinary action.', officerDecision: 'Application held', urgent: true },
-  { id: 'APP-2401', service: 'Welfare Scheme', citizen: 'Gopal Rao', officer: 'Priya Nair', subtype: 'Rejection Dispute', badge: 'badge-warning', go: 'Renu Verma', on: '23', summary: 'Officer rejected citing income ₹1,72,000 exceeds scheme limit. Citizen disputes — claims data entry error (actual income ₹72,000). Grievance Officer unable to resolve independently.', officerDecision: 'Rejected — income limit', urgent: false },
-  { id: 'APP-2456', service: 'Record Correction', citizen: 'Sunita Devi', officer: 'Ramesh Kumar', subtype: 'Rejection Dispute', badge: 'badge-warning', go: 'Renu Verma', on: '22', summary: 'DOB mismatch between Aadhaar and certificate. Citizen claims Aadhaar itself has an error — supervisor-level UIDAI cross-verification required.', officerDecision: 'Rejected — DOB mismatch', urgent: false },
-  { id: 'APP-2312', service: 'Welfare Scheme', citizen: 'Meena Devi', officer: 'Priya Nair', subtype: 'Repeated Rejection', badge: 'badge-warning', go: 'Renu Verma', on: '20', summary: 'Third application for same scheme within 4 months, all rejected. Grievance Officer flagged pattern for supervisor review before officer issues final rejection.', officerDecision: 'Recommended rejection', urgent: false },
-];
-
-const SUPER_TEAM = [
-  { name: 'Suresh Reddy', role: 'VRO', initials: 'SR', pending: 28, approved: 14, breach: 2, sla: 91 },
-  { name: 'Anita Sharma', role: 'VRO', initials: 'AS', pending: 34, approved: 18, breach: 3, sla: 87 },
-  { name: 'Ramesh Kumar', role: 'MRO', initials: 'RK', pending: 18, approved: 10, breach: 1, sla: 95 },
-  { name: 'Priya Nair', role: 'Welfare Officer', initials: 'PN', pending: 7, approved: 5, breach: 0, sla: 97 },
-];
-
-const SUPER_ESC_SLA_CASES = [
-  { id: 'APP-2415', type: 'sla', service: 'Income Certificate', citizen: 'Venkat Rao', officer: 'Suresh Reddy', overdue: 5, on: '20 Jan', urgent: true, officerDecision: 'No decision — SLA exceeded', docs: ['Aadhaar Card.pdf', 'Salary Slip.pdf'], summary: 'Officer did not act for 5 days past SLA. Citizen flagged scholarship application deadline.', timeline: [{ d: '13 Jan', e: 'Application submitted', t: 'info' }, { d: '14 Jan', e: 'Assigned to Suresh Reddy', t: 'info' }, { d: '16 Jan', e: 'Officer raised query', t: 'warn' }, { d: '18 Jan', e: 'Citizen responded', t: 'info' }, { d: '20 Jan', e: 'SLA exceeded — no officer action', t: 'danger' }, { d: '25 Jan', e: 'Auto-escalated to supervisor', t: 'danger' }] },
-  { id: 'APP-2389', type: 'sla', service: 'Caste Certificate', citizen: 'Lalitha M.', officer: 'Anita Sharma', overdue: 7, on: '18 Jan', urgent: true, officerDecision: 'No decision — SLA exceeded', docs: ['Aadhaar Card.pdf', 'Community Declaration.pdf'], summary: '7 days overdue. Officer raised document dispute on day 3, citizen did not respond. Auto-escalated.', timeline: [{ d: '11 Jan', e: 'Application submitted', t: 'info' }, { d: '12 Jan', e: 'Assigned to Anita Sharma', t: 'info' }, { d: '14 Jan', e: 'Officer disputed document — asked for re-upload', t: 'warn' }, { d: '18 Jan', e: 'SLA exceeded', t: 'danger' }, { d: '25 Jan', e: 'Auto-escalated — 7 days overdue', t: 'danger' }] },
-  { id: 'APP-2356', type: 'sla', service: 'Income Certificate', citizen: 'Raju Pillai', officer: 'Anita Sharma', overdue: 3, on: '22 Jan', urgent: false, officerDecision: 'No decision — SLA exceeded', docs: ['Aadhaar Card.pdf'], summary: '3 days overdue. Officer workload flagged as high — 34 pending applications. Auto-escalated.', timeline: [{ d: '22 Jan', e: 'Application submitted', t: 'info' }, { d: '23 Jan', e: 'SLA exceeded', t: 'danger' }] },
-  { id: 'APP-2341', type: 'sla', service: 'Caste Certificate', citizen: 'Uma Shankar', officer: 'Ramesh Kumar', overdue: 4, on: '21 Jan', urgent: false, officerDecision: 'No decision — SLA exceeded', docs: ['Aadhaar Card.pdf', 'Community Declaration.pdf'], summary: '4 days overdue. No officer activity recorded since assignment. Auto-escalated.', timeline: [{ d: '21 Jan', e: 'Application submitted', t: 'info' }, { d: '22 Jan', e: 'SLA exceeded', t: 'danger' }] },
-  { id: 'APP-2329', type: 'sla', service: 'Residence Certificate', citizen: 'Kavya Nair', officer: 'Anita Sharma', overdue: 2, on: '23 Jan', urgent: false, officerDecision: 'No decision — SLA exceeded', docs: ['Aadhaar Card.pdf', 'Utility Bill.pdf'], summary: '2 days overdue. System escalated after no action taken post-deadline.', timeline: [{ d: '23 Jan', e: 'Application submitted', t: 'info' }, { d: '24 Jan', e: 'SLA exceeded', t: 'danger' }] },
-  { id: 'APP-2301', type: 'sla', service: 'Income Certificate', citizen: 'Sanjay Gupta', officer: 'Suresh Reddy', overdue: 9, on: '16 Jan', urgent: true, officerDecision: 'No decision — SLA exceeded', docs: ['Aadhaar Card.pdf', 'Salary Slip.pdf'], summary: '9 days overdue — longest outstanding case. Multiple auto-escalation reminders sent to officer with no response.', timeline: [{ d: '16 Jan', e: 'Application submitted', t: 'info' }, { d: '17 Jan', e: 'SLA exceeded', t: 'danger' }] }
-];
-
-const SUPER_ESC_GRIEVANCE_CASES = [
-  { id: 'APP-2498', type: 'grievance', subtype: 'Misconduct Complaint', service: 'Caste Certificate', citizen: 'Arjun Mehta', officer: 'Suresh Reddy', on: '24 Jan', urgent: true, officerDecision: 'Application held', docs: ['Aadhaar Card.pdf', 'Community Certificate.pdf'], go: 'Renu Verma', summary: 'Citizen alleges officer requested unofficial payment to expedite application. Grievance Officer investigated and escalated.', timeline: [{ d: '21 Jan', e: 'Application submitted', t: 'info' }, { d: '22 Jan', e: 'Assigned to Suresh Reddy', t: 'info' }, { d: '23 Jan', e: 'Citizen called helpline — reported alleged payment request', t: 'danger' }, { d: '24 Jan', e: 'Grievance Officer escalated to supervisor', t: 'danger' }] },
-  { id: 'APP-2401', type: 'grievance', subtype: 'Rejection Dispute', service: 'Welfare Scheme', citizen: 'Gopal Rao', officer: 'Priya Nair', on: '23 Jan', urgent: false, officerDecision: 'Rejected — income limit exceeded', docs: ['Aadhaar Card.pdf', 'Income Certificate.pdf'], go: 'Renu Verma', summary: 'Officer rejected citing income ₹1,72,000 above limit. Citizen disputes — claims data entry error (actual: ₹72,000).', timeline: [{ d: '19 Jan', e: 'Application submitted', t: 'info' }, { d: '20 Jan', e: 'Assigned to Priya Nair', t: 'info' }, { d: '22 Jan', e: 'Officer rejected — income ₹1,72,000 above limit', t: 'danger' }, { d: '23 Jan', e: 'Citizen raised grievance: data entry error claimed', t: 'warn' }, { d: '24 Jan', e: 'Grievance Officer escalated to supervisor', t: 'warn' }] },
-  { id: 'APP-2456', type: 'grievance', subtype: 'Rejection Dispute', service: 'Record Correction', citizen: 'Sunita Devi', officer: 'Ramesh Kumar', on: '22 Jan', urgent: false, officerDecision: 'Rejected — DOB mismatch', docs: ['Aadhaar Card.pdf', 'Original Certificate.pdf'], go: 'Renu Verma', summary: 'DOB mismatch between Aadhaar and certificate. Citizen claims Aadhaar itself has an error — requires UIDAI cross-verification.', timeline: [{ d: '18 Jan', e: 'Application submitted', t: 'info' }, { d: '19 Jan', e: 'Assigned to Ramesh Kumar', t: 'info' }, { d: '21 Jan', e: 'Officer rejected — DOB mismatch detected', t: 'danger' }, { d: '22 Jan', e: 'Citizen raised grievance — claims Aadhaar error', t: 'warn' }, { d: '23 Jan', e: 'Grievance Officer escalated to supervisor', t: 'warn' }] },
-  { id: 'APP-2312', type: 'grievance', subtype: 'Repeated Rejection', service: 'Welfare Scheme', citizen: 'Meena Devi', officer: 'Priya Nair', on: '20 Jan', urgent: false, officerDecision: 'Recommended rejection', docs: ['Aadhaar Card.pdf', 'Land Records.pdf'], go: 'Renu Verma', summary: 'Third application for same scheme in 4 months, all rejected. Grievance Officer flagged pattern for supervisor review.', timeline: [{ d: '15 Jan', e: 'Application submitted (3rd attempt)', t: 'info' }, { d: '16 Jan', e: 'Assigned to Priya Nair', t: 'info' }, { d: '18 Jan', e: 'Officer recommended rejection — prior rejections cited', t: 'warn' }, { d: '20 Jan', e: 'Grievance Officer escalated for supervisor review', t: 'warn' }] }
+  {
+    id: 'APP-AP-1001',
+    service: 'Integrated Community, Nativity & Date of Birth Certificate',
+    citizen: 'Ravi Kumar (AP Rural)',
+    officer: 'Suresh Reddy (VRO)',
+    officerAction: 'Recommended for Approval',
+    date: '2026-04-14T15:00:00.000Z',
+    notes: 'All documents verified and resident of Chandragiri confirmed.',
+  },
+  {
+    id: 'APP-KA-2002',
+    service: 'Gruha Lakshmi Monthly Financial Grant',
+    citizen: 'Ananya Rao (KA Urban)',
+    officer: 'Ramesh H. B. (TWO)',
+    officerAction: 'Recommended for Approval',
+    date: '2026-04-10T12:00:00.000Z',
+    notes: 'Ration card matches BPL criteria.',
+  },
 ];
 
 const SUPER_PENDING_APPS = [
-  { id: 'APP-2501', service: 'Income Certificate', citizen: 'Arjun Mehta', officer: 'Anita Sharma', slaLeft: 5 },
-  { id: 'APP-2495', service: 'Residence Certificate', citizen: 'Gopal Sharma', officer: 'Anita Sharma', slaLeft: 1 },
-  { id: 'APP-2490', service: 'Welfare Scheme', citizen: 'Gopal Rao', officer: 'Anita Sharma', slaLeft: 4 },
-  { id: 'APP-2487', service: 'Caste Certificate', citizen: 'Meena Reddy', officer: 'Suresh Reddy', slaLeft: 3 },
-  { id: 'APP-2483', service: 'Record Correction', citizen: 'Kiran Bose', officer: 'Anita Sharma', slaLeft: 4 },
-  { id: 'APP-2415', service: 'Income Certificate', citizen: 'Venkat Rao', officer: 'Suresh Reddy', slaLeft: -5 },
-  { id: 'APP-2389', service: 'Caste Certificate', citizen: 'Lalitha M.', officer: 'Anita Sharma', slaLeft: -7 },
+  {
+    id: 'APP-AP-1002',
+    service: 'Agricultural Land Mutation & Pattadar Passbook',
+    citizen: 'Ravi Kumar (AP Rural)',
+    officer: 'M. Jagadeesh (RI)',
+    daysPending: 4,
+    slaDaysRemaining: 26,
+    status: 'Field Inspection Pending',
+  },
+  {
+    id: 'APP-KA-2001',
+    service: 'Caste & Income Certificate (Nadakacheri / AJSK)',
+    citizen: 'Basavaraju K (KA Rural)',
+    officer: 'Kumaraswamy H. S. (RI)',
+    daysPending: 3,
+    slaDaysRemaining: 8,
+    status: 'Hobli Inquiry Underway',
+  },
 ];
 
-const MOCK_SETTINGS = {
-  general: {
-    platformName: 'DigiConnect Telangana',
-    supportEmail: 'support.digiconnect@telangana.gov.in',
-    sessionTimeout: 30,
-    languageDefault: 'en'
-  },
-  sla: {
-    slaCert: 7,
-    slaWelfare: 14,
-    slaPermission: 5,
-    slaCorrection: 10,
-    slaGrievance: 15
-  },
-  notifications: {
-    emailEnabled: true,
-    smsEnabled: true,
-    whatsappEnabled: false,
-    pushEnabled: true
-  },
-  security: {
-    twoFactorEnabled: false,
-    passwordExpiry: 90,
-    maxLoginAttempts: 5,
-    aadhaarMasking: true
-  },
-  maintenance: {
-    enabled: false,
-    message: 'System is undergoing scheduled maintenance. Please try again later.',
-    estimatedEnd: ''
-  }
-};
+const MOCK_WORKFLOW_CONFIG = DYNAMIC_SERVICES.map((s) => ({
+  id: s.id,
+  name: s.name,
+  code: s.code,
+  departmentId: s.departmentId,
+  stateId: s.stateId,
+  stages: s.workflowSteps.map((st) => st.stepName),
+  slaTotal: 15,
+  steps: s.workflowSteps,
+}));
 
+// ═══════════════════════════════════════════════════════════════════════════
+// 6. GLOBAL CENTRALIZED DATA STORE SINGLETON (db)
+// ═══════════════════════════════════════════════════════════════════════════
 
-
-export const db: {
-  users: User[];
-  applications: Application[];
-  grievances: Grievance[];
-  services: GovtService[];
-  notifications: Notification[];
-  auditLogs: AuditLog[];
-  officerQueue: OfficerQueueItem[];
-  pendingOfficers: PendingOfficer[];
-  settings: SystemSettings;
-  officerQueries: any[];
-  officerActivity: any[];
-  officerSlaRisks: any[];
-  officerWeekChart: any;
-  superOfficerApproved: any[];
-  superSlaBreaches: any[];
-  superGrievances: any[];
-  superTeam: any[];
-  superEscSlaCases: any[];
-  superEscGrievanceCases: any[];
-  superPendingApps: any[];
-  workflowConfig: any[];
-  states: StateGovernment[];
-  jurisdictionNodes: JurisdictionNode[];
-  departments: Department[];
-  designations: Designation[];
-  officers: OfficerUser[];
-  dynamicServices: any[];
-} = {
-  users: MOCK_USERS as User[],
-  applications: MOCK_APPLICATIONS as Application[],
-  grievances: MOCK_GRIEVANCES as Grievance[],
-  services: [
-    ...MOCK_SERVICES as GovtService[],
-  ],
-  notifications: MOCK_NOTIFICATIONS as Notification[],
-  auditLogs: MOCK_AUDIT_LOGS as AuditLog[],
-  officerQueue: OFFICER_QUEUE as OfficerQueueItem[],
-  pendingOfficers: MOCK_PENDING_OFFICERS as PendingOfficer[],
-  settings: MOCK_SETTINGS,
-  officerQueries: OFFICER_QUERIES,
-  officerActivity: OFFICER_ACTIVITY,
-  officerSlaRisks: OFFICER_SLA_RISKS,
-  officerWeekChart: OFFICER_WEEK_CHART,
-  superOfficerApproved: SUPER_OFFICER_APPROVED,
-  superSlaBreaches: SUPER_SLA_BREACHES,
-  superGrievances: SUPER_GRIEVANCES,
-  superTeam: SUPER_TEAM,
-  superEscSlaCases: SUPER_ESC_SLA_CASES,
-  superEscGrievanceCases: SUPER_ESC_GRIEVANCE_CASES,
-  superPendingApps: SUPER_PENDING_APPS,
-  workflowConfig: MOCK_WORKFLOW_CONFIG,
+export const db = {
+  users: [...MOCK_USERS],
   states: [...MASTER_STATES],
   jurisdictionNodes: [...MASTER_JURISDICTION_NODES],
   departments: [...MASTER_DEPARTMENTS],
   designations: [...MASTER_DESIGNATIONS],
   officers: [...MASTER_OFFICERS],
-  dynamicServices: [
-    {
-      id: 'srv_caste_income_ap',
-      departmentId: 'dept_rev_ap',
-      stateId: 'state_ap',
-      name: 'Integrated Community, Nativity & Date of Birth Certificate',
-      code: 'CASTE_CERT_AP',
-      description: 'Official statutory certificate verifying caste, nativity, and parental ancestry.',
-      status: 'ACTIVE',
-      serviceFee: 35,
-      platformFee: 15,
-      totalFee: 50,
-      termsAndConditions: 'I hereby declare that the details provided are true and verified per Revenue Act guidelines.',
-      fields: [
-        { id: 'applicant_name', label: 'Full Name of Applicant', type: 'TEXT', required: true },
-        { id: 'aadhaar_number', label: 'Aadhaar Card Number', type: 'TEXT', required: true },
-        { id: 'caste_category', label: 'Social Category / Caste', type: 'DROPDOWN', required: true },
-        { id: 'annual_income', label: 'Annual Family Income (INR)', type: 'NUMBER', required: true },
-        { id: 'dob', label: 'Date of Birth', type: 'DATE', required: true },
-      ],
-      documentRequirements: [
-        { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
-        { id: 'doc_address', name: 'Address / Residence Proof', required: true },
-      ],
-      workflowSteps: [
-        { stepNumber: 1, stepName: 'VRO Verification', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
-        { stepNumber: 2, stepName: 'MRO Verification', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
-        { stepNumber: 3, stepName: 'Tahsildar Final Approval', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
-      ],
-      createdAt: '2026-01-01T00:00:00.000Z',
-    },
-    {
-      id: 'srv_income_ap',
-      departmentId: 'dept_rev_ap',
-      stateId: 'state_ap',
-      name: 'Income & Asset Certificate',
-      code: 'INCOME_CERT_AP',
-      description: 'Annual family income certificate for educational scholarships, welfare concessions, and subsidies.',
-      status: 'ACTIVE',
-      serviceFee: 20,
-      platformFee: 15,
-      totalFee: 35,
-      termsAndConditions: 'I hereby declare that all submitted income statements and IT declarations are authentic.',
-      fields: [
-        { id: 'applicant_name', label: 'Full Name of Applicant', type: 'TEXT', required: true },
-        { id: 'annual_income', label: 'Annual Family Income (INR)', type: 'NUMBER', required: true },
-      ],
-      documentRequirements: [
-        { id: 'doc_salary_slip', name: 'Salary Slip / Income Proof', required: true },
-        { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
-      ],
-      workflowSteps: [
-        { stepNumber: 1, stepName: 'VRO Income Verification', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
-        { stepNumber: 2, stepName: 'Tahsildar Approval & DSC Issuance', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
-      ],
-      createdAt: '2026-01-01T00:00:00.000Z',
-    },
-    {
-      id: 'srv_residence_ap',
-      departmentId: 'dept_rev_ap',
-      stateId: 'state_ap',
-      name: 'Residence & Domicile Certificate',
-      code: 'RESIDENCE_CERT_AP',
-      description: 'Proof of local residence and domicile within Andhra Pradesh administrative jurisdiction.',
-      status: 'ACTIVE',
-      serviceFee: 20,
-      platformFee: 10,
-      totalFee: 30,
-      termsAndConditions: 'I hereby declare that I have continuously resided at the mentioned address.',
-      fields: [
-        { id: 'applicant_name', label: 'Full Name of Applicant', type: 'TEXT', required: true },
-        { id: 'years_of_residence', label: 'Duration of Continuous Residence (Years)', type: 'NUMBER', required: true },
-      ],
-      documentRequirements: [
-        { id: 'doc_aadhaar', name: 'Aadhaar Card Proof', required: true },
-        { id: 'doc_utility_bill', name: 'Electricity Bill / Ration Card', required: true },
-      ],
-      workflowSteps: [
-        { stepNumber: 1, stepName: 'VRO Verification & Field Inquiry', requiredDesignationId: 'desig_vro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
-        { stepNumber: 2, stepName: 'MRO Approval & DSC Issuance', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
-      ],
-      createdAt: '2026-01-01T00:00:00.000Z',
-    },
-    {
-      id: 'srv_land_mutation_ap',
-      departmentId: 'dept_rev_ap',
-      stateId: 'state_ap',
-      name: 'Agricultural Land Mutation & Pattadar Passbook',
-      code: 'LAND_MUTATION_AP',
-      description: 'Title deed transfer and revenue record title passbook endorsement for agricultural landholdings.',
-      status: 'ACTIVE',
-      serviceFee: 75,
-      platformFee: 25,
-      totalFee: 100,
-      termsAndConditions: 'I declare that the agricultural land parcel is free of civil litigation and undisputed.',
-      fields: [
-        { id: 'survey_number', label: 'Survey Number / Sub-division', type: 'TEXT', required: true },
-      ],
-      documentRequirements: [
-        { id: 'doc_sale_deed', name: 'Registered Sale Deed Copy', required: true },
-      ],
-      workflowSteps: [
-        { stepNumber: 1, stepName: 'Revenue Inspector Spot Survey', requiredDesignationId: 'desig_ri', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
-        { stepNumber: 2, stepName: 'MRO Endorsement & Verification', requiredDesignationId: 'desig_mro', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: false },
-        { stepNumber: 3, stepName: 'Tahsildar Record Mutation & Issue', requiredDesignationId: 'desig_tahsildar', canApprove: true, canReject: true, canRaiseQuery: true, isFinalApprovalStep: true },
-      ],
-      createdAt: '2026-01-01T00:00:00.000Z',
-    },
-  ],
+  dynamicServices: [...DYNAMIC_SERVICES],
+  services: [...MOCK_SERVICES],
+  applications: [...MOCK_APPLICATIONS],
+  grievances: [...MOCK_GRIEVANCES],
+  notifications: [...MOCK_NOTIFICATIONS],
+  auditLogs: [...MOCK_AUDIT_LOGS],
+  officerWeekChart: [...OFFICER_WEEK_CHART],
+  superOfficerApproved: [...SUPER_OFFICER_APPROVED],
+  superPendingApps: [...SUPER_PENDING_APPS],
+  workflowConfig: [...MOCK_WORKFLOW_CONFIG],
 };
+
 

@@ -194,13 +194,18 @@
             });
         });
 
+        // Attach explicit button listener
+        document.getElementById('configCellTriggerBtn')?.addEventListener('click', () => {
+            window.openModal('configCellModal');
+        });
+
         // 2. Auto-provision State Admin Session
         let session = getSession();
         if (!session || (session.role !== 'state_admin' && session.roleKey !== 'state_admin')) {
             session = {
-                id: 'state_admin_ap',
-                name: 'K. Vijayanand IAS',
-                title: 'Special Chief Secretary (State Admin - AP)',
+                id: 'USR-SA-AP',
+                name: 'Dr. K. S. Jawahar Reddy IAS',
+                title: 'Chief Secretary (State Admin - AP)',
                 role: 'state_admin',
                 roleKey: 'state_admin',
                 backendRole: 'STATE_ADMIN',
@@ -217,7 +222,13 @@
         });
 
         const currentStateId = session?.stateId || 'state_ap';
-        const currentStateName = session?.stateName || (currentStateId === 'state_ap' ? 'Andhra Pradesh' : 'Telangana');
+        const stateNameMap = {
+            'state_ap': 'Andhra Pradesh',
+            'state_ka': 'Karnataka',
+            'state_kl': 'Kerala',
+            'state_tn': 'Tamil Nadu',
+        };
+        const currentStateName = session?.stateName || stateNameMap[currentStateId] || 'Andhra Pradesh';
 
         const subtitleEl = document.getElementById('stateGrievanceSubtitle');
         if (subtitleEl) {
@@ -230,8 +241,12 @@
                 const res = await apiGetStateDepartments(currentStateId);
                 const depts = res.data || [];
                 const select = document.getElementById('cellDeptInput');
-                if (select && depts.length > 0) {
-                    select.innerHTML = depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+                if (select) {
+                    if (depts.length > 0) {
+                        select.innerHTML = depts.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+                    } else {
+                        select.innerHTML = `<option value="">No departments available for this state</option>`;
+                    }
                 }
             } catch (e) {
                 console.error('Failed to load departments for cell config:', e);
@@ -250,7 +265,7 @@
                 if (!tbody) return;
 
                 if (cells.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--slate-400);">No grievance cells configured yet.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--slate-400);">No grievance cells configured yet. Click "+ Configure Grievance Cell" to add one.</td></tr>`;
                     return;
                 }
 
@@ -278,11 +293,11 @@
             }
             const btn = document.getElementById('saveCellBtn');
             const deptSelect = document.getElementById('cellDeptInput');
-            const deptId = deptSelect.value;
-            const deptName = deptSelect.options[deptSelect.selectedIndex]?.text || 'Department';
-            const cellName = document.getElementById('cellNameInput').value.trim();
-            const tier = document.getElementById('cellTierInput').value;
-            const sla = parseInt(document.getElementById('cellSlaInput').value, 10) || 7;
+            const deptId = deptSelect?.value;
+            const deptName = deptSelect?.options[deptSelect.selectedIndex]?.text || 'Department';
+            const cellName = document.getElementById('cellNameInput')?.value?.trim();
+            const tier = document.getElementById('cellTierInput')?.value || 'DISTRICT';
+            const sla = parseInt(document.getElementById('cellSlaInput')?.value, 10) || 7;
 
             if (!deptId || !cellName) {
                 showToast('Please select a department and enter a cell name.', 'warning');
@@ -300,7 +315,7 @@
                 deptName: deptName,
                 cellName: cellName,
                 jurisdictionTier: tier,
-                slaDays: sla
+                slaDays: sla,
             };
 
             try {

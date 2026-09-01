@@ -20,6 +20,8 @@ export interface GrievanceCellConfig {
   stateId: string;
   departmentId: string;
   cellName: string;
+  jurisdictionTier?: string;
+  slaDays?: number;
   workflowSteps: {
     stepNumber: number;
     roleTitle: string;
@@ -33,36 +35,121 @@ export interface GrievanceCellConfig {
 export class StateAdminService {
   constructor(private readonly centralService: CentralService) {}
 
-  // In-memory store for department grievance cells
+  // In-memory store for department grievance cells across all 4 states
   private grievanceCells: GrievanceCellConfig[] = [
+    // ── AP GRIEVANCE CELLS ──
     {
-      id: 'cell_rev_ap',
+      id: 'cell_dept_rev_ap',
       stateId: 'state_ap',
       departmentId: 'dept_rev_ap',
       cellName: 'Revenue Department Grievance Redressal Cell',
+      jurisdictionTier: 'DISTRICT',
+      slaDays: 7,
       workflowSteps: [
-        {
-          stepNumber: 1,
-          roleTitle: 'Sub-Division Grievance Officer',
-          jurisdictionTier: 'SUB_DIVISION',
-          assignedOfficerId: 'GO-RSD-01',
-        },
-        {
-          stepNumber: 2,
-          roleTitle: 'District Grievance Officer',
-          jurisdictionTier: 'DISTRICT',
-          assignedOfficerId: 'GO-DIST-01',
-        },
-        {
-          stepNumber: 3,
-          roleTitle: 'State Grievance Officer',
-          jurisdictionTier: 'STATE',
-          assignedOfficerId: 'GO-STATE-01',
-        },
+        { stepNumber: 1, roleTitle: 'Sub-Division Grievance Officer', jurisdictionTier: 'SUB_DIVISION', assignedOfficerId: 'OFF-AP-REV-GRV1-01' },
+        { stepNumber: 2, roleTitle: 'District Grievance Officer', jurisdictionTier: 'DISTRICT', assignedOfficerId: 'OFF-AP-REV-GRV2-01' },
+        { stepNumber: 3, roleTitle: 'State Appellate Authority', jurisdictionTier: 'STATE', assignedOfficerId: 'USR-DH-REV-AP' },
       ],
       createdAt: '2026-01-01T00:00:00.000Z',
     },
-    ];
+    {
+      id: 'cell_dept_wel_ap',
+      stateId: 'state_ap',
+      departmentId: 'dept_wel_ap',
+      cellName: 'Social Welfare Grievance Redressal Cell',
+      jurisdictionTier: 'DISTRICT',
+      slaDays: 7,
+      workflowSteps: [
+        { stepNumber: 1, roleTitle: 'District Welfare Grievance Officer', jurisdictionTier: 'DISTRICT', assignedOfficerId: 'OFF-AP-WEL-GRV1-01' },
+        { stepNumber: 2, roleTitle: 'State Welfare Appellate Authority', jurisdictionTier: 'STATE', assignedOfficerId: 'OFF-AP-WEL-GRV2-01' },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+
+    // ── KA GRIEVANCE CELLS ──
+    {
+      id: 'cell_dept_rev_ka',
+      stateId: 'state_ka',
+      departmentId: 'dept_rev_ka',
+      cellName: 'Revenue Department (Kandaya Ilakhe) Grievance Cell',
+      jurisdictionTier: 'DISTRICT',
+      slaDays: 7,
+      workflowSteps: [
+        { stepNumber: 1, roleTitle: 'Taluk Grievance Officer', jurisdictionTier: 'SUB_DIVISION', assignedOfficerId: 'OFF-KA-REV-GRV1-01' },
+        { stepNumber: 2, roleTitle: 'District Grievance Authority', jurisdictionTier: 'DISTRICT', assignedOfficerId: 'OFF-KA-REV-GRV2-01' },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+    {
+      id: 'cell_dept_wel_ka',
+      stateId: 'state_ka',
+      departmentId: 'dept_wel_ka',
+      cellName: 'Social Welfare & Backward Classes Grievance Cell',
+      jurisdictionTier: 'DISTRICT',
+      slaDays: 7,
+      workflowSteps: [
+        { stepNumber: 1, roleTitle: 'District Welfare Grievance Officer', jurisdictionTier: 'DISTRICT', assignedOfficerId: 'OFF-KA-WEL-GRV1-01' },
+        { stepNumber: 2, roleTitle: 'State Welfare Appellate Authority', jurisdictionTier: 'STATE', assignedOfficerId: 'OFF-KA-WEL-GRV2-01' },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+
+    // ── KL GRIEVANCE CELLS ──
+    {
+      id: 'cell_dept_rev_kl',
+      stateId: 'state_kl',
+      departmentId: 'dept_rev_kl',
+      cellName: 'Revenue Department (Keralam E-District) Grievance Cell',
+      jurisdictionTier: 'DISTRICT',
+      slaDays: 7,
+      workflowSteps: [
+        { stepNumber: 1, roleTitle: 'Taluk Grievance Officer', jurisdictionTier: 'SUB_DIVISION', assignedOfficerId: 'OFF-KL-REV-GRV1-01' },
+        { stepNumber: 2, roleTitle: 'District Collectorate Appellate Authority', jurisdictionTier: 'DISTRICT', assignedOfficerId: 'OFF-KL-REV-GRV2-01' },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+    {
+      id: 'cell_dept_wel_kl',
+      stateId: 'state_kl',
+      departmentId: 'dept_wel_kl',
+      cellName: 'Social Justice & Empowerment Grievance Cell',
+      jurisdictionTier: 'DISTRICT',
+      slaDays: 7,
+      workflowSteps: [
+        { stepNumber: 1, roleTitle: 'District Social Justice Officer', jurisdictionTier: 'DISTRICT', assignedOfficerId: 'OFF-KL-WEL-GRV1-01' },
+        { stepNumber: 2, roleTitle: 'Directorate Appellate Authority', jurisdictionTier: 'STATE', assignedOfficerId: 'OFF-KL-WEL-GRV2-01' },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+
+    // ── TN GRIEVANCE CELLS ──
+    {
+      id: 'cell_dept_rev_tn',
+      stateId: 'state_tn',
+      departmentId: 'dept_rev_tn',
+      cellName: 'Revenue & Disaster Management (e-Sevai) Grievance Cell',
+      jurisdictionTier: 'DISTRICT',
+      slaDays: 7,
+      workflowSteps: [
+        { stepNumber: 1, roleTitle: 'Taluk Grievance Officer', jurisdictionTier: 'SUB_DIVISION', assignedOfficerId: 'OFF-TN-REV-GRV1-01' },
+        { stepNumber: 2, roleTitle: 'District Revenue Officer (DRO)', jurisdictionTier: 'DISTRICT', assignedOfficerId: 'OFF-TN-REV-GRV2-01' },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+    {
+      id: 'cell_dept_wel_tn',
+      stateId: 'state_tn',
+      departmentId: 'dept_wel_tn',
+      cellName: 'Adi Dravidar & Tribal Welfare Grievance Cell',
+      jurisdictionTier: 'DISTRICT',
+      slaDays: 7,
+      workflowSteps: [
+        { stepNumber: 1, roleTitle: 'District Welfare Grievance Officer', jurisdictionTier: 'DISTRICT', assignedOfficerId: 'OFF-TN-WEL-GRV1-01' },
+        { stepNumber: 2, roleTitle: 'State Directorate Appellate Authority', jurisdictionTier: 'STATE', assignedOfficerId: 'OFF-TN-WEL-GRV2-01' },
+      ],
+      createdAt: '2026-01-01T00:00:00.000Z',
+    },
+  ];
 
   /**
    * List departments in a state.
@@ -425,21 +512,63 @@ export class StateAdminService {
    * Section 23: Each department has one grievance cell and workflow.
    */
   configureGrievanceCell(dto: ConfigureGrievanceCellDto): GrievanceCellConfig {
+    const tier = dto.jurisdictionTier || 'DISTRICT';
+    const sla = dto.slaDays || 7;
+    const dept = db.departments.find((d) => d.id === dto.departmentId);
+    const deptName = dept?.name || dto.deptName || dto.cellName;
+
+    const defaultSteps =
+      tier === 'SUB_DIVISION'
+        ? [
+            { stepNumber: 1, roleTitle: `${deptName} Sub-Division Grievance Officer`, jurisdictionTier: 'SUB_DIVISION' },
+            { stepNumber: 2, roleTitle: `${deptName} District Grievance Officer`, jurisdictionTier: 'DISTRICT' },
+            { stepNumber: 3, roleTitle: `${deptName} State Appellate Authority`, jurisdictionTier: 'STATE' },
+          ]
+        : tier === 'STATE'
+        ? [
+            { stepNumber: 1, roleTitle: `${deptName} State Grievance Redressal Authority`, jurisdictionTier: 'STATE' },
+          ]
+        : [
+            { stepNumber: 1, roleTitle: `${deptName} District Grievance Officer`, jurisdictionTier: 'DISTRICT' },
+            { stepNumber: 2, roleTitle: `${deptName} State Appellate Authority`, jurisdictionTier: 'STATE' },
+          ];
+
+    const steps = dto.workflowSteps && dto.workflowSteps.length > 0 ? dto.workflowSteps : defaultSteps;
+
     let cell = this.grievanceCells.find((c) => c.departmentId === dto.departmentId);
     if (cell) {
       cell.cellName = dto.cellName.trim();
-      cell.workflowSteps = dto.workflowSteps;
+      cell.jurisdictionTier = tier;
+      cell.slaDays = sla;
+      cell.workflowSteps = steps;
     } else {
       cell = {
         id: `cell_${dto.departmentId}`,
         stateId: dto.stateId,
         departmentId: dto.departmentId,
         cellName: dto.cellName.trim(),
-        workflowSteps: dto.workflowSteps,
+        jurisdictionTier: tier,
+        slaDays: sla,
+        workflowSteps: steps,
         createdAt: new Date().toISOString(),
       };
       this.grievanceCells.push(cell);
     }
+
+    if (dept) {
+      (dept as any).hasGrievanceCell = true;
+      (dept as any).grievanceCellName = cell.cellName;
+    }
+
+    db.auditLogs.push({
+      id: `AUD-${Date.now()}`,
+      action: 'GRIEVANCE_CELL_CONFIGURED',
+      actor: 'State Admin',
+      role: 'STATE_ADMIN',
+      date: new Date().toISOString(),
+      details: `Configured grievance cell '${cell.cellName}' for department '${deptName}'.`,
+    });
+
     return cell;
   }
 
@@ -451,7 +580,7 @@ export class StateAdminService {
    * List all grievance cells for a state.
    * Only returns cells whose department actually exists in the state.
    */
-  listGrievanceCells(stateId: string): (GrievanceCellConfig & { deptName: string; slaDays: number; jurisdictionTier: string; status: string })[] {
+  listGrievanceCells(stateId: string): (GrievanceCellConfig & { deptName: string; slaDays: number; jurisdictionTier: string; workflowSummary: string; status: string })[] {
     const stateDepts = db.departments.filter((d) => !stateId || d.stateId === stateId);
     const deptIds = new Set(stateDepts.map((d) => d.id));
 
@@ -462,9 +591,9 @@ export class StateAdminService {
         return {
           ...c,
           deptName: dept?.name || c.departmentId,
-          slaDays: 7,
-          jurisdictionTier: c.workflowSteps?.length > 0 ? c.workflowSteps[c.workflowSteps.length - 1].jurisdictionTier : 'DISTRICT',
-          workflowSummary: c.workflowSteps?.map((s) => s.roleTitle).join(' ➔ ') || '',
+          slaDays: c.slaDays || 7,
+          jurisdictionTier: c.jurisdictionTier || (c.workflowSteps?.length > 0 ? c.workflowSteps[c.workflowSteps.length - 1].jurisdictionTier : 'DISTRICT'),
+          workflowSummary: c.workflowSteps?.map((s) => s.roleTitle).join(' ➔ ') || 'District Grievance Officer ➔ State Appellate Authority',
           status: 'ACTIVE',
         };
       });

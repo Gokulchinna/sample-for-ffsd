@@ -708,94 +708,261 @@ export async function apiGetCentralMetrics() {
 // ──────────────────────────────────────────
 
 const INITIAL_LOCAL_DEPARTMENTS = [
+  // ─── AP DEPARTMENTS ───
   {
     id: 'dept_rev_ap',
     stateId: 'state_ap',
     name: 'Revenue, Registration & Stamps Department',
     code: 'REV-AP',
-    description: 'Statutory revenue, land administration, caste, nativity, and income verification secretariat.',
+    description: 'Land records, patta passbooks, caste, income, and residence certificates',
     status: 'ACTIVE',
-    headUserId: 'USR-DH-AP-REV',
+    headUserId: 'USR-DH-REV-AP',
     headName: 'Dr. B. R. Ambedkar IAS',
-    headEmail: 'head.revenue@ap.gov.in',
-    servicesCount: 4,
-    officersCount: 12,
-    applicationsCount: 1420,
-    grievancesCount: 85,
-    designationsCount: 3,
+    headEmail: 'head.rev@ap.gov.in',
+    servicesCount: 2,
+    officersCount: 4,
+    applicationsCount: 4,
+    grievancesCount: 2,
+    designationsCount: 7,
     hasGrievanceCell: true,
     grievanceCellName: 'Revenue Department Grievance Redressal Cell',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'dept_mun_ap',
+    id: 'dept_wel_ap',
     stateId: 'state_ap',
-    name: 'Municipal Administration & Urban Development',
-    code: 'MAUD-AP',
-    description: 'Urban governance, trade licensing, building permissions, and municipal services.',
+    name: 'Social Welfare & Empowerment Department',
+    code: 'WEL-AP',
+    description: 'Welfare schemes, fee reimbursements, livelihood grants, and educational assistance',
     status: 'ACTIVE',
-    headUserId: 'USR-DH-AP-MUN',
-    headName: 'Sri K. Praveen Kumar IAS',
-    headEmail: 'head.municipal@ap.gov.in',
-    servicesCount: 3,
-    officersCount: 8,
-    applicationsCount: 890,
-    grievancesCount: 42,
-    designationsCount: 2,
-    hasGrievanceCell: true,
-    grievanceCellName: 'Municipal Grievance Redressal Cell',
-    createdAt: '2026-01-01T00:00:00.000Z',
-  },
-  {
-    id: 'dept_trans_ap',
-    stateId: 'state_ap',
-    name: 'Transport Department',
-    code: 'TRANS-AP',
-    description: 'Vehicle registration, driving licenses, route permits, and road safety regulations.',
-    status: 'ACTIVE',
-    headUserId: 'USR-DH-AP-TRANS',
-    headName: 'Sri M. R. K. Prasad IAS',
-    headEmail: 'head.transport@ap.gov.in',
+    headUserId: 'USR-DH-WEL-AP',
+    headName: 'Sri K. Harshavardhan IAS',
+    headEmail: 'head.wel@ap.gov.in',
     servicesCount: 2,
-    officersCount: 5,
-    applicationsCount: 650,
-    grievancesCount: 18,
-    designationsCount: 2,
+    officersCount: 4,
+    applicationsCount: 2,
+    grievancesCount: 1,
+    designationsCount: 6,
     hasGrievanceCell: true,
-    grievanceCellName: 'Transport Department Grievance Cell',
+    grievanceCellName: 'Social Welfare Grievance Redressal Cell',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── KA DEPARTMENTS ───
+  {
+    id: 'dept_rev_ka',
+    stateId: 'state_ka',
+    name: 'Revenue Department (Kandaya Ilakhe)',
+    code: 'REV-KA',
+    description: 'Bhoomi RTC land records, caste & income certificates (Nadakacheri / AJSK)',
+    status: 'ACTIVE',
+    headUserId: 'USR-DH-REV-KA',
+    headName: 'Sri Rajender Kumar Kataria IAS',
+    headEmail: 'head.rev@ka.gov.in',
+    servicesCount: 2,
+    officersCount: 4,
+    applicationsCount: 2,
+    grievancesCount: 1,
+    designationsCount: 6,
+    hasGrievanceCell: true,
+    grievanceCellName: 'Revenue Department (Kandaya Ilakhe) Grievance Cell',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
   {
-    id: 'dept_rev_ts',
-    stateId: 'state_ts',
-    name: 'Revenue Department',
-    code: 'REV-TS',
-    description: 'Revenue and land administration for Government of Telangana.',
+    id: 'dept_wel_ka',
+    stateId: 'state_ka',
+    name: 'Social Welfare & Backward Classes Department',
+    code: 'WEL-KA',
+    description: 'Student scholarships, Gruha Lakshmi benefits, and backward classes empowerment',
     status: 'ACTIVE',
-    headUserId: 'USR-DH-TS-REV',
-    headName: 'Smt. A. Shanti Kumari IAS',
-    headEmail: 'head.revenue@telangana.gov.in',
-    servicesCount: 3,
-    officersCount: 10,
-    applicationsCount: 1100,
-    grievancesCount: 50,
-    designationsCount: 3,
+    headUserId: 'USR-DH-WEL-KA',
+    headName: 'Dr. R. Vishal IAS',
+    headEmail: 'head.wel@ka.gov.in',
+    servicesCount: 2,
+    officersCount: 4,
+    applicationsCount: 1,
+    grievancesCount: 1,
+    designationsCount: 6,
     hasGrievanceCell: true,
-    grievanceCellName: 'Telangana Revenue Grievance Cell',
+    grievanceCellName: 'Social Welfare & Backward Classes Grievance Cell',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── KL DEPARTMENTS ───
+  {
+    id: 'dept_rev_kl',
+    stateId: 'state_kl',
+    name: 'Revenue Department (Keralam E-District)',
+    code: 'REV-KL',
+    description: 'e-District land records, revenue certificates, and possession certificates',
+    status: 'ACTIVE',
+    headUserId: 'USR-DH-REV-KL',
+    headName: 'Dr. A. Jayathilak IAS',
+    headEmail: 'head.rev@kl.gov.in',
+    servicesCount: 2,
+    officersCount: 4,
+    applicationsCount: 2,
+    grievancesCount: 1,
+    designationsCount: 6,
+    hasGrievanceCell: true,
+    grievanceCellName: 'Revenue Department (Keralam E-District) Grievance Cell',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'dept_wel_kl',
+    stateId: 'state_kl',
+    name: 'Social Justice & Empowerment Department',
+    code: 'WEL-KL',
+    description: 'Vidyakiranam, Karunya scheme, disabled welfare, and social pensions',
+    status: 'ACTIVE',
+    headUserId: 'USR-DH-WEL-KL',
+    headName: 'Dr. Sharmila Mary Joseph IAS',
+    headEmail: 'head.wel@kl.gov.in',
+    servicesCount: 2,
+    officersCount: 4,
+    applicationsCount: 1,
+    grievancesCount: 1,
+    designationsCount: 6,
+    hasGrievanceCell: true,
+    grievanceCellName: 'Social Justice & Empowerment Grievance Cell',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+
+  // ─── TN DEPARTMENTS ───
+  {
+    id: 'dept_rev_tn',
+    stateId: 'state_tn',
+    name: 'Revenue & Disaster Management Department',
+    code: 'REV-TN',
+    description: 'e-Sevai community, nativity, legal heir certificates, and land administration',
+    status: 'ACTIVE',
+    headUserId: 'USR-DH-REV-TN',
+    headName: 'Thiru Kumar Jayant IAS',
+    headEmail: 'head.rev@tn.gov.in',
+    servicesCount: 2,
+    officersCount: 4,
+    applicationsCount: 2,
+    grievancesCount: 1,
+    designationsCount: 6,
+    hasGrievanceCell: true,
+    grievanceCellName: 'Revenue & Disaster Management (e-Sevai) Grievance Cell',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  },
+  {
+    id: 'dept_wel_tn',
+    stateId: 'state_tn',
+    name: 'Adi Dravidar & Tribal Welfare Department',
+    code: 'WEL-TN',
+    description: 'Pudhumai Penn grants, tribal welfare, and higher education scholarships',
+    status: 'ACTIVE',
+    headUserId: 'USR-DH-WEL-TN',
+    headName: 'Thiru Laxmi Narayan IAS',
+    headEmail: 'head.wel@tn.gov.in',
+    servicesCount: 2,
+    officersCount: 4,
+    applicationsCount: 1,
+    grievancesCount: 1,
+    designationsCount: 6,
+    hasGrievanceCell: true,
+    grievanceCellName: 'Adi Dravidar & Tribal Welfare Grievance Cell',
     createdAt: '2026-01-01T00:00:00.000Z',
   },
 ];
 
 const INITIAL_LOCAL_GRIEVANCE_CELLS = [
+  // ── AP ──
   {
-    id: 'cell_rev_ap',
+    id: 'cell_dept_rev_ap',
     stateId: 'state_ap',
     departmentId: 'dept_rev_ap',
     deptName: 'Revenue, Registration & Stamps Department',
-    cellName: 'Revenue Department Appellate Redressal Cell',
-    jurisdictionTier: 'DISTRICT & STATE',
+    cellName: 'Revenue Department Grievance Redressal Cell',
+    jurisdictionTier: 'DISTRICT',
     slaDays: 7,
-    workflowSummary: 'District Grievance Officer ➔ State Appellate Authority',
+    workflowSummary: 'Sub-Division Grievance Officer ➔ District Grievance Officer ➔ State Appellate Authority',
+    status: 'ACTIVE',
+  },
+  {
+    id: 'cell_dept_wel_ap',
+    stateId: 'state_ap',
+    departmentId: 'dept_wel_ap',
+    deptName: 'Social Welfare & Empowerment Department',
+    cellName: 'Social Welfare Grievance Redressal Cell',
+    jurisdictionTier: 'DISTRICT',
+    slaDays: 7,
+    workflowSummary: 'District Welfare Grievance Officer ➔ State Welfare Appellate Authority',
+    status: 'ACTIVE',
+  },
+
+  // ── KA ──
+  {
+    id: 'cell_dept_rev_ka',
+    stateId: 'state_ka',
+    departmentId: 'dept_rev_ka',
+    deptName: 'Revenue Department (Kandaya Ilakhe)',
+    cellName: 'Revenue Department (Kandaya Ilakhe) Grievance Cell',
+    jurisdictionTier: 'DISTRICT',
+    slaDays: 7,
+    workflowSummary: 'Taluk Grievance Officer ➔ District Grievance Authority',
+    status: 'ACTIVE',
+  },
+  {
+    id: 'cell_dept_wel_ka',
+    stateId: 'state_ka',
+    departmentId: 'dept_wel_ka',
+    deptName: 'Social Welfare & Backward Classes Department',
+    cellName: 'Social Welfare & Backward Classes Grievance Cell',
+    jurisdictionTier: 'DISTRICT',
+    slaDays: 7,
+    workflowSummary: 'District Welfare Grievance Officer ➔ State Welfare Appellate Authority',
+    status: 'ACTIVE',
+  },
+
+  // ── KL ──
+  {
+    id: 'cell_dept_rev_kl',
+    stateId: 'state_kl',
+    departmentId: 'dept_rev_kl',
+    deptName: 'Revenue Department (Keralam E-District)',
+    cellName: 'Revenue Department (Keralam E-District) Grievance Cell',
+    jurisdictionTier: 'DISTRICT',
+    slaDays: 7,
+    workflowSummary: 'Taluk Grievance Officer ➔ District Collectorate Appellate Authority',
+    status: 'ACTIVE',
+  },
+  {
+    id: 'cell_dept_wel_kl',
+    stateId: 'state_kl',
+    departmentId: 'dept_wel_kl',
+    deptName: 'Social Justice & Empowerment Department',
+    cellName: 'Social Justice & Empowerment Grievance Cell',
+    jurisdictionTier: 'DISTRICT',
+    slaDays: 7,
+    workflowSummary: 'District Social Justice Officer ➔ Directorate Appellate Authority',
+    status: 'ACTIVE',
+  },
+
+  // ── TN ──
+  {
+    id: 'cell_dept_rev_tn',
+    stateId: 'state_tn',
+    departmentId: 'dept_rev_tn',
+    deptName: 'Revenue & Disaster Management Department',
+    cellName: 'Revenue & Disaster Management (e-Sevai) Grievance Cell',
+    jurisdictionTier: 'DISTRICT',
+    slaDays: 7,
+    workflowSummary: 'Taluk Grievance Officer ➔ District Revenue Officer (DRO)',
+    status: 'ACTIVE',
+  },
+  {
+    id: 'cell_dept_wel_tn',
+    stateId: 'state_tn',
+    departmentId: 'dept_wel_tn',
+    deptName: 'Adi Dravidar & Tribal Welfare Department',
+    cellName: 'Adi Dravidar & Tribal Welfare Grievance Cell',
+    jurisdictionTier: 'DISTRICT',
+    slaDays: 7,
+    workflowSummary: 'District Welfare Grievance Officer ➔ State Directorate Appellate Authority',
     status: 'ACTIVE',
   },
 ];
@@ -1038,17 +1205,48 @@ export async function apiGetGrievanceCells(stateId = 'state_ap') {
 
 export async function apiConfigureGrievanceCell(data) {
   let configured = null;
+  const tier = data.jurisdictionTier || 'DISTRICT';
+  const sla = data.slaDays || 7;
+  const deptName = data.deptName || 'Department';
+
+  const defaultSteps =
+    tier === 'SUB_DIVISION'
+      ? [
+          { stepNumber: 1, roleTitle: `${deptName} Sub-Division Grievance Officer`, jurisdictionTier: 'SUB_DIVISION' },
+          { stepNumber: 2, roleTitle: `${deptName} District Grievance Officer`, jurisdictionTier: 'DISTRICT' },
+          { stepNumber: 3, roleTitle: `${deptName} State Appellate Authority`, jurisdictionTier: 'STATE' },
+        ]
+      : tier === 'STATE'
+      ? [
+          { stepNumber: 1, roleTitle: `${deptName} State Grievance Redressal Authority`, jurisdictionTier: 'STATE' },
+        ]
+      : [
+          { stepNumber: 1, roleTitle: `${deptName} District Grievance Officer`, jurisdictionTier: 'DISTRICT' },
+          { stepNumber: 2, roleTitle: `${deptName} State Appellate Authority`, jurisdictionTier: 'STATE' },
+        ];
+
+  const payload = {
+    stateId: data.stateId || 'state_ap',
+    departmentId: data.departmentId,
+    cellName: data.cellName,
+    jurisdictionTier: tier,
+    slaDays: sla,
+    deptName: deptName,
+    workflowSteps: data.workflowSteps && data.workflowSteps.length > 0 ? data.workflowSteps : defaultSteps,
+  };
+
   try {
     const res = await apiFetch('/state-admin/grievance-cells', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
     if (res && res.data) configured = res.data;
-  } catch (e) {}
+  } catch (e) {
+    console.warn('apiConfigureGrievanceCell backend fallback:', e);
+  }
 
   const depts = getStoredDepartments();
   const dept = depts.find(d => d.id === data.departmentId);
-  const deptName = dept ? dept.name : (data.deptName || 'Department');
 
   if (dept) {
     dept.hasGrievanceCell = true;
@@ -1058,20 +1256,25 @@ export async function apiConfigureGrievanceCell(data) {
 
   if (!configured) {
     configured = {
-      id: `cell_${Date.now().toString().slice(-4)}`,
+      id: `cell_${data.departmentId}`,
       stateId: data.stateId || 'state_ap',
       departmentId: data.departmentId,
       deptName: deptName,
       cellName: data.cellName,
-      jurisdictionTier: data.jurisdictionTier,
-      slaDays: data.slaDays || 7,
-      workflowSummary: 'District Grievance Officer ➔ State Appellate Authority',
+      jurisdictionTier: tier,
+      slaDays: sla,
+      workflowSteps: payload.workflowSteps,
+      workflowSummary: payload.workflowSteps.map(s => s.roleTitle).join(' ➔ '),
       status: 'ACTIVE',
       createdAt: new Date().toISOString(),
     };
   } else {
     configured.deptName = deptName;
-    configured.workflowSummary = configured.workflowSummary || 'District Grievance Officer ➔ State Appellate Authority';
+    configured.workflowSummary =
+      configured.workflowSummary ||
+      (configured.workflowSteps?.length > 0
+        ? configured.workflowSteps.map(s => s.roleTitle).join(' ➔ ')
+        : 'District Grievance Officer ➔ State Appellate Authority');
     configured.status = 'ACTIVE';
   }
 
