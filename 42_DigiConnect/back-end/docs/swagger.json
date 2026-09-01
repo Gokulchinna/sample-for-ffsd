@@ -3665,6 +3665,38 @@
           "department-head"
         ]
       }
+    },
+    "/api/v1/department-head/revenue": {
+      "get": {
+        "operationId": "DepartmentHeadController_getDepartmentRevenue",
+        "parameters": [
+          {
+            "name": "departmentId",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-department-id",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Department financial revenue analytics & transaction ledger",
+        "tags": [
+          "department-head"
+        ]
+      }
     }
   },
   "info": {

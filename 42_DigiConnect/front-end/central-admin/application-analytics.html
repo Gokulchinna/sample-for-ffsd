@@ -65,31 +65,31 @@
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#eff6ff;color:#2563eb;">📋</div>
                     <div>
-                        <div class="stat-value" id="kpi-total">48,920</div>
+                        <div class="stat-value" id="kpi-total">0</div>
                         <div class="stat-label">Total Submissions</div>
-                        <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;">Across 28 states</div>
+                        <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;" id="kpi-states-label">Across federated states</div>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#f0fdf4;color:#16a34a;">✅</div>
                     <div>
-                        <div class="stat-value" id="kpi-completed" style="color:#16a34a;">22,100</div>
+                        <div class="stat-value" id="kpi-completed" style="color:#16a34a;">0</div>
                         <div class="stat-label">Completed & Issued</div>
-                        <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;">45.2% completion rate</div>
+                        <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;" id="kpi-completion-rate">0.0% completion rate</div>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#fefce8;color:#ca8a04;">⏳</div>
                     <div>
-                        <div class="stat-value" id="kpi-pending" style="color:#d97706;">12,450</div>
+                        <div class="stat-value" id="kpi-pending" style="color:#d97706;">0</div>
                         <div class="stat-label">In Verification Queue</div>
-                        <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;">Avg. 3.2 days in queue</div>
+                        <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;">Pending department review</div>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#fdf2f8;color:#db2777;">⏱️</div>
                     <div>
-                        <div class="stat-value" id="kpi-sla">94.8%</div>
+                        <div class="stat-value" id="kpi-sla">95.0%</div>
                         <div class="stat-label">National SLA Compliance</div>
                         <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;">Target: &gt;90.0%</div>
                     </div>
@@ -253,9 +253,18 @@
         async function initData() {
             nationalData = await getNationalAnalyticsData();
 
-            document.getElementById('kpi-total').textContent = formatNum(nationalData.totalApplications);
-            document.getElementById('kpi-completed').textContent = formatNum(nationalData.appOverview.completed);
-            document.getElementById('kpi-pending').textContent = formatNum(nationalData.appOverview.pending);
+            const total = nationalData.totalApplications || 0;
+            const completed = nationalData.appOverview?.completed || 0;
+            const pending = nationalData.appOverview?.pending || 0;
+            const rate = total > 0 ? ((completed / total) * 100).toFixed(1) : '0.0';
+
+            document.getElementById('kpi-total').textContent = formatNum(total);
+            document.getElementById('kpi-completed').textContent = formatNum(completed);
+            document.getElementById('kpi-pending').textContent = formatNum(pending);
+            const rateEl = document.getElementById('kpi-completion-rate');
+            if (rateEl) rateEl.textContent = `${rate}% completion rate`;
+            const statesLabel = document.getElementById('kpi-states-label');
+            if (statesLabel) statesLabel.textContent = `Across ${nationalData.totalStates} federated states`;
 
             renderVelocityChart();
             renderTopStatesChart();

@@ -616,13 +616,17 @@ export class StateAdminService {
       departmentName: d.name,
       departmentCode: d.code,
       totalApplications: d.applicationsCount || 0,
-      paidApplications: Math.round((d.applicationsCount || 0) * 0.8),
+      paidApplications: d.completedCount || d.applicationsCount || 0,
       totalRevenue: d.revenue || 0,
+      platformFee: d.platformFee || 0,
+      serviceFee: d.serviceFee !== undefined ? d.serviceFee : (d.revenue || 0),
     }));
 
     return {
       stateId,
       totalStateRevenue: details.summary.totalRevenue,
+      totalStatePlatformFee: details.summary.platformFees || 0,
+      totalStateServiceFee: details.summary.serviceFees || details.summary.totalRevenue,
       departmentBreakdown: breakdown,
       generatedAt: new Date().toISOString(),
     };

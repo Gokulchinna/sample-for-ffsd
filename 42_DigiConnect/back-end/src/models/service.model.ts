@@ -22,4 +22,14 @@ export interface GovtService {
     docType: string;
     uploadedAt: string;
   }>;
+  code?: string;
+  category?: string;
+  serviceFee?: number;
+  platformFee?: number;
+  totalFee?: number;
+  departmentId?: string;
+  stateId?: string;
+  fields?: any[];
+  documentRequirements?: any[];
+  workflowSteps?: any[];
 }

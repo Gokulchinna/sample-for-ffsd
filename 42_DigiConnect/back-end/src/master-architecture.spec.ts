@@ -314,4 +314,43 @@ describe('DigiConnect Master Architecture Verification', () => {
       expect(res.application.certificateId).toBe(res.certificate.id);
     });
   });
+
+  describe('Pillar 7: Cross-Tier Financial Synchronization & Platform Fee Segregation', () => {
+    it('Department Head revenue calculates exact service fees and platform fee breakdown', () => {
+      const revData = deptHeadService.getDepartmentRevenue('dept_rev_ap');
+      expect(revData).toBeDefined();
+      expect(revData.departmentId).toBe('dept_rev_ap');
+      expect(revData.totalRevenue).toBeGreaterThan(0);
+      expect(revData.totalPlatformFee).toBeGreaterThanOrEqual(0);
+      expect(revData.totalServiceFee).toBeGreaterThanOrEqual(0);
+      expect(revData.totalRevenue).toBe(revData.totalPlatformFee + revData.totalServiceFee);
+      expect(Array.isArray(revData.serviceBreakdown)).toBe(true);
+      expect(Array.isArray(revData.transactions)).toBe(true);
+    });
+
+    it('State Admin revenue aggregates department breakdown with platform fee share', () => {
+      const stateRev = stateAdminService.getDepartmentRevenue('state_ap');
+      expect(stateRev).toBeDefined();
+      expect(stateRev.stateId).toBe('state_ap');
+      expect(stateRev.totalStateRevenue).toBeGreaterThan(0);
+      expect(stateRev.totalStatePlatformFee).toBeGreaterThanOrEqual(0);
+      expect(stateRev.totalStateRevenue).toBe(stateRev.totalStatePlatformFee + stateRev.totalStateServiceFee);
+      expect(Array.isArray(stateRev.departmentBreakdown)).toBe(true);
+      const revDept = stateRev.departmentBreakdown.find((d: any) => d.departmentId === 'dept_rev_ap');
+      expect(revDept).toBeDefined();
+      expect(revDept.platformFee).toBeGreaterThanOrEqual(0);
+    });
+
+    it('Central Government national revenue aggregates per-state platform fee and national total', () => {
+      const natRev = centralService.getStateWiseRevenue();
+      expect(natRev).toBeDefined();
+      expect(natRev.nationalTotalRevenue).toBeGreaterThan(0);
+      expect(natRev.nationalPlatformFees).toBeGreaterThan(0);
+      expect(natRev.nationalTotalRevenue).toBe(natRev.nationalPlatformFees + natRev.nationalServiceFees);
+      expect(Array.isArray(natRev.stateBreakdown)).toBe(true);
+      const apBreakdown = natRev.stateBreakdown.find((s) => s.stateCode === 'AP');
+      expect(apBreakdown).toBeDefined();
+      expect(apBreakdown?.platformFee).toBeGreaterThan(0);
+    });
+  });
 });

@@ -175,7 +175,7 @@
                     <!-- 11. LOAD MORE -->
                     <div class="load-more-container" id="loadMoreContainer">
                         <button type="button" class="btn btn-outline btn-sm" id="btnLoadMoreStates" onclick="handleLoadMore()">
-                            Load More States (Showing <span id="shownCount">5</span> of <span id="totalCount">28</span>)
+                            Load More States (Showing <span id="shownCount">4</span> of <span id="totalCount">4</span>)
                         </button>
                     </div>
                 </div>
@@ -511,7 +511,7 @@
                         stateAdminEmail: b.stateAdmin?.email || b.stateAdminEmail || `admin@${code.toLowerCase()}.gov.in`,
                         status: status,
                         departmentsCount: b.departmentsCount ?? 0,
-                        citizensCount: b.citizensCount ?? (b.totalApplications ? Math.round(b.totalApplications * 4.2) : 0),
+                        citizensCount: b.citizensCount ?? 2,
                         applicationsCount: b.totalApplications ?? 0,
                         revenue: b.totalRevenue ?? 0,
                         createdAt: b.createdAt || new Date().toISOString()

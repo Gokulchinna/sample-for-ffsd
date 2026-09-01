@@ -197,4 +197,19 @@ export class DepartmentHeadController {
       data: this.deptHeadService.getDepartmentAnalytics(dept),
     };
   }
+
+  @Get('revenue')
+  @UseGuards(RolesGuard)
+  @Roles(Role.DEPARTMENT_HEAD, Role.STATE_ADMIN)
+  @ApiOperation({ summary: 'Department financial revenue analytics & transaction ledger' })
+  getDepartmentRevenue(
+    @Query('departmentId') departmentId?: string,
+    @Headers('x-department-id') headerDeptId?: string,
+  ) {
+    const dept = departmentId || headerDeptId || 'dept_rev_ap';
+    return {
+      success: true,
+      data: this.deptHeadService.getDepartmentRevenue(dept),
+    };
+  }
 }

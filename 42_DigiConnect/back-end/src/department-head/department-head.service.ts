@@ -435,14 +435,28 @@ export class DepartmentHeadService {
       (a) => (a as any).departmentId === deptId || a.dept === dept?.name,
     );
 
-    const approved = apps.filter((a) => a.status === 'approved' || a.status === 'completed');
-    const rejected = apps.filter((a) => a.status === 'rejected');
-    const queries = apps.filter((a) => a.status === 'query' || a.status === 'QUERY_RAISED');
+    const approved = apps.filter((a) => {
+      const st = String(a.status || '').toLowerCase();
+      return st.includes('approved') || st.includes('completed');
+    });
+    const rejected = apps.filter((a) => String(a.status || '').toLowerCase().includes('reject'));
+    const queries = apps.filter((a) => String(a.status || '').toLowerCase().includes('query'));
 
-    const totalRevenue = apps.reduce((acc, a) => {
-      const isPaid = a.paymentStatus === 'PAID' || a.paymentStatus === 'completed' || a.paymentStatus === 'SUCCESS';
-      return isPaid ? acc + (Number(a.fee) || 0) : acc;
-    }, 0);
+    let totalRevenue = 0;
+    let totalPlatformFee = 0;
+
+    apps.forEach((a) => {
+      const isPaid = ['paid', 'completed', 'success'].includes(String(a.paymentStatus || '').toLowerCase());
+      if (isPaid) {
+        const fee = Number(a.fee) || 0;
+        totalRevenue += fee;
+        const srv = services.find((s) => s.id === a.serviceId);
+        const pFee = srv && srv.platformFee !== undefined ? Number(srv.platformFee) : (fee > 0 ? Math.round(fee * 0.15) : 0);
+        totalPlatformFee += pFee;
+      }
+    });
+
+    const totalServiceFee = Math.max(0, totalRevenue - totalPlatformFee);
 
     return {
       departmentName: dept?.name || 'Department',
@@ -456,6 +470,100 @@ export class DepartmentHeadService {
       rejectedApplications: rejected.length,
       pendingQueries: queries.length,
       totalRevenue,
+      totalPlatformFee,
+      totalServiceFee,
+    };
+  }
+
+  getDepartmentRevenue(deptId: string) {
+    const dept = db.departments.find((d) => d.id === deptId);
+    const services = [
+      ...this.dynamicServices.filter((s) => s.departmentId === deptId),
+      ...(db.services || []).filter((s) => (s as any).departmentId === deptId || s.dept === dept?.name),
+    ];
+    // Deduplicate services by id
+    const uniqueServices = Array.from(new Map(services.map((s) => [s.id, s])).values());
+
+    const apps = db.applications.filter(
+      (a) => (a as any).departmentId === deptId || a.dept === dept?.name,
+    );
+
+    let totalRevenue = 0;
+    let totalPlatformFee = 0;
+    let totalServiceFee = 0;
+    let paidTransactionsCount = 0;
+
+    const paidApps: any[] = [];
+
+    apps.forEach((a) => {
+      const isPaid = ['paid', 'completed', 'success'].includes(String(a.paymentStatus || '').toLowerCase());
+      const fee = Number(a.fee) || 0;
+      const srv = uniqueServices.find((s) => s.id === a.serviceId);
+      const pFee = srv && srv.platformFee !== undefined ? Number(srv.platformFee) : (fee > 0 ? Math.round(fee * 0.15) : 0);
+      const sFee = Math.max(0, fee - pFee);
+
+      if (isPaid) {
+        paidTransactionsCount++;
+        totalRevenue += fee;
+        totalPlatformFee += pFee;
+        totalServiceFee += sFee;
+        paidApps.push({
+          id: a.id,
+          serviceId: a.serviceId,
+          serviceName: a.serviceName,
+          citizenName: a.citizenName,
+          fee,
+          platformFee: pFee,
+          serviceFee: sFee,
+          paymentStatus: a.paymentStatus,
+          paymentMethod: a.paymentMethod || 'Online Payment (UPI/Card)',
+          paymentTransactionId: a.paymentTransactionId || `TXN-${a.id.replace('APP-', '')}`,
+          date: a.submittedDate || a.appliedDate || (a as any).createdAt || new Date().toISOString(),
+          status: a.status,
+        });
+      }
+    });
+
+    // Breakdown per service
+    const serviceBreakdown = uniqueServices.map((srv) => {
+      const srvApps = apps.filter((a) => a.serviceId === srv.id);
+      const srvPaidApps = srvApps.filter((a) => ['paid', 'completed', 'success'].includes(String(a.paymentStatus || '').toLowerCase()));
+      const fee = Number(srv.totalFee) || Number((srv as any).fee) || 0;
+      const sFee = srv.serviceFee !== undefined ? Number(srv.serviceFee) : Math.round(fee * 0.85);
+      const pFee = srv.platformFee !== undefined ? Number(srv.platformFee) : Math.round(fee * 0.15);
+
+      const totalCollected = srvPaidApps.reduce((sum, a) => sum + (Number(a.fee) || fee), 0);
+      const platformCollected = srvPaidApps.length * pFee;
+      const serviceCollected = Math.max(0, totalCollected - platformCollected);
+
+      return {
+        serviceId: srv.id,
+        serviceName: srv.name,
+        code: srv.code,
+        category: (srv as any).category || (srv as any).cat || 'General',
+        totalApplications: srvApps.length,
+        paidApplications: srvPaidApps.length,
+        serviceFee: sFee,
+        platformFee: pFee,
+        totalFee: fee,
+        totalCollected,
+        platformCollected,
+        serviceCollected,
+      };
+    });
+
+    return {
+      departmentId: deptId,
+      departmentName: dept?.name || 'Department',
+      stateId: dept?.stateId || '',
+      totalRevenue,
+      totalPlatformFee,
+      totalServiceFee,
+      paidTransactionsCount,
+      totalApplications: apps.length,
+      serviceBreakdown,
+      transactions: paidApps,
+      generatedAt: new Date().toISOString(),
     };
   }
 }

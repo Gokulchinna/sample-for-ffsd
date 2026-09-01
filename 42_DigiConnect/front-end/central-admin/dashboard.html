@@ -105,8 +105,8 @@
                 </div>
             </div>
 
-            <!-- 2. TOP SUMMARY CARDS -->
-            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));gap:var(--space-md);margin-bottom:var(--space-xl);">
+            <!-- 2. TOP SUMMARY CARDS (5 Cards with Platform Fee) -->
+            <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:var(--space-md);margin-bottom:var(--space-xl);">
                 <!-- Card 1: Total States -->
                 <div class="stat-card">
                     <div class="stat-icon" style="background:#eff6ff;color:#2563eb;">🏛️</div>
@@ -144,6 +144,16 @@
                         <div class="stat-value" id="card-total-revenue" style="color:#2563eb;">₹0</div>
                         <div class="stat-label">Total Revenue</div>
                         <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;">Across all states</div>
+                    </div>
+                </div>
+
+                <!-- Card 5: Total Platform Fee -->
+                <div class="stat-card" style="border:1.5px solid #0284c7;">
+                    <div class="stat-icon" style="background:#e0f2fe;color:#0284c7;">⚡</div>
+                    <div>
+                        <div class="stat-value" id="card-total-platform-fee" style="color:#0284c7;">₹0</div>
+                        <div class="stat-label">Total Platform Fee</div>
+                        <div style="font-size:0.75rem;color:var(--slate-500);margin-top:2px;">Central e-Gov share</div>
                     </div>
                 </div>
             </div>
@@ -235,7 +245,9 @@
                                 <tr>
                                     <th>State</th>
                                     <th>Applications</th>
-                                    <th>Revenue</th>
+                                    <th>Dept. Share (₹)</th>
+                                    <th>Platform Fee (₹)</th>
+                                    <th>Total Revenue (₹)</th>
                                     <th>Revenue Share</th>
                                 </tr>
                             </thead>
@@ -259,11 +271,13 @@
                         <span class="card-title">State Performance</span>
                         <div style="font-size:0.8125rem;color:var(--slate-500);margin-top:2px;">End-to-end application lifecycle and completion breakdown per state</div>
                     </div>
-                    <span class="badge badge-info" id="perfCountBadge">4 Federated States</span>
+                    <a href="application-analytics.html" class="btn btn-ghost btn-sm" style="display:inline-flex;align-items:center;gap:4px;">
+                        Application Analytics →
+                    </a>
                 </div>
                 <div class="card-body" style="padding:0;">
                     <div class="table-container">
-                        <table class="table">
+                        <table class="table" id="statePerformanceTable">
                             <thead>
                                 <tr>
                                     <th>State</th>
@@ -302,23 +316,23 @@
                         <div class="status-chip-grid" style="grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));">
                             <div class="status-chip" style="border-left:3px solid var(--navy-600);">
                                 <div class="status-chip-lbl">Total Grievances</div>
-                                <div class="status-chip-val" id="grv-total">3,610</div>
+                                <div class="status-chip-val" id="grv-total">0</div>
                             </div>
                             <div class="status-chip" style="border-left:3px solid #f59e0b;">
                                 <div class="status-chip-lbl">Pending</div>
-                                <div class="status-chip-val" style="color:#d97706;" id="grv-pending">850</div>
+                                <div class="status-chip-val" style="color:#d97706;" id="grv-pending">0</div>
                             </div>
                             <div class="status-chip" style="border-left:3px solid #3b82f6;">
                                 <div class="status-chip-lbl">In Progress</div>
-                                <div class="status-chip-val" style="color:#2563eb;" id="grv-in-progress">120</div>
+                                <div class="status-chip-val" style="color:#2563eb;" id="grv-in-progress">0</div>
                             </div>
                             <div class="status-chip" style="border-left:3px solid #22c55e;">
                                 <div class="status-chip-lbl">Resolved</div>
-                                <div class="status-chip-val" style="color:#16a34a;" id="grv-resolved">2,540</div>
+                                <div class="status-chip-val" style="color:#16a34a;" id="grv-resolved">0</div>
                             </div>
                             <div class="status-chip" style="border-left:3px solid #ef4444;">
                                 <div class="status-chip-lbl">Escalated</div>
-                                <div class="status-chip-val" style="color:#dc2626;" id="grv-escalated">220</div>
+                                <div class="status-chip-val" style="color:#dc2626;" id="grv-escalated">0</div>
                             </div>
                         </div>
                     </div>
@@ -427,23 +441,29 @@
             const visible = states.slice(0, revLimit);
             const tbody = document.getElementById('stateRevenueTbody');
 
-            tbody.innerHTML = visible.map(s => `
-                <tr>
-                    <td style="font-weight:700;color:var(--navy-900);">
-                        🏛️ ${s.name} <span class="badge badge-neutral" style="margin-left:4px;">${s.code}</span>
-                    </td>
-                    <td style="font-weight:600;">${formatNum(s.applications)}</td>
-                    <td style="font-weight:700;color:#16a34a;">${formatINR(s.revenue)}</td>
-                    <td>
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <div style="flex:1;max-width:80px;height:6px;background:var(--slate-200);border-radius:3px;overflow:hidden;">
-                                <div style="width:${s.revenueShare || 0}%;height:100%;background:#2563eb;"></div>
+            tbody.innerHTML = visible.map(s => {
+                const srvFee = s.serviceFee !== undefined ? s.serviceFee : Math.round(s.revenue * 0.8);
+                const platFee = s.platformFee !== undefined ? s.platformFee : Math.round(s.revenue * 0.2);
+                return `
+                    <tr>
+                        <td style="font-weight:700;color:var(--navy-900);">
+                            🏛️ ${s.name} <span class="badge badge-neutral" style="margin-left:4px;">${s.code}</span>
+                        </td>
+                        <td style="font-weight:600;">${formatNum(s.applications)}</td>
+                        <td style="font-weight:700;color:#16a34a;">${formatINR(srvFee)}</td>
+                        <td style="font-weight:700;color:#0284c7;">${formatINR(platFee)}</td>
+                        <td style="font-weight:800;color:var(--navy-900);">${formatINR(s.revenue)}</td>
+                        <td>
+                            <div style="display:flex;align-items:center;gap:8px;">
+                                <div style="flex:1;max-width:80px;height:6px;background:var(--slate-200);border-radius:3px;overflow:hidden;">
+                                    <div style="width:${s.revenueShare || 0}%;height:100%;background:#2563eb;"></div>
+                                </div>
+                                <span style="font-weight:700;font-size:0.8125rem;">${s.revenueShare || 0}%</span>
                             </div>
-                            <span style="font-weight:700;font-size:0.8125rem;">${s.revenueShare || 0}%</span>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
+                        </td>
+                    </tr>
+                `;
+            }).join('');
 
             document.getElementById('revShownCount').textContent = visible.length;
             document.getElementById('revTotalCount').textContent = states.length;
@@ -531,6 +551,8 @@
             document.getElementById('card-total-citizens').textContent = formatNum(nationalData.totalCitizens);
             document.getElementById('card-total-apps').textContent = formatNum(nationalData.totalApplications);
             document.getElementById('card-total-revenue').textContent = formatINR(nationalData.totalRevenue);
+            const platEl = document.getElementById('card-total-platform-fee');
+            if (platEl) platEl.textContent = formatINR(nationalData.totalPlatformFees || 0);
 
             // Update badge for federated states count
             const perfBadge = document.getElementById('perfCountBadge');

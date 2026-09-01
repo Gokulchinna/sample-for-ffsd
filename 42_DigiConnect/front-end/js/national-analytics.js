@@ -10,103 +10,104 @@ export const NATIONAL_STATES_DATA = [
     id: 'state_ap',
     name: 'Andhra Pradesh',
     code: 'AP',
-    applications: 8420,
-    completed: 5900,
-    pending: 1650,
-    inProgress: 1095,
-    rejected: 580,
-    query: 290,
-    revenue: 425000,
-    grievances: 1250,
-    grvPending: 290,
-    grvResolved: 880,
-    grvEscalated: 80,
+    applications: 3,
+    completed: 2,
+    pending: 1,
+    inProgress: 1,
+    rejected: 0,
+    query: 0,
+    revenue: 150,
+    platformFee: 40,
+    serviceFee: 110,
+    grievances: 2,
+    grvPending: 1,
+    grvResolved: 1,
+    grvEscalated: 0,
   },
   {
     id: 'state_ka',
     name: 'Karnataka',
     code: 'KA',
-    applications: 7820,
-    completed: 5400,
-    pending: 1580,
-    inProgress: 980,
-    rejected: 550,
-    query: 290,
-    revenue: 390000,
-    grievances: 1180,
-    grvPending: 280,
-    grvResolved: 820,
-    grvEscalated: 80,
+    applications: 2,
+    completed: 1,
+    pending: 1,
+    inProgress: 1,
+    rejected: 0,
+    query: 0,
+    revenue: 50,
+    platformFee: 10,
+    serviceFee: 40,
+    grievances: 2,
+    grvPending: 1,
+    grvResolved: 1,
+    grvEscalated: 0,
   },
   {
     id: 'state_tn',
     name: 'Tamil Nadu',
     code: 'TN',
-    applications: 5980,
-    completed: 4200,
-    pending: 1210,
-    inProgress: 760,
-    rejected: 410,
-    query: 160,
-    revenue: 295000,
-    grievances: 890,
-    grvPending: 210,
-    grvResolved: 630,
-    grvEscalated: 50,
+    applications: 2,
+    completed: 1,
+    pending: 1,
+    inProgress: 0,
+    rejected: 0,
+    query: 1,
+    revenue: 60,
+    platformFee: 15,
+    serviceFee: 45,
+    grievances: 2,
+    grvPending: 1,
+    grvResolved: 1,
+    grvEscalated: 0,
   },
   {
     id: 'state_kl',
     name: 'Kerala',
     code: 'KL',
-    applications: 1980,
-    completed: 1480,
-    pending: 360,
-    inProgress: 240,
-    rejected: 100,
-    query: 40,
-    revenue: 98000,
-    grievances: 290,
-    grvPending: 70,
-    grvResolved: 210,
-    grvEscalated: 10,
+    applications: 2,
+    completed: 1,
+    pending: 1,
+    inProgress: 0,
+    rejected: 0,
+    query: 0,
+    revenue: 50,
+    platformFee: 15,
+    serviceFee: 35,
+    grievances: 1,
+    grvPending: 0,
+    grvResolved: 1,
+    grvEscalated: 0,
   },
 ];
 
 export const NATIONAL_TIME_TRENDS = {
   daily: [
-    { label: 'Mon', apps: 1620, revenue: 82000 },
-    { label: 'Tue', apps: 1890, revenue: 95000 },
-    { label: 'Wed', apps: 2150, revenue: 109000 },
-    { label: 'Thu', apps: 1980, revenue: 101000 },
-    { label: 'Fri', apps: 2420, revenue: 124000 },
-    { label: 'Sat', apps: 1410, revenue: 71000 },
-    { label: 'Sun', apps: 980, revenue: 49000 },
+    { label: 'Mon', apps: 1, revenue: 50 },
+    { label: 'Tue', apps: 2, revenue: 100 },
+    { label: 'Wed', apps: 1, revenue: 0 },
+    { label: 'Thu', apps: 2, revenue: 60 },
+    { label: 'Fri', apps: 2, revenue: 50 },
+    { label: 'Sat', apps: 1, revenue: 50 },
+    { label: 'Sun', apps: 0, revenue: 0 },
   ],
   weekly: [
-    { label: 'Week 1', apps: 5400, revenue: 270000 },
-    { label: 'Week 2', apps: 6150, revenue: 312000 },
-    { label: 'Week 3', apps: 6880, revenue: 341000 },
-    { label: 'Week 4', apps: 5770, revenue: 285000 },
+    { label: 'Week 1', apps: 2, revenue: 100 },
+    { label: 'Week 2', apps: 3, revenue: 110 },
+    { label: 'Week 3', apps: 2, revenue: 50 },
+    { label: 'Week 4', apps: 2, revenue: 50 },
   ],
   monthly: [
-    { label: 'Jan', apps: 1820, revenue: 91000 },
-    { label: 'Feb', apps: 1950, revenue: 97000 },
-    { label: 'Mar', apps: 2100, revenue: 105000 },
-    { label: 'Apr', apps: 1890, revenue: 94000 },
-    { label: 'May', apps: 2050, revenue: 102000 },
-    { label: 'Jun', apps: 2150, revenue: 108000 },
-    { label: 'Jul', apps: 2020, revenue: 101000 },
-    { label: 'Aug', apps: 2200, revenue: 110000 },
-    { label: 'Sep', apps: 1980, revenue: 99000 },
-    { label: 'Oct', apps: 2120, revenue: 106000 },
-    { label: 'Nov', apps: 2010, revenue: 100000 },
-    { label: 'Dec', apps: 1910, revenue: 95000 },
+    { label: 'Jan', apps: 1, revenue: 50 },
+    { label: 'Feb', apps: 1, revenue: 0 },
+    { label: 'Mar', apps: 2, revenue: 50 },
+    { label: 'Apr', apps: 3, revenue: 150 },
+    { label: 'May', apps: 2, revenue: 60 },
+    { label: 'Jun', apps: 0, revenue: 0 },
   ],
   yearly: [
-    { label: '2023', apps: 18200, revenue: 910000 },
-    { label: '2024', apps: 20800, revenue: 1040000 },
-    { label: '2025', apps: 22600, revenue: 1130000 },
-    { label: '2026', apps: 24200, revenue: 1208000 },
+    { label: '2024', apps: 3, revenue: 100 },
+    { label: '2025', apps: 4, revenue: 150 },
+    { label: '2026', apps: 9, revenue: 310 },
   ],
 };
 
@@ -137,18 +138,20 @@ export async function getNationalAnalyticsData() {
       const match = NATIONAL_STATES_DATA.find(
         (s) => s.code.toUpperCase() === code || s.id === bs.id,
       );
-      const apps = match ? match.applications : (bs.totalApplications ?? 0);
-      const rev = match ? match.revenue : (bs.totalRevenue ?? 0);
-      const completed = match ? match.completed : (apps > 0 ? Math.round(apps * 0.7) : 0);
-      const pending = match ? match.pending : (apps > 0 ? Math.round(apps * 0.2) : 0);
-      const inProgress = match ? match.inProgress : (apps > 0 ? Math.round(apps * 0.12) : 0);
-      const rejected = match ? match.rejected : (apps > 0 ? Math.round(apps * 0.07) : 0);
-      const query = match ? match.query : (apps > 0 ? Math.round(apps * 0.03) : 0);
-      const grievances = match ? match.grievances : (apps > 0 ? Math.round(apps * 0.15) : 0);
-      const grvPending = match ? match.grvPending : (grievances > 0 ? Math.round(grievances * 0.23) : 0);
-      const grvResolved = match ? match.grvResolved : (grievances > 0 ? Math.round(grievances * 0.7) : 0);
-      const grvEscalated = match ? match.grvEscalated : (grievances > 0 ? Math.round(grievances * 0.06) : 0);
-      const grvInProgress = grievances - (grvPending + grvResolved + grvEscalated);
+
+      const apps = bs.totalApplications !== undefined ? bs.totalApplications : (match ? match.applications : 0);
+      const rev = bs.totalRevenue !== undefined ? bs.totalRevenue : (match ? match.revenue : 0);
+      const platformFee = bs.platformFees !== undefined ? bs.platformFees : (backendRevenue?.stateBreakdown?.find(b => b.stateId === bs.id)?.platformFee || (match?.platformFee || Math.round(rev * 0.2)));
+      const serviceFee = bs.serviceFees !== undefined ? bs.serviceFees : Math.max(0, rev - platformFee);
+      const completed = bs.paidApplications !== undefined ? bs.paidApplications : (match ? match.completed : Math.max(0, apps - 1));
+      const pending = Math.max(0, apps - completed);
+      const inProgress = Math.max(0, Math.round(pending * 0.6));
+      const rejected = 0;
+      const query = 0;
+      const grievances = bs.grievancesCount !== undefined ? bs.grievancesCount : (match ? match.grievances : 0);
+      const grvPending = Math.round(grievances * 0.5);
+      const grvResolved = grievances - grvPending;
+      const grvEscalated = 0;
 
       // Check localStorage for active/inactive status override
       const localStatus =
@@ -161,8 +164,8 @@ export async function getNationalAnalyticsData() {
         name: bs.name,
         code: code || bs.name.slice(0, 2).toUpperCase(),
         status: status,
-        departmentsCount: bs.departmentsCount ?? 0,
-        citizens: match ? Math.round(apps * 4.2) : (bs.citizensCount ?? (apps ? Math.round(apps * 4.2) : 0)),
+        departmentsCount: bs.departmentsCount ?? 2,
+        citizens: bs.citizensCount ?? (match ? match.applications : 2),
         applications: apps,
         completed,
         pending,
@@ -170,10 +173,12 @@ export async function getNationalAnalyticsData() {
         rejected,
         query,
         revenue: rev,
+        platformFee,
+        serviceFee,
         grievances,
         grvPending,
         grvResolved,
-        grvInProgress: Math.max(0, grvInProgress),
+        grvInProgress: 0,
         grvEscalated,
       };
     });
@@ -184,20 +189,21 @@ export async function getNationalAnalyticsData() {
         localStorage.getItem('state_status_' + s.id) ||
         localStorage.getItem('state_status_' + code);
       const status = localStatus || 'ACTIVE';
-      const grvInProgress = s.grievances - (s.grvPending + s.grvResolved + s.grvEscalated);
 
       return {
         ...s,
         status,
-        departmentsCount: 12,
-        citizens: Math.round(s.applications * 4.2),
-        grvInProgress: Math.max(0, grvInProgress),
+        departmentsCount: 2,
+        citizens: s.applications,
+        grvInProgress: 0,
       };
     });
   }
 
   // Aggregates
   const totalRevenue = states.reduce((sum, s) => sum + s.revenue, 0);
+  const totalPlatformFees = states.reduce((sum, s) => sum + (s.platformFee || 0), 0);
+  const totalServiceFees = states.reduce((sum, s) => sum + (s.serviceFee || 0), 0);
   const totalApplications = states.reduce((sum, s) => sum + s.applications, 0);
   const totalCompleted = states.reduce((sum, s) => sum + s.completed, 0);
   const totalPending = states.reduce((sum, s) => sum + s.pending, 0);
@@ -212,7 +218,7 @@ export async function getNationalAnalyticsData() {
 
   const activeStates = states.filter((s) => s.status === 'ACTIVE').length;
   const inactiveStates = states.length - activeStates;
-  const totalCitizens = Math.round(totalApplications * 4.2);
+  const totalCitizens = states.reduce((sum, s) => sum + (s.citizens || 0), 0) || 8;
 
   // Compute revenueShare on each state
   states.forEach((s) => {
@@ -223,7 +229,7 @@ export async function getNationalAnalyticsData() {
   const sortedByRevenue = [...states].sort((a, b) => b.revenue - a.revenue);
   const highestState = sortedByRevenue[0] || {
     name: 'Andhra Pradesh',
-    revenue: 425000,
+    revenue: 150,
   };
 
   const appOverview = {
@@ -252,6 +258,8 @@ export async function getNationalAnalyticsData() {
     totalCitizens,
     totalApplications,
     totalRevenue,
+    totalPlatformFees,
+    totalServiceFees,
     avgRevPerApp,
     highestRevenueState: highestState.name,
     highestRevenueAmount: highestState.revenue,

@@ -72,6 +72,8 @@ export const roleConfig = {
       { type: 'link', icon: 'plus-circle', label: 'Service & Workflow Builder', href: 'department-head/service-builder.html' },
       { type: 'label', label: 'Field Administration' },
       { type: 'link', icon: 'users-swap', label: 'Onboard Officers', href: 'department-head/officers.html' },
+      { type: 'label', label: 'Financials & Revenue' },
+      { type: 'link', icon: 'bar-chart', label: 'Department Revenue', href: 'department-head/revenue.html' },
     ],
   },
   officer: {

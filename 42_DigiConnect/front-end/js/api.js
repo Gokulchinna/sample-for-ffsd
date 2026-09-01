@@ -1949,12 +1949,35 @@ export async function apiGetDepartmentAnalytics(deptId = 'dept_rev_ap') {
   return {
     success: true,
     data: {
-      totalServices: 4,
-      activeServices: 4,
+      totalServices: 2,
+      activeServices: 2,
       totalDesignations: 4,
-      totalOfficers: 3,
-      totalApplications: 4,
-      totalRevenue: 0,
+      totalOfficers: 4,
+      totalApplications: 2,
+      totalRevenue: 150,
+      totalPlatformFee: 40,
+      totalServiceFee: 110,
+    },
+  };
+}
+
+export async function apiGetDepartmentRevenue(deptId = 'dept_rev_ap') {
+  try {
+    const res = await apiFetch(`/department-head/revenue?departmentId=${deptId}`);
+    if (res && res.data) return res;
+  } catch (e) {}
+  return {
+    success: true,
+    data: {
+      departmentId: deptId,
+      departmentName: 'Department',
+      totalRevenue: 150,
+      totalPlatformFee: 40,
+      totalServiceFee: 110,
+      paidTransactionsCount: 2,
+      totalApplications: 2,
+      serviceBreakdown: [],
+      transactions: [],
     },
   };
 }

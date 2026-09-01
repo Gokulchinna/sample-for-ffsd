@@ -129,34 +129,42 @@
             <!-- 21. STATE DETAILS SUMMARY CARDS (7 CARDS) -->
             <div style="margin-bottom:var(--space-xl);">
                 <div class="detail-section-title">📊 State Overview Metrics</div>
-                <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));gap:var(--space-md);">
+                <div class="stats-grid" style="grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:var(--space-md);">
                     <div class="stat-badge-tile">
                         <span class="stat-tile-lbl">Citizens</span>
-                        <span class="stat-tile-val" id="sum-citizens">35,820</span>
+                        <span class="stat-tile-val" id="sum-citizens">0</span>
                     </div>
                     <div class="stat-badge-tile">
                         <span class="stat-tile-lbl">Applications</span>
-                        <span class="stat-tile-val" id="sum-apps">8,420</span>
+                        <span class="stat-tile-val" id="sum-apps">0</span>
                     </div>
                     <div class="stat-badge-tile" style="border:1.5px solid #2563eb;">
-                        <span class="stat-tile-lbl" style="color:#2563eb;">Revenue</span>
-                        <span class="stat-tile-val" id="sum-revenue" style="color:#2563eb;">₹4.25L</span>
+                        <span class="stat-tile-lbl" style="color:#2563eb;">Total Revenue</span>
+                        <span class="stat-tile-val" id="sum-revenue" style="color:#2563eb;">₹0</span>
+                    </div>
+                    <div class="stat-badge-tile" style="border:1.5px solid #0284c7;">
+                        <span class="stat-tile-lbl" style="color:#0284c7;">Platform Fee</span>
+                        <span class="stat-tile-val" id="sum-platform-fee" style="color:#0284c7;">₹0</span>
+                    </div>
+                    <div class="stat-badge-tile" style="border:1.5px solid #16a34a;">
+                        <span class="stat-tile-lbl" style="color:#16a34a;">Dept Share</span>
+                        <span class="stat-tile-val" id="sum-service-fee" style="color:#16a34a;">₹0</span>
                     </div>
                     <div class="stat-badge-tile">
                         <span class="stat-tile-lbl">Departments</span>
-                        <span class="stat-tile-val" id="sum-depts">12</span>
+                        <span class="stat-tile-val" id="sum-depts">0</span>
                     </div>
                     <div class="stat-badge-tile">
                         <span class="stat-tile-lbl">Officers</span>
-                        <span class="stat-tile-val" id="sum-officers">420</span>
+                        <span class="stat-tile-val" id="sum-officers">0</span>
                     </div>
                     <div class="stat-badge-tile">
                         <span class="stat-tile-lbl">Services</span>
-                        <span class="stat-tile-val" id="sum-services">86</span>
+                        <span class="stat-tile-val" id="sum-services">0</span>
                     </div>
                     <div class="stat-badge-tile">
                         <span class="stat-tile-lbl">Grievances</span>
-                        <span class="stat-tile-val" id="sum-grievances">1,240</span>
+                        <span class="stat-tile-val" id="sum-grievances">0</span>
                     </div>
                 </div>
             </div>
@@ -284,27 +292,27 @@
                     <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(140px, 1fr));gap:12px;">
                         <div style="padding:12px;background:var(--slate-50);border-radius:var(--radius-md);border:1px solid var(--slate-200);text-align:center;">
                             <div style="font-size:0.75rem;color:var(--slate-500);font-weight:700;">DISTRICTS</div>
-                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-districts">26</div>
+                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-districts">0</div>
                         </div>
                         <div style="padding:12px;background:var(--slate-50);border-radius:var(--radius-md);border:1px solid var(--slate-200);text-align:center;">
                             <div style="font-size:0.75rem;color:var(--slate-500);font-weight:700;">SUB-DIVISIONS</div>
-                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-subdiv">68</div>
+                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-subdiv">0</div>
                         </div>
                         <div style="padding:12px;background:var(--slate-50);border-radius:var(--radius-md);border:1px solid var(--slate-200);text-align:center;">
                             <div style="font-size:0.75rem;color:var(--slate-500);font-weight:700;">MANDALS / TALUKS</div>
-                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-mandals">679</div>
+                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-mandals">0</div>
                         </div>
                         <div style="padding:12px;background:var(--slate-50);border-radius:var(--radius-md);border:1px solid var(--slate-200);text-align:center;">
                             <div style="font-size:0.75rem;color:var(--slate-500);font-weight:700;">VILLAGES / GPS</div>
-                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-villages">14,200</div>
+                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-villages">0</div>
                         </div>
                         <div style="padding:12px;background:var(--slate-50);border-radius:var(--radius-md);border:1px solid var(--slate-200);text-align:center;">
                             <div style="font-size:0.75rem;color:var(--slate-500);font-weight:700;">MUNICIPALITIES</div>
-                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-mun">124</div>
+                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-mun">0</div>
                         </div>
                         <div style="padding:12px;background:var(--slate-50);border-radius:var(--radius-md);border:1px solid var(--slate-200);text-align:center;">
                             <div style="font-size:0.75rem;color:var(--slate-500);font-weight:700;">WARDS / ZONES</div>
-                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-wards">3,400</div>
+                            <div style="font-size:1.25rem;font-weight:800;color:var(--navy-900);margin-top:2px;" id="jur-wards">0</div>
                         </div>
                     </div>
                 </div>
@@ -749,13 +757,19 @@
             btnStateStatus.style.color = isStateActive ? '#ef4444' : '#16a34a';
 
             // Summary metrics
-            document.getElementById('sum-citizens').textContent = formatNum(summary.totalCitizens);
-            document.getElementById('sum-apps').textContent = formatNum(summary.totalApplications);
-            document.getElementById('sum-revenue').textContent = formatINR(summary.totalRevenue, true);
-            document.getElementById('sum-depts').textContent = summary.totalDepartments;
-            document.getElementById('sum-officers').textContent = summary.totalOfficers;
-            document.getElementById('sum-services').textContent = summary.totalServices;
-            document.getElementById('sum-grievances').textContent = formatNum(summary.totalGrievances);
+            document.getElementById('sum-citizens').textContent = formatNum(summary.totalCitizens || 0);
+            document.getElementById('sum-apps').textContent = formatNum(summary.totalApplications || 0);
+            document.getElementById('sum-revenue').textContent = formatINR(summary.totalRevenue || 0, true);
+            const platFee = summary.platformFees !== undefined ? summary.platformFees : Math.round((summary.totalRevenue || 0) * 0.2);
+            const srvFee = summary.serviceFees !== undefined ? summary.serviceFees : Math.max(0, (summary.totalRevenue || 0) - platFee);
+            const platEl = document.getElementById('sum-platform-fee');
+            if (platEl) platEl.textContent = formatINR(platFee, true);
+            const srvEl = document.getElementById('sum-service-fee');
+            if (srvEl) srvEl.textContent = formatINR(srvFee, true);
+            document.getElementById('sum-depts').textContent = summary.totalDepartments || 0;
+            document.getElementById('sum-officers').textContent = summary.totalOfficers || 0;
+            document.getElementById('sum-services').textContent = summary.totalServices || 0;
+            document.getElementById('sum-grievances').textContent = formatNum(summary.totalGrievances || 0);
 
             // Administrator
             document.getElementById('adminName').textContent = stateAdmin.name;
