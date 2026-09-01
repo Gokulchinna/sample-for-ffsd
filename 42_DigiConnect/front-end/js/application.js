@@ -17,6 +17,26 @@ export async function initApplyService() {
   const session = initPage({ title: 'Apply for Service', breadcrumbs: [{ label: 'Citizen Portal', href: 'citizen/citizen-dashboard.html' }, { label: 'Apply for Service' }], requiredRole: 'citizen' });
   if (!session) return;
   renderNotifPanel();
+
+  // Prefill applicant details from session if available
+  try {
+    const names = (session.name || '').trim().split(' ');
+    const fFirstName = document.getElementById('f_firstName');
+    const fLastName = document.getElementById('f_lastName');
+    const fEmail = document.getElementById('f_email');
+    const fMobile = document.getElementById('f_mobile');
+    const fAadhaar = document.getElementById('f_aadhaar');
+    const fDob = document.getElementById('f_dob');
+    const fGender = document.getElementById('f_gender');
+    
+    if (fFirstName && !fFirstName.value && names[0]) fFirstName.value = names[0];
+    if (fLastName && !fLastName.value && names.length > 1) fLastName.value = names.slice(1).join(' ');
+    if (fEmail && !fEmail.value && session.email) fEmail.value = session.email;
+    if (fMobile && !fMobile.value && (session.phone || session.mobile)) fMobile.value = session.phone || session.mobile;
+    if (fAadhaar && !fAadhaar.value && session.aadhaar) fAadhaar.value = session.aadhaar;
+    if (fDob && !fDob.value && session.dob) fDob.value = session.dob;
+    if (fGender && !fGender.value && session.gender) fGender.value = session.gender;
+  } catch(e) { console.warn('Autofill error:', e); }
   
   let services = [];
   const citizenStateId = session.stateId || (session.stateName?.toLowerCase().includes('karnataka') ? 'state_ka' : session.stateName?.toLowerCase().includes('kerala') ? 'state_kl' : session.stateName?.toLowerCase().includes('tamil') ? 'state_tn' : 'state_ap');
@@ -302,6 +322,91 @@ export async function initApplyService() {
       </div>`
   };
 
+  function renderServiceSpecificFields(service) {
+    const specificBody = document.getElementById('specificBody');
+    const specificTitle = document.getElementById('specificTitle');
+    const specificSection = document.getElementById('serviceSpecificSection');
+    if (!specificBody) return;
+
+    if (specificTitle) {
+      specificTitle.textContent = `${service.name} — Service-Specific Information`;
+    }
+
+    const allFields = service.fields || [];
+    // Demographic / personal address fields already present in Sections 1 & 2
+    const commonIds = ['applicant_name', 'aadhaar_number', 'dob', 'first_name', 'last_name', 'mobile', 'email', 'phone', 'street', 'pincode', 'gender'];
+    let displayFields = allFields.filter(f => !commonIds.includes((f.id || '').toLowerCase()));
+    
+    // If all fields were common or displayFields is empty, show all service fields
+    if (displayFields.length === 0 && allFields.length > 0) {
+      displayFields = allFields;
+    }
+
+    if (displayFields.length > 0) {
+      let html = '<div class="form-grid">';
+      displayFields.forEach(f => {
+        const reqStar = f.required ? '<span class="required">*</span>' : '';
+        const reqAttr = f.required ? 'required' : '';
+        const fieldType = (f.type || 'TEXT').toUpperCase();
+        const fieldId = `dyn_${f.id}`;
+        
+        let inputHtml = '';
+        if (fieldType === 'DROPDOWN' || fieldType === 'SELECT') {
+          const rawOpts = f.constraints?.options || f.options || [];
+          const opts = Array.isArray(rawOpts) ? rawOpts : (typeof rawOpts === 'string' ? rawOpts.split(',').map(s => s.trim()) : []);
+          inputHtml = `
+            <select class="form-input dynamic-field" id="${fieldId}" name="${f.id}" data-field-id="${f.id}" data-label="${f.label}" ${reqAttr}>
+              <option value="">Select ${f.label}...</option>
+              ${opts.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+            </select>
+          `;
+        } else if (fieldType === 'NUMBER') {
+          inputHtml = `
+            <input type="number" class="form-input dynamic-field" id="${fieldId}" name="${f.id}" data-field-id="${f.id}" data-label="${f.label}" placeholder="Enter ${f.label}" min="0" ${reqAttr} />
+          `;
+        } else if (fieldType === 'DATE') {
+          inputHtml = `
+            <input type="date" class="form-input dynamic-field" id="${fieldId}" name="${f.id}" data-field-id="${f.id}" data-label="${f.label}" ${reqAttr} />
+          `;
+        } else if (fieldType === 'TEXTAREA') {
+          inputHtml = `
+            <textarea class="form-input dynamic-field" id="${fieldId}" name="${f.id}" data-field-id="${f.id}" data-label="${f.label}" rows="3" placeholder="Enter ${f.label}" ${reqAttr}></textarea>
+          `;
+        } else {
+          // Default TEXT
+          inputHtml = `
+            <input type="text" class="form-input dynamic-field" id="${fieldId}" name="${f.id}" data-field-id="${f.id}" data-label="${f.label}" placeholder="Enter ${f.label}" ${reqAttr} />
+          `;
+        }
+
+        const isColSpanFull = fieldType === 'TEXTAREA' || (f.label && f.label.length > 35);
+        html += `
+          <div class="form-group ${isColSpanFull ? 'col-span-full' : ''}">
+            <label class="form-label" for="${fieldId}">${f.label} ${reqStar}</label>
+            ${inputHtml}
+          </div>
+        `;
+      });
+      html += '</div>';
+      specificBody.innerHTML = html;
+      if (specificSection) specificSection.style.display = 'block';
+      return;
+    }
+
+    // Fallback: If service has no explicit fields, check specificFields by category or name
+    const fallbackTemplate = specificFields[service.name] || specificFields[service.category] || specificFields[service.cat];
+    if (fallbackTemplate) {
+      specificBody.innerHTML = fallbackTemplate;
+      if (specificSection) specificSection.style.display = 'block';
+    } else {
+      specificBody.innerHTML = `
+        <div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:var(--radius-md);padding:16px;text-align:center;">
+          <p style="color:var(--color-text-muted);font-size:0.875rem;margin:0;">No additional service-specific parameters required. Basic applicant and address details are sufficient.</p>
+        </div>
+      `;
+    }
+  }
+
   function selectService(serviceId) {
     selectedService = services.find(s => s.id === serviceId);
     if (!selectedService) return;
@@ -339,11 +444,8 @@ export async function initApplyService() {
     if (pm_card)       pm_card.style.display       = fee === 0 ? 'none' : 'flex';
     if (pm_netbanking) pm_netbanking.style.display  = fee === 0 ? 'none' : 'flex';
     
-    // Populate service specific fields
-    const specificBody = document.getElementById('specificBody');
-    if (specificBody) {
-      specificBody.innerHTML = specificFields[selectedService.name] || '<p style="color:var(--color-text-muted);font-size:0.875rem;">No additional fields required.</p>';
-    }
+    // Populate service-specific fields dynamically from department head defined fields
+    renderServiceSpecificFields(selectedService);
 
     // Docs upload slots
     const docUploadList = document.getElementById('docUploadList');
@@ -579,6 +681,24 @@ export async function initApplyService() {
       tc('rev_docs', uploadedSlots.length > 0
         ? `${uploadedSlots.length} document(s): ${uploadedNames.join(', ')}`
         : 'No documents uploaded');
+
+      // Populate service-specific fields in review
+      const revSpecificCard = document.getElementById('revSpecificCard');
+      const revSpecificFields = document.getElementById('rev_specific_fields');
+      const dynInputs = document.querySelectorAll('#specificBody .dynamic-field');
+      if (revSpecificFields && dynInputs.length > 0) {
+        revSpecificFields.innerHTML = Array.from(dynInputs).map(inp => {
+          const label = inp.getAttribute('data-label') || inp.name || 'Field';
+          let val = inp.value || '—';
+          if (inp.tagName === 'SELECT' && inp.selectedIndex >= 0 && inp.options[inp.selectedIndex]) {
+            val = inp.options[inp.selectedIndex].text || val;
+          }
+          return `<div class="review-row"><span class="review-label">${label}</span><span class="review-value">${val}</span></div>`;
+        }).join('');
+        if (revSpecificCard) revSpecificCard.style.display = 'block';
+      } else if (revSpecificCard) {
+        revSpecificCard.style.display = 'none';
+      }
     }
   }
 
@@ -712,25 +832,39 @@ export async function initApplyService() {
       const formAddress = [formStreet, formVillage, formMandal, formDistrict, formState, formPincode]
         .filter(Boolean).join(', ') || null;
 
-      // Service-specific fields — positionally from specificBody
+      // Service-specific fields — dynamically from department-defined fields
       let svcFields = {};
-      const sName = selectedService.name;
-      if (sName === 'Income Certificate') {
-        svcFields = { income: sf(0), incomeSource: sf(1), occupation: sf(2), purpose: sf(3) };
-      } else if (sName === 'Caste Certificate') {
-        svcFields = { community: sf(0), subCaste: sf(1), category: sf(2), religion: sf(3), purpose: sf(4) };
-      } else if (sName === 'Residence Certificate') {
-        svcFields = { duration: sf(0), residenceType: sf(1), purpose: sf(2) };
-      } else if (sName === 'Welfare / Subsidy Scheme') {
-        svcFields = { landHolding: sf(0), surveyNo: sf(1), bankAccount: sf(2), ifsc: sf(3) };
-      } else if (sName === 'Scholarship Application') {
-        svcFields = { courseName: sf(0), institution: sf(1), admissionYear: sf(2), tuitionFee: sf(3) };
-      } else if (sName === 'Event Permission') {
-        svcFields = { eventName: sf(0), eventType: sf(1), eventDate: sf(2), eventDuration: sf(3), venueAddress: sf(4), attendance: sf(5) };
-      } else if (sName === 'Vendor License') {
-        svcFields = { businessName: sf(0), businessType: sf(1), businessAddress: sf(2), ownershipType: sf(3) };
-      } else if (sName === 'Record Correction') {
-        svcFields = { recordType: sf(0), recordNo: sf(1), incorrect: sf(2), correct: sf(3), reason: sf(4) };
+      const dynInputs = document.querySelectorAll('#specificBody .dynamic-field');
+      if (dynInputs.length > 0) {
+        dynInputs.forEach(input => {
+          const fid = input.getAttribute('data-field-id') || input.name || input.id.replace('dyn_', '');
+          svcFields[fid] = input.value;
+        });
+      } else {
+        const sName = selectedService.name;
+        if (sName === 'Income Certificate') {
+          svcFields = { income: sf(0), incomeSource: sf(1), occupation: sf(2), purpose: sf(3) };
+        } else if (sName === 'Caste Certificate') {
+          svcFields = { community: sf(0), subCaste: sf(1), category: sf(2), religion: sf(3), purpose: sf(4) };
+        } else if (sName === 'Residence Certificate') {
+          svcFields = { duration: sf(0), residenceType: sf(1), purpose: sf(2) };
+        } else if (sName === 'Welfare / Subsidy Scheme') {
+          svcFields = { landHolding: sf(0), surveyNo: sf(1), bankAccount: sf(2), ifsc: sf(3) };
+        } else if (sName === 'Scholarship Application') {
+          svcFields = { courseName: sf(0), institution: sf(1), admissionYear: sf(2), tuitionFee: sf(3) };
+        } else if (sName === 'Event Permission') {
+          svcFields = { eventName: sf(0), eventType: sf(1), eventDate: sf(2), eventDuration: sf(3), venueAddress: sf(4), attendance: sf(5) };
+        } else if (sName === 'Vendor License') {
+          svcFields = { businessName: sf(0), businessType: sf(1), businessAddress: sf(2), ownershipType: sf(3) };
+        } else if (sName === 'Record Correction') {
+          svcFields = { recordType: sf(0), recordNo: sf(1), incorrect: sf(2), correct: sf(3), reason: sf(4) };
+        } else {
+          const allInputs = document.querySelectorAll('#specificBody input, #specificBody select, #specificBody textarea');
+          allInputs.forEach((input, idx) => {
+            const key = input.getAttribute('data-field-id') || input.name || input.id || `field_${idx}`;
+            if (input.value) svcFields[key] = input.value;
+          });
+        }
       }
 
       const paymentTxnId = selectedService.fee === 0 ? null : (window.mockPaymentTxn || `TXN-${Math.floor(1000000+Math.random()*9000000)}`);
