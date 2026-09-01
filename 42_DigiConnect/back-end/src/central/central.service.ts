@@ -429,12 +429,12 @@ export class CentralService {
       const deptOfficers = db.officers.filter((o) => o.departmentId === d.id);
 
       const isRev = d.code?.includes('REV') || d.name?.includes('Revenue');
-      const isEdu = d.code?.includes('EDU') || d.name?.includes('Education');
+      const isWel = d.code?.includes('WEL') || d.name?.includes('Welfare') || d.code?.includes('EDU');
 
-      const baseDeptApps = isRev ? 5200 : (isEdu ? 3220 : 0);
-      const baseDeptRev = isRev ? 265000 : (isEdu ? 160000 : 0);
-      const baseDeptGrv = isRev ? 770 : (isEdu ? 470 : 0);
-      const baseDeptOfficers = isRev ? 230 : (isEdu ? 190 : 0);
+      const baseDeptApps = isRev ? 5200 : (isWel ? 3220 : 0);
+      const baseDeptRev = isRev ? 265000 : (isWel ? 160000 : 0);
+      const baseDeptGrv = isRev ? 770 : (isWel ? 470 : 0);
+      const baseDeptOfficers = isRev ? 230 : (isWel ? 190 : 0);
 
       const liveDeptApps = stateApplications.filter((a) => (a as any).departmentId === d.id || a.dept === d.name);
       const liveDeptRev = liveDeptApps.reduce((sum, a) => {
@@ -456,7 +456,7 @@ export class CentralService {
         id: d.id,
         name: d.name,
         code: d.code,
-        headName: head ? head.name : (isRev ? 'Dr. B. R. Ambedkar IAS' : (isEdu ? 'K. Sandhya Rani IAS' : `${d.name} Director IAS`)),
+        headName: head ? head.name : (isRev ? 'Dr. B. R. Ambedkar IAS' : (isWel ? 'Sri K. Harshavardhan IAS' : `${d.name} Director IAS`)),
         headEmail: head ? head.email : `head.${d.code.toLowerCase()}@${state.code.toLowerCase()}.gov.in`,
         servicesCount: deptServices.length > 0 ? deptServices.length : 3,
         officersCount: deptOfficersCount,

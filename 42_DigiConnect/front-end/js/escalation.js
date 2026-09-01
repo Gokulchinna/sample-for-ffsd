@@ -15,15 +15,33 @@ import { apiGetEscalated, apiGetSupervisorDashboard, apiAssignApplication, apiRe
  * @returns {object} { status: 'ok'|'warning'|'breach', daysLeft, text }
  */
 export function checkSLA(app) {
-  if (!app.slaDate) return { status: 'ok', daysLeft: null, text: 'No SLA' };
-  const now = new Date();
-  const sla = new Date(app.slaDate);
-  const diffMs = sla - now;
-  const daysLeft = Math.ceil(diffMs / 86400000);
+  if (!app) return { status: 'ok', daysLeft: null, text: 'No SLA' };
 
-  if (app.status === 'approved' || app.status === 'rejected' || app.status === 'resolved') {
-    return { status: 'ok', daysLeft, text: 'Completed' };
+  const normStatus = (app.status || '').toLowerCase().replace(/_/g, '-');
+  const isClosed = ['approved', 'completed', 'resolved', 'certificate-generated', 'rejected'].includes(normStatus);
+
+  let daysLeft = null;
+  if (app.slaRemaining !== undefined && app.slaRemaining !== null) {
+    daysLeft = Number(app.slaRemaining);
+  } else if (app.slaDaysRemaining !== undefined && app.slaDaysRemaining !== null) {
+    daysLeft = Number(app.slaDaysRemaining);
+  } else if (app.slaDate) {
+    const now = new Date();
+    const sla = new Date(app.slaDate);
+    const diffMs = sla - now;
+    daysLeft = Math.ceil(diffMs / 86400000);
+  } else if (app.submittedDate || app.appliedDate) {
+    const start = new Date(app.submittedDate || app.appliedDate);
+    const total = Number(app.slaTotal || app.slaDays || 15);
+    const end = new Date(start.getTime() + total * 86400000);
+    daysLeft = Math.ceil((end - new Date()) / 86400000);
   }
+
+  if (isClosed) {
+    return { status: normStatus === 'rejected' ? 'breach' : 'ok', daysLeft: daysLeft ?? 0, text: normStatus === 'rejected' ? 'Rejected' : 'Closed' };
+  }
+
+  if (daysLeft === null || isNaN(daysLeft)) return { status: 'ok', daysLeft: null, text: 'Active' };
   if (daysLeft < 0) return { status: 'breach', daysLeft, text: `${Math.abs(daysLeft)} days overdue` };
   if (daysLeft <= 2) return { status: 'warning', daysLeft, text: `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left` };
   return { status: 'ok', daysLeft, text: `${daysLeft} days left` };

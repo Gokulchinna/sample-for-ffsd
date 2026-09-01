@@ -48,13 +48,32 @@ export class ApplicationsService {
       createApplicationDto.formData?.selectedJurisdictionNodeId ||
       citizen?.jurisdiction;
 
-    // Auto-assign logic: Hybrid Jurisdiction + Workload Balancer
-    // 1. Filter officers by department AND jurisdiction matching the citizen
-    let eligibleOfficers = this.usersService.findEligibleOfficers(
-      createApplicationDto.dept, 
-      selectedNodeId || citizen?.jurisdiction
-    );
+    // Resolve service workflow definition
+    const workflowSteps = (service as any)?.workflowSteps || [];
+    const step1 = workflowSteps.find((s: any) => s.stepNumber === 1);
+    const requiredDesignationId = step1?.requiredDesignationId;
 
+    // Auto-assign logic: Hybrid Jurisdiction + Workload Balancer
+    // 1. If Step 1 specifies a required designation, find matching officers in the department
+    let eligibleOfficers: any[] = [];
+    if (requiredDesignationId) {
+      const deptOfficers = db.officers.filter(o => 
+        o.designationId === requiredDesignationId &&
+        (!(service as any)?.departmentId || o.departmentId === (service as any)?.departmentId || (o as any).departmentName === createApplicationDto.dept)
+      );
+      if (deptOfficers.length > 0) {
+        const leafNodeId = selectedNodeId || citizen?.jurisdiction;
+        const scoped = deptOfficers.filter(o => !leafNodeId || !o.assignedNodeId || this.geographyService.isNodeWithinScope(leafNodeId, o.assignedNodeId));
+        eligibleOfficers = scoped.length > 0 ? scoped : deptOfficers;
+      }
+    }
+
+    if (eligibleOfficers.length === 0) {
+      eligibleOfficers = this.usersService.findEligibleOfficers(
+        createApplicationDto.dept, 
+        selectedNodeId || citizen?.jurisdiction
+      );
+    }
     if (eligibleOfficers.length === 0) {
       eligibleOfficers = this.usersService.findFallbackOfficers(createApplicationDto.dept);
     }
@@ -91,6 +110,11 @@ export class ApplicationsService {
       }
     }
 
+    const slaTotalDays = (service as any)?.slaDays || (service as any)?.sla || 15;
+    const nowIso = new Date().toISOString();
+    const slaIso = new Date(Date.now() + slaTotalDays * 24 * 60 * 60 * 1000).toISOString();
+    const assignedOffName = officer ? `${officer.name} (${officer.designationTitle || officer.designationId || 'Officer'})` : 'Unassigned';
+
     const newApp: Application = {
       id: generateId('APP'),
       serviceId: createApplicationDto.serviceId,
@@ -100,7 +124,7 @@ export class ApplicationsService {
       citizenName: citizen ? citizen.name : 'Unknown Citizen',
       jurisdiction: selectedNodeId || jurisdictionPath,
       officerId: officer ? officer.id : 'UNASSIGNED',
-      officerName: officer ? officer.name : 'Unassigned',
+      officerName: assignedOffName,
       dept: createApplicationDto.dept,
       status: AppStatus.PENDING,
       remarks: createApplicationDto.remarks || '',
@@ -108,26 +132,53 @@ export class ApplicationsService {
       paymentMethod: createApplicationDto.paymentTransactionId ? 'online' : undefined,
       paymentStatus: createApplicationDto.paymentTransactionId ? 'paid' : 'pending',
       paymentTransactionId: createApplicationDto.paymentTransactionId,
-      submittedDate: new Date().toISOString(),
-      slaDate: new Date(Date.now() + (service ? (service as any).sla || 7 : 7) * 24 * 60 * 60 * 1000).toISOString(),
-      timeline: [{ action: 'Application Submitted', date: new Date().toISOString(), actor: citizen ? citizen.name : 'Citizen', note: 'Application received' }],
-      documents: createApplicationDto.documents || [],
+      submittedDate: nowIso,
+      slaDate: slaIso,
+      timeline: [{ 
+        action: 'Application Submitted', 
+        stepName: 'Application Submitted',
+        date: nowIso, 
+        completedDate: nowIso,
+        actor: citizen ? citizen.name : 'Citizen', 
+        note: 'Application received online',
+        remarks: 'Application received online',
+        status: 'COMPLETED'
+      }],
+      documents: (createApplicationDto.documents || []).map((d: any) => ({
+        ...d,
+        date: d.date || nowIso,
+      })),
       ...(createApplicationDto.formData || {}),
     };
 
+    (newApp as any).appliedDate = nowIso;
+    (newApp as any).departmentName = createApplicationDto.dept;
+    (newApp as any).departmentId = (service as any)?.departmentId;
+    (newApp as any).stateId = (service as any)?.stateId;
+    (newApp as any).assignedOfficerId = newApp.officerId;
+    (newApp as any).assignedOfficerName = assignedOffName;
+    (newApp as any).slaTotal = slaTotalDays;
+    (newApp as any).slaRemaining = slaTotalDays;
+    (newApp as any).slaDaysRemaining = slaTotalDays;
     (newApp as any).selectedJurisdictionNodeId = selectedNodeId;
     (newApp as any).jurisdictionPath = jurisdictionPath;
+    (newApp as any).currentStep = 1;
     (newApp as any).currentStepNumber = 1;
-    (newApp as any).totalWorkflowSteps = 3;
+    (newApp as any).totalWorkflowSteps = workflowSteps.length > 0 ? workflowSteps.length : 3;
+    (newApp as any).workflowSteps = workflowSteps;
     (newApp as any).queries = [];
 
     if (createApplicationDto.paymentTransactionId) {
       const pMethod = createApplicationDto.paymentMethod || 'online';
       newApp.timeline.push({ 
         action: 'Payment Confirmed', 
+        stepName: 'Payment Confirmed',
         date: new Date().toISOString(), 
+        completedDate: new Date().toISOString(),
         actor: 'System', 
-        note: `Payment of ₹${createApplicationDto.fee} received via ${pMethod}. TXN: ${createApplicationDto.paymentTransactionId}` 
+        note: `Payment of ₹${createApplicationDto.fee} received via ${pMethod}. TXN: ${createApplicationDto.paymentTransactionId}`,
+        remarks: `Payment of ₹${createApplicationDto.fee} received via ${pMethod}. TXN: ${createApplicationDto.paymentTransactionId}`,
+        status: 'COMPLETED'
       });
     }
 
@@ -412,18 +463,26 @@ export class ApplicationsService {
           this.geographyService.isNodeWithinScope(leafNodeId, o.assignedNodeId)
         ) || db.officers.find(o => o.designationId === nextStepConfig.requiredDesignationId);
 
-
         if (nextOfficer) {
           app.officerId = nextOfficer.id;
           app.officerName = `${nextOfficer.name} (${nextOfficer.designationTitle || nextOfficer.designationId})`;
+          (app as any).assignedOfficerId = nextOfficer.id;
+          (app as any).assignedOfficerName = app.officerName;
         }
       }
 
+      (app as any).currentStep = nextStep;
+      (app as any).currentStepNumber = nextStep;
+
       app.timeline.push({
         action: `Stage ${currentStep} Approved -> Advanced to Step ${nextStep}`,
+        stepName: nextStepConfig?.stepName || `Stage ${nextStep}`,
         date: timestamp,
+        completedDate: timestamp,
         actor: actorName,
         note: remarks || `Stage verified and forwarded to next officer in workflow.`,
+        remarks: remarks || `Stage verified and forwarded to next officer in workflow.`,
+        status: 'IN_PROGRESS',
       });
 
       this.notificationsService.pushApplicationNotification(
@@ -557,7 +616,7 @@ export class ApplicationsService {
 
       apps = apps.filter((a) => {
         const leafNodeId = (a as any).selectedJurisdictionNodeId || a.jurisdiction;
-        const currentStepNum = Number((a as any).currentStepNumber) || 1;
+        const currentStepNum = Number((a as any).currentStepNumber || (a as any).currentStep) || 1;
 
         // Check service workflow definition
         const service = (db.dynamicServices || []).find((s: any) => s.id === a.serviceId) ||
@@ -598,11 +657,14 @@ export class ApplicationsService {
 
     return apps.map(a => {
       const citizenUser = db.users.find(u => u.id === a.citizenId);
-      const submittedDate = new Date(a.submittedDate);
-      const slaDate = new Date(a.slaDate);
+      const subDateStr = a.submittedDate || (a as any).appliedDate || (a as any).createdAt || new Date().toISOString();
+      const submittedDate = new Date(subDateStr);
+      const slaTotalDays = (a as any).slaTotal || 15;
+      const slaDateStr = a.slaDate || new Date(submittedDate.getTime() + slaTotalDays * 86400000).toISOString();
+      const slaDate = new Date(slaDateStr);
       const totalDays = Math.max(1, Math.ceil((slaDate.getTime() - submittedDate.getTime()) / 86400000));
       const usedDays = Math.ceil((new Date().getTime() - submittedDate.getTime()) / 86400000);
-      const slaLeft = totalDays - usedDays;
+      const slaLeft = (a as any).slaRemaining !== undefined ? (a as any).slaRemaining : (totalDays - usedDays);
 
       // Mask aadhaar — show only last 4 digits
       const rawAadhaar = citizenUser?.aadhaar || '';

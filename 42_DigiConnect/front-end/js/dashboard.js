@@ -118,63 +118,76 @@ export async function initCitizenDashboard() {
 
   // Render latest application progress card dynamically
   const latestCard = document.getElementById('latestAppProgressCard');
-  if (latestCard && apps.length > 0) {
-    const latest = [...apps].sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate))[0];
-    const statusBadge = latest.status === 'approved' || latest.status === 'completed'
-      ? '<span class="badge badge-success">Approved</span>'
-      : latest.status === 'rejected'
-      ? '<span class="badge badge-danger">Rejected</span>'
-      : latest.status === 'query'
-      ? '<span class="badge badge-warning">Query Raised</span>'
-      : latest.status === 'escalated'
-      ? '<span class="badge badge-danger">Escalated</span>'
-      : '<span class="badge badge-info">In Progress</span>';
+  if (latestCard) {
+    if (apps.length > 0) {
+      const latest = [...apps].sort((a, b) => new Date(b.submittedDate) - new Date(a.submittedDate))[0];
+      const statusBadge = latest.status === 'approved' || latest.status === 'completed'
+        ? '<span class="badge badge-success">Approved</span>'
+        : latest.status === 'rejected'
+        ? '<span class="badge badge-danger">Rejected</span>'
+        : latest.status === 'query'
+        ? '<span class="badge badge-warning">Query Raised</span>'
+        : latest.status === 'escalated'
+        ? '<span class="badge badge-danger">Escalated</span>'
+        : '<span class="badge badge-info">In Progress</span>';
 
-    const timelineItems = (latest.timeline || []).map(t => {
-      const dotClass = t.action?.toLowerCase().includes('reject') ? 'danger'
-        : t.action?.toLowerCase().includes('approve') || t.action?.toLowerCase().includes('issued') || t.action?.toLowerCase().includes('completed') ? 'success'
-        : t.action?.toLowerCase().includes('query') || t.action?.toLowerCase().includes('escalat') ? 'warning'
-        : 'default';
-      const icon = dotClass === 'success'
-        ? '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />'
-        : dotClass === 'danger'
-        ? '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />'
-        : '<circle cx="12" cy="12" r="4" fill="currentColor"/>';
-      return `
-        <div class="timeline-item">
-          <div class="timeline-dot ${dotClass}">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">${icon}</svg>
-          </div>
-          <div class="timeline-content">
-            <div class="timeline-label">${t.action}</div>
-            <div class="timeline-time">${formatDate(t.date)}${t.note ? ' · ' + t.note : ''}</div>
-          </div>
+      const timelineItems = (latest.timeline || []).map(t => {
+        const dotClass = t.action?.toLowerCase().includes('reject') ? 'danger'
+          : t.action?.toLowerCase().includes('approve') || t.action?.toLowerCase().includes('issued') || t.action?.toLowerCase().includes('completed') ? 'success'
+          : t.action?.toLowerCase().includes('query') || t.action?.toLowerCase().includes('escalat') ? 'warning'
+          : 'default';
+        const icon = dotClass === 'success'
+          ? '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />'
+          : dotClass === 'danger'
+          ? '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />'
+          : '<circle cx="12" cy="12" r="4" fill="currentColor"/>';
+        return `
+          <div class="timeline-item">
+            <div class="timeline-dot ${dotClass}">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">${icon}</svg>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-label">${t.action}</div>
+              <div class="timeline-time">${formatDate(t.date)}${t.note ? ' · ' + t.note : ''}</div>
+            </div>
+          </div>`;
+      }).join('');
+
+      const canDownload = latest.status === 'approved' || latest.status === 'completed';
+
+      latestCard.innerHTML = `
+        <div class="card-header">
+          <span class="card-title">${latest.id} – Progress</span>
+          ${statusBadge}
+        </div>
+        <div class="card-body">
+          <div style="font-size:0.8rem;color:var(--color-text-muted);margin-bottom:var(--space-md);">${latest.serviceName} · ${latest.dept}</div>
+          <div class="timeline">${timelineItems || '<div style="color:var(--color-text-muted);font-size:0.875rem;">No timeline events yet.</div>'}</div>
+          ${canDownload ? `
+          <div style="margin-top:var(--space-lg);">
+            <button class="btn btn-primary w-full" onclick="window.showToast && window.showToast('Certificate downloaded!','success')">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              Download Certificate
+            </button>
+          </div>` : `
+          <div style="margin-top:var(--space-lg);">
+            <a href="track-application.html?id=${latest.id}" class="btn btn-outline w-full">View Full Details →</a>
+          </div>`}
         </div>`;
-    }).join('');
-
-    const canDownload = latest.status === 'approved' || latest.status === 'completed';
-
-    latestCard.innerHTML = `
-      <div class="card-header">
-        <span class="card-title">${latest.id} – Progress</span>
-        ${statusBadge}
-      </div>
-      <div class="card-body">
-        <div style="font-size:0.8rem;color:var(--color-text-muted);margin-bottom:var(--space-md);">${latest.serviceName} · ${latest.dept}</div>
-        <div class="timeline">${timelineItems || '<div style="color:var(--color-text-muted);font-size:0.875rem;">No timeline events yet.</div>'}</div>
-        ${canDownload ? `
-        <div style="margin-top:var(--space-lg);">
-          <button class="btn btn-primary w-full" onclick="window.showToast && window.showToast('Certificate downloaded!','success')">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-            </svg>
-            Download Certificate
-          </button>
-        </div>` : `
-        <div style="margin-top:var(--space-lg);">
-          <a href="track-application.html?id=${latest.id}" class="btn btn-outline w-full">View Full Details →</a>
-        </div>`}
-      </div>`;
+    } else {
+      latestCard.innerHTML = `
+        <div class="card-header">
+          <span class="card-title">Application Progress</span>
+        </div>
+        <div class="card-body" style="text-align:center;padding:var(--space-xl);color:var(--color-text-muted);">
+          <div style="font-size:2rem;margin-bottom:8px;">📋</div>
+          <div style="font-weight:700;color:var(--navy-900);margin-bottom:4px;">No Active Applications</div>
+          <div style="font-size:0.8125rem;margin-bottom:var(--space-md);color:var(--slate-500);">Apply for a government service to track its real-time workflow progress here.</div>
+          <a href="apply-service.html" class="btn btn-primary btn-sm">Browse Services & Apply →</a>
+        </div>`;
+    }
   }
 
   document.querySelectorAll('[data-action="download-cert"]').forEach(btn => {
@@ -249,6 +262,33 @@ export async function initOfficerDashboard() {
         if (noteEl) noteEl.textContent = `Target: 95% | ${withinSla}/${totalProcessed} on-time`;
       }
     });
+
+    // ── Update Officer Queue Metrics dynamically ──
+    const pendingReviewCount = displayQueue.length;
+    const queriesCount = (window._officerQueries || []).length;
+    const breaches = officerQueue.filter(a => a.slaLeft < 0);
+    const breachCount = breaches.length;
+    const approvedToday = officerActivity.filter(a => a.icon === 'check' || (a.msg && a.msg.toLowerCase().includes('approve'))).length;
+
+    const elPending = document.getElementById('stat-pending');
+    if (elPending) elPending.textContent = pendingReviewCount;
+    const elApproved = document.getElementById('stat-approved');
+    if (elApproved) elApproved.textContent = approvedToday;
+    const elBreached = document.getElementById('stat-breached');
+    if (elBreached) elBreached.textContent = breachCount;
+    const elQueries = document.getElementById('stat-queries');
+    if (elQueries) elQueries.textContent = queriesCount;
+
+    const breachBanner = document.getElementById('breachBanner');
+    if (breachBanner) {
+      if (breachCount > 0) {
+        breachBanner.style.display = 'flex';
+        const strongEl = breachBanner.querySelector('strong');
+        if (strongEl) strongEl.textContent = `${breachCount} application${breachCount === 1 ? '' : 's'} have breached SLA.`;
+      } else {
+        breachBanner.style.display = 'none';
+      }
+    }
 
     officerSlaRisks = slaRes.data || [];
     officerWeekChart = chartRes.data || { days: [], vals: [] };
@@ -1376,7 +1416,22 @@ export async function initAdminDashboard() {
     };
 
     let _assigningId = '';
-    window.openAssign = function (id) { _assigningId = id; openModalEl('assignModal'); };
+    window.openAssign = async function (id) {
+      _assigningId = id;
+      const selectEl = document.getElementById('assignOfficer');
+      if (selectEl) {
+        try {
+          const { apiGetUsers } = await import('./api.js');
+          const res = await apiGetUsers();
+          const grvOfficers = (res.data || []).filter(u => u.role === 'grievance' || u.role === 'officer');
+          if (grvOfficers.length > 0) {
+            selectEl.innerHTML = '<option value="">-- Choose Officer --</option>' +
+              grvOfficers.map(o => `<option value="${o.name}">${o.name} (${o.designation || o.role})</option>`).join('');
+          }
+        } catch (e) {}
+      }
+      openModalEl('assignModal');
+    };
 
     window.confirmAssign = function () {
       const officer = document.getElementById('assignOfficer')?.value;

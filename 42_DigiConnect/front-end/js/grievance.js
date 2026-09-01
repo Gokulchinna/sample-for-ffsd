@@ -42,6 +42,25 @@ export function initRaiseGrievance() {
   let currentStep = 1;
   let selectedCategory = '';
 
+  // ── Populate authentic departments for citizen's state ──
+  const citizenStateId = session.stateId || (session.stateName?.toLowerCase().includes('karnataka') ? 'state_ka' : session.stateName?.toLowerCase().includes('kerala') ? 'state_kl' : session.stateName?.toLowerCase().includes('tamil') ? 'state_tn' : 'state_ap');
+  const gDeptSelect = document.getElementById('gDept');
+  if (gDeptSelect) {
+    (async () => {
+      try {
+        const { apiGetStateDepartments } = await import('./api.js');
+        const deptRes = await apiGetStateDepartments(citizenStateId);
+        const depts = deptRes.data || [];
+        if (depts.length > 0) {
+          gDeptSelect.innerHTML = '<option value="">Select department</option>' +
+            depts.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+        }
+      } catch (e) {
+        console.error('Failed to load departments for grievance:', e);
+      }
+    })();
+  }
+
   window.selectGrievCat = (el) => {
     document.querySelectorAll('.grievance-cat-card').forEach(c => {
       c.style.borderColor = 'var(--color-border)';
@@ -69,8 +88,8 @@ export function initRaiseGrievance() {
     if (step === 3) {
       const appId = document.getElementById('gAppId')?.value?.trim();
       if (appId) {
-        if (!/^APP-\d+$/i.test(appId)) {
-          if(window.showToast) window.showToast('Please enter a valid Application ID (e.g., APP-1234).', 'warning');
+        if (!/^APP-[A-Z0-9-]+$/i.test(appId)) {
+          if(window.showToast) window.showToast('Please enter a valid Application ID (e.g., APP-AP-1001).', 'warning');
           return;
         }
         

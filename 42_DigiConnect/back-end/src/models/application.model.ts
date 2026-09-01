@@ -15,6 +15,10 @@ export interface TimelineEntry {
   date: string;
   actor: string;
   note: string;
+  stepName?: string;
+  completedDate?: string | null;
+  remarks?: string;
+  status?: string;
 }
 
 export interface Application {

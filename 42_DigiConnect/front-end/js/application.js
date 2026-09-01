@@ -19,9 +19,12 @@ export async function initApplyService() {
   renderNotifPanel();
   
   let services = [];
+  const citizenStateId = session.stateId || (session.stateName?.toLowerCase().includes('karnataka') ? 'state_ka' : session.stateName?.toLowerCase().includes('kerala') ? 'state_kl' : session.stateName?.toLowerCase().includes('tamil') ? 'state_tn' : 'state_ap');
   try {
       const res = await apiGetServices();
-      services = (res.data || []).filter(s => s.status === 'Active');
+      const allServices = (res.data || []).filter(s => s.status === 'Active' || s.status === 'ACTIVE');
+      const stateServices = allServices.filter(s => s.stateId === citizenStateId);
+      services = stateServices.length > 0 ? stateServices : allServices;
   } catch(e) { console.error(e); }
   let selectedService = null;
   let currentStep = 1;
@@ -32,69 +35,112 @@ export async function initApplyService() {
     renderServiceCards(services);
   }
 
-  // ── Dynamic Jurisdiction Tree Cascading Selector (Master Prompt Section 5) ──
+  // ── Dynamic Jurisdiction Tree Cascading Selector (Multi-State Hierarchy) ──
+  const JURISDICTION_DATA = {
+    state_ap: {
+      rural: {
+        subDivLabel: 'Revenue Sub-Division',
+        tier4Label: 'Mandal',
+        tier5Label: 'Village / Gram Panchayat (Leaf Node)',
+        subDivs: [{ id: 'node_tpt_sub', name: 'Tirupati Revenue Sub-Division' }, { id: 'node_ctr_sub', name: 'Chittoor Revenue Sub-Division' }],
+        tier4: [{ id: 'node_cg_man', name: 'Chandragiri Mandal' }, { id: 'node_tpt_man', name: 'Tirupati Rural Mandal' }],
+        leaves: [{ id: 'node_cg_vil', name: 'Chandragiri Village' }, { id: 'node_pn_vil', name: 'Panapakam Village' }, { id: 'node_sn_vil', name: 'Sanambatla Village' }],
+      },
+      urban: {
+        subDivLabel: 'Urban Sub-Division',
+        tier4Label: 'Municipal Corporation',
+        tier5Label: 'Ward / Zone (Leaf Node)',
+        subDivs: [{ id: 'node_tpt_urb_sub', name: 'Tirupati Urban Sub-Division' }],
+        tier4: [{ id: 'node_tmc', name: 'Tirupati Municipal Corporation (TMC)' }],
+        leaves: [{ id: 'node_tpt_w14', name: 'Ward 14 (Balaji Colony)' }, { id: 'node_tpt_w15', name: 'Ward 15 (Bhavani Nagar)' }, { id: 'node_tpt_w16', name: 'Ward 16 (Korlagunta)' }],
+      },
+    },
+    state_ka: {
+      rural: {
+        subDivLabel: 'Revenue Sub-Division',
+        tier4Label: 'Taluk',
+        tier5Label: 'Gram Panchayat / Village (Leaf Node)',
+        subDivs: [{ id: 'node_mys_sub', name: 'Mysuru Sub-Division' }],
+        tier4: [{ id: 'node_hunsur_taluk', name: 'Hunsur Taluk' }],
+        leaves: [{ id: 'node_bilikere_vil', name: 'Bilikere Village' }, { id: 'node_ratnapuri_vil', name: 'Ratnapuri Village' }],
+      },
+      urban: {
+        subDivLabel: 'Urban Sub-Division',
+        tier4Label: 'City Corporation',
+        tier5Label: 'Ward (Leaf Node)',
+        subDivs: [{ id: 'node_bengaluru_sub', name: 'Bengaluru Urban Sub-Division' }],
+        tier4: [{ id: 'node_bbmp_corp', name: 'Bruhat Bengaluru Mahanagara Palike (BBMP)' }],
+        leaves: [{ id: 'node_w150', name: 'Ward 150 (Bellandur)' }, { id: 'node_w174', name: 'Ward 174 (HSR Layout)' }],
+      },
+    },
+    state_kl: {
+      rural: {
+        subDivLabel: 'Revenue Sub-Division',
+        tier4Label: 'Taluk',
+        tier5Label: 'Village (Leaf Node)',
+        subDivs: [{ id: 'node_ned_sub', name: 'Nedumangad Revenue Sub-Division' }],
+        tier4: [{ id: 'node_ned_taluk', name: 'Nedumangad Taluk' }],
+        leaves: [{ id: 'node_nedumangad_vil', name: 'Nedumangad Village' }, { id: 'node_karakulam_vil', name: 'Karakulam Village' }, { id: 'node_vembayam_vil', name: 'Vembayam Village' }],
+      },
+      urban: {
+        subDivLabel: 'Urban Sub-Division',
+        tier4Label: 'Municipal Corporation',
+        tier5Label: 'Ward (Leaf Node)',
+        subDivs: [{ id: 'node_tvm_urb_sub', name: 'Thiruvananthapuram Urban Sub-Division' }],
+        tier4: [{ id: 'node_tvm_corp', name: 'Thiruvananthapuram Corporation' }],
+        leaves: [{ id: 'node_w12', name: 'Ward 12 (Palayam)' }, { id: 'node_w15', name: 'Ward 15 (Vazhuthacaud)' }],
+      },
+    },
+    state_tn: {
+      rural: {
+        subDivLabel: 'Revenue Sub-Division',
+        tier4Label: 'Taluk',
+        tier5Label: 'Revenue Village (Leaf Node)',
+        subDivs: [{ id: 'node_madurai_sub', name: 'Madurai Rural Sub-Division' }],
+        tier4: [{ id: 'node_tpk_taluk', name: 'Thiruparankundram Taluk' }],
+        leaves: [{ id: 'node_valayankulam_vil', name: 'Valayankulam Village' }, { id: 'node_nilaiyur_vil', name: 'Nilaiyur Village' }],
+      },
+      urban: {
+        subDivLabel: 'Urban Sub-Division',
+        tier4Label: 'City Corporation',
+        tier5Label: 'Ward (Leaf Node)',
+        subDivs: [{ id: 'node_chennai_sub', name: 'Greater Chennai Urban Sub-Division' }],
+        tier4: [{ id: 'node_gcc_corp', name: 'Greater Chennai Corporation (GCC)' }],
+        leaves: [{ id: 'node_w50', name: 'Ward 50 (Royapuram)' }, { id: 'node_w114', name: 'Ward 114 (T. Nagar)' }],
+      },
+    },
+  };
+
   window.onAreaTypeChange = (areaType) => {
     const isRural = areaType === 'RURAL';
     const subDivLabel = document.getElementById('subDivLabel');
     const tier4Label = document.getElementById('tier4Label');
     const tier5Label = document.getElementById('tier5Label');
 
-    if (isRural) {
-      if (subDivLabel) subDivLabel.innerHTML = 'Revenue Sub-Division <span class="required">*</span>';
-      if (tier4Label) tier4Label.innerHTML = 'Mandal <span class="required">*</span>';
-      if (tier5Label) tier5Label.innerHTML = 'Village / Gram Panchayat (Leaf Node) <span class="required">*</span>';
+    const stateConfig = JURISDICTION_DATA[citizenStateId] || JURISDICTION_DATA.state_ap;
+    const hier = isRural ? stateConfig.rural : stateConfig.urban;
 
-      const sDiv = document.getElementById('jurSubDivSelect');
-      if (sDiv) sDiv.innerHTML = `
-        <option value="node_tpt_sub" selected>Tirupati Revenue Sub-Division</option>
-        <option value="node_ctr_sub">Chittoor Revenue Sub-Division</option>
-      `;
-      const t4 = document.getElementById('jurTier4Select');
-      if (t4) t4.innerHTML = `
-        <option value="node_cg_man" selected>Chandragiri Mandal</option>
-        <option value="node_tpt_man">Tirupati Rural Mandal</option>
-      `;
-      const leaf = document.getElementById('jurLeafSelect');
-      if (leaf) {
-        leaf.innerHTML = `
-          <option value="node_cg_vil" selected>Chandragiri Village</option>
-          <option value="node_pn_vil">Panapakam Village</option>
-          <option value="node_sn_vil">Sanambatla Village</option>
-        `;
-        leaf.onchange = (e) => {
-          const hid = document.getElementById('selectedJurisdictionNodeId');
-          if (hid) hid.value = e.target.value;
-        };
-      }
-      const hid = document.getElementById('selectedJurisdictionNodeId');
-      if (hid) hid.value = 'node_cg_vil';
-    } else {
-      if (subDivLabel) subDivLabel.innerHTML = 'Urban Sub-Division <span class="required">*</span>';
-      if (tier4Label) tier4Label.innerHTML = 'Municipality / Municipal Corporation <span class="required">*</span>';
-      if (tier5Label) tier5Label.innerHTML = 'Ward / Zone (Leaf Node) <span class="required">*</span>';
+    if (subDivLabel) subDivLabel.innerHTML = `${hier.subDivLabel} <span class="required">*</span>`;
+    if (tier4Label) tier4Label.innerHTML = `${hier.tier4Label} <span class="required">*</span>`;
+    if (tier5Label) tier5Label.innerHTML = `${hier.tier5Label} <span class="required">*</span>`;
 
-      const sDiv = document.getElementById('jurSubDivSelect');
-      if (sDiv) sDiv.innerHTML = `
-        <option value="node_tpt_urb_sub" selected>Tirupati Urban Sub-Division</option>
-      `;
-      const t4 = document.getElementById('jurTier4Select');
-      if (t4) t4.innerHTML = `
-        <option value="node_tmc" selected>Tirupati Municipal Corporation (TMC)</option>
-      `;
-      const leaf = document.getElementById('jurLeafSelect');
-      if (leaf) {
-        leaf.innerHTML = `
-          <option value="node_tpt_w14" selected>Ward 14 (Balaji Colony)</option>
-          <option value="node_tpt_w15">Ward 15 (Bhavani Nagar)</option>
-          <option value="node_tpt_w16">Ward 16 (Korlagunta)</option>
-        `;
-        leaf.onchange = (e) => {
-          const hid = document.getElementById('selectedJurisdictionNodeId');
-          if (hid) hid.value = e.target.value;
-        };
-      }
+    const sDiv = document.getElementById('jurSubDivSelect');
+    if (sDiv) {
+      sDiv.innerHTML = hier.subDivs.map((d, i) => `<option value="${d.id}" ${i === 0 ? 'selected' : ''}>${d.name}</option>`).join('');
+    }
+    const t4 = document.getElementById('jurTier4Select');
+    if (t4) {
+      t4.innerHTML = hier.tier4.map((d, i) => `<option value="${d.id}" ${i === 0 ? 'selected' : ''}>${d.name}</option>`).join('');
+    }
+    const leaf = document.getElementById('jurLeafSelect');
+    if (leaf && hier.leaves.length > 0) {
+      leaf.innerHTML = hier.leaves.map((d, i) => `<option value="${d.id}" ${i === 0 ? 'selected' : ''}>${d.name}</option>`).join('');
+      leaf.onchange = (e) => {
+        const hid = document.getElementById('selectedJurisdictionNodeId');
+        if (hid) hid.value = e.target.value;
+      };
       const hid = document.getElementById('selectedJurisdictionNodeId');
-      if (hid) hid.value = 'node_tpt_w14';
+      if (hid) hid.value = hier.leaves[0].id;
     }
   };
 
@@ -837,18 +883,35 @@ export async function initMyApplications() {
     } catch(e) { console.error(e); }
 
     let filtered = baseApps.filter(a => {
-      // Treat 'completed' as 'approved' — same terminal success state
-      const effectiveStatus = a.status === 'completed' ? 'approved' : a.status;
-      if (filterStatus !== 'all' && effectiveStatus !== filterStatus) return false;
-      if (filterType && a.serviceType && a.serviceType.toLowerCase() !== filterType) return false;
-      if (query && !a.id.toLowerCase().includes(query) && !a.serviceName.toLowerCase().includes(query)) return false;
+      const normStatus = (a.status || '').toLowerCase().replace(/_/g, '-');
+      const isApproved = ['approved', 'completed', 'certificate-generated'].includes(normStatus);
+      const isQuery = ['query', 'query-raised'].includes(normStatus);
+      const isUnderReview = ['submitted', 'under-review', 'officer-approved', 'supervisor-review', 'pending_external_verification', 'pending', 'pending-officer-review'].includes(normStatus);
+      const isRejected = normStatus === 'rejected';
+      const isEscalated = normStatus === 'escalated';
+
+      if (filterStatus === 'approved' && !isApproved) return false;
+      if (filterStatus === 'query' && !isQuery) return false;
+      if (filterStatus === 'under-review' && !isUnderReview) return false;
+      if (filterStatus === 'submitted' && normStatus !== 'submitted' && normStatus !== 'pending') return false;
+      if (filterStatus === 'rejected' && !isRejected) return false;
+      if (filterStatus === 'escalated' && !isEscalated) return false;
+
+      const rawServiceType = (a.serviceType || a.category || '').toLowerCase();
+      if (filterType && rawServiceType !== filterType) return false;
+      if (query) {
+        const idMatch = (a.id || '').toLowerCase().includes(query);
+        const nameMatch = (a.serviceName || '').toLowerCase().includes(query);
+        const deptMatch = (a.dept || a.departmentName || '').toLowerCase().includes(query);
+        if (!idMatch && !nameMatch && !deptMatch) return false;
+      }
       return true;
     });
 
-    if (sortBy === 'date-desc') filtered.sort((a,b) => new Date(b.submittedDate) - new Date(a.submittedDate));
-    if (sortBy === 'date-asc') filtered.sort((a,b) => new Date(a.submittedDate) - new Date(b.submittedDate));
-    if (sortBy === 'status') filtered.sort((a,b) => a.status.localeCompare(b.status));
-    if (sortBy === 'sla') filtered.sort((a,b) => checkSLA(a).daysLeft - checkSLA(b).daysLeft);
+    if (sortBy === 'date-desc') filtered.sort((a,b) => new Date(b.submittedDate || b.appliedDate || 0) - new Date(a.submittedDate || a.appliedDate || 0));
+    if (sortBy === 'date-asc') filtered.sort((a,b) => new Date(a.submittedDate || a.appliedDate || 0) - new Date(b.submittedDate || b.appliedDate || 0));
+    if (sortBy === 'status') filtered.sort((a,b) => (a.status || '').localeCompare(b.status || ''));
+    if (sortBy === 'sla') filtered.sort((a,b) => (checkSLA(a).daysLeft ?? 999) - (checkSLA(b).daysLeft ?? 999));
 
     const totalItems = filtered.length;
     const paginated = filtered;
@@ -863,43 +926,50 @@ export async function initMyApplications() {
       document.getElementById('cardView').style.display = 'none';
 
       tbody.innerHTML = paginated.map(a => {
-        const clsMap = { 
-          'approved': 'badge-success', 
-          'completed': 'badge-success',   // completed = approved (same thing)
-          'rejected': 'badge-danger', 
-          'query': 'badge-warning', 
-          'escalated': 'badge-purple',
-          'draft': 'badge-neutral', 
-          'under-review': 'badge-info'
-        };
-        const statusClass = clsMap[a.status] || 'badge-info';
-        // Display 'Approved' for completed apps — same meaning, simpler label
-        const rawLabel = a.status === 'completed' ? 'approved' : a.status;
-        const statusLabel = rawLabel.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
-        const typeClassMap = { 'certificate': 'svc-certificate', 'welfare': 'svc-welfare', 'permission': 'svc-permission', 'correction': 'svc-record' };
-        const typeClass = typeClassMap[(a.serviceType||'').toLowerCase()] || 'svc-certificate';
-        const typeLabel = a.serviceType ? a.serviceType.charAt(0).toUpperCase() + a.serviceType.slice(1) : 'Service';
+        const normStatus = (a.status || '').toLowerCase().replace(/_/g, '-');
+        const isApproved = ['approved', 'completed', 'certificate-generated'].includes(normStatus);
+        const isQuery = ['query', 'query-raised'].includes(normStatus);
+        const isRejected = normStatus === 'rejected';
+        const isEscalated = normStatus === 'escalated';
+        const isDraft = normStatus === 'draft';
+
+        let statusClass = 'badge-info';
+        let statusLabel = 'Under Review';
+        if (isApproved) { statusClass = 'badge-success'; statusLabel = 'Approved'; }
+        else if (isRejected) { statusClass = 'badge-danger'; statusLabel = 'Rejected'; }
+        else if (isQuery) { statusClass = 'badge-warning'; statusLabel = 'Query Raised'; }
+        else if (isEscalated) { statusClass = 'badge-purple'; statusLabel = 'Escalated'; }
+        else if (isDraft) { statusClass = 'badge-neutral'; statusLabel = 'Draft'; }
+
+        const rawServiceType = a.serviceType || a.category || 'certificate';
+        const typeClassMap = { 'certificate': 'svc-certificate', 'welfare': 'svc-welfare', 'permission': 'svc-permission', 'correction': 'svc-record', 'record': 'svc-record' };
+        const typeClass = typeClassMap[rawServiceType.toLowerCase()] || 'svc-certificate';
+        const typeLabel = rawServiceType.charAt(0).toUpperCase() + rawServiceType.slice(1);
         
+        const submittedDate = a.submittedDate || a.appliedDate || a.createdAt;
+        const officerName = a.officerName || a.assignedOfficerName || a.officer || '—';
+        const dept = a.dept || a.departmentName || a.department || '—';
+
         const sla = checkSLA(a);
-        const isClosed = ['approved', 'completed', 'rejected'].includes(a.status);
-        const slaText = isClosed ? 'Closed' : (sla.daysLeft !== null ? (sla.daysLeft >= 0 ? `${sla.daysLeft} days left` : `${Math.abs(sla.daysLeft)} days overdue`) : '—');
-        const slaCls = isClosed ? (a.status === 'rejected' ? 'breach' : 'safe') : (sla.daysLeft === null ? '' : sla.daysLeft > 4 ? 'safe' : sla.daysLeft >= 0 ? 'warn' : 'breach');
-        const slaWidth = isClosed ? 100 : Math.max(0, sla.daysLeft||0) * 10;
+        const isClosed = isApproved || isRejected;
+        const slaText = isClosed ? (isRejected ? 'Rejected' : 'Closed') : (sla.daysLeft !== null ? (sla.daysLeft >= 0 ? `${sla.daysLeft} days left` : `${Math.abs(sla.daysLeft)} days overdue`) : 'Active');
+        const slaCls = isClosed ? (isRejected ? 'breach' : 'safe') : (sla.daysLeft === null ? 'safe' : sla.daysLeft > 4 ? 'safe' : sla.daysLeft >= 0 ? 'warn' : 'breach');
+        const slaWidth = isClosed ? 100 : Math.max(10, Math.min(100, Math.max(0, sla.daysLeft || 0) * 10));
 
         return `
           <tr data-testid="app-row-${a.id}">
             <td class="app-id">${a.id}</td>
-            <td><div style="font-weight:600;color:var(--navy-900);">${a.serviceName}</div><div style="font-size:0.75rem;color:var(--color-text-muted);">${a.dept}</div></td>
+            <td><div style="font-weight:600;color:var(--navy-900);">${a.serviceName}</div><div style="font-size:0.75rem;color:var(--color-text-muted);">${dept}</div></td>
             <td><span class="service-tag ${typeClass}">${typeLabel}</span></td>
             <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
-            <td>${formatDate(a.submittedDate)}</td>
+            <td>${formatDate(submittedDate)}</td>
             <td>
               <div class="sla-wrap">
                 <div class="sla-bar-bg"><div class="sla-bar-fill ${slaCls}" style="width:${slaWidth}%"></div></div>
                 <div class="sla-text ${slaCls}">${slaText}</div>
               </div>
             </td>
-            <td>${a.officerName || '—'}</td>
+            <td>${officerName}</td>
             <td>
               <div class="row-actions">
                 <a href="track-application.html?id=${a.id}" class="icon-btn" title="Track"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg></a>
@@ -913,42 +983,54 @@ export async function initMyApplications() {
       document.getElementById('tableView').style.display = 'none';
       document.getElementById('cardView').style.display = 'block';
       cardGrid.innerHTML = paginated.map(a => {
-        const clsMap = { 
-          'approved': 'badge-success', 
-          'completed': 'badge-success',
-          'rejected': 'badge-danger', 
-          'query': 'badge-warning', 
-          'escalated': 'badge-purple',
-          'draft': 'badge-neutral', 
-          'under-review': 'badge-info' 
-        };
-        const rawLabel = a.status === 'completed' ? 'approved' : a.status;
-        const statusLabel = rawLabel.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const normStatus = (a.status || '').toLowerCase().replace(/_/g, '-');
+        const isApproved = ['approved', 'completed', 'certificate-generated'].includes(normStatus);
+        const isQuery = ['query', 'query-raised'].includes(normStatus);
+        const isRejected = normStatus === 'rejected';
+        const isEscalated = normStatus === 'escalated';
+
+        let statusClass = 'badge-info';
+        let statusLabel = 'Under Review';
+        if (isApproved) { statusClass = 'badge-success'; statusLabel = 'Approved'; }
+        else if (isRejected) { statusClass = 'badge-danger'; statusLabel = 'Rejected'; }
+        else if (isQuery) { statusClass = 'badge-warning'; statusLabel = 'Query Raised'; }
+        else if (isEscalated) { statusClass = 'badge-purple'; statusLabel = 'Escalated'; }
+
+        const submittedDate = a.submittedDate || a.appliedDate || a.createdAt;
+        const officerName = a.officerName || a.assignedOfficerName || 'Assigned Officer';
+        const dept = a.dept || a.departmentName || '—';
+
         return `
           <div class="app-card" onclick="window.location.href='track-application.html?id=${a.id}'">
             <div class="app-card-header">
               <div class="app-card-meta">
                 <div class="app-card-id">${a.id}</div>
                 <div class="app-card-title">${a.serviceName}</div>
-                <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:2px;">${a.dept}</div>
+                <div style="font-size:0.75rem;color:var(--color-text-muted);margin-top:2px;">${dept}</div>
               </div>
             </div>
             <div class="app-card-body">
-              <div class="app-card-row"><span class="app-card-label">Submitted</span><span class="app-card-value">${formatDate(a.submittedDate)}</span></div>
-              <div class="app-card-row"><span class="app-card-label">Status</span><span class="badge ${clsMap[a.status]||'badge-info'}">${statusLabel}</span></div>
+              <div class="app-card-row"><span class="app-card-label">Submitted</span><span class="app-card-value">${formatDate(submittedDate)}</span></div>
+              <div class="app-card-row"><span class="app-card-label">Officer</span><span class="app-card-value">${officerName}</span></div>
+              <div class="app-card-row"><span class="app-card-label">Status</span><span class="badge ${statusClass}">${statusLabel}</span></div>
             </div>
           </div>`;
       }).join('');
     }
     
     // Update stats chips dynamically from live data
-    const IN_PROGRESS = ['submitted', 'under-review', 'officer-approved', 'supervisor-review', 'pending_external_verification'];
+    const isUnderReviewApp = a => ['submitted', 'under-review', 'officer-approved', 'supervisor-review', 'pending_external_verification', 'pending', 'pending_officer_review', 'pending-officer-review'].includes((a.status||'').toLowerCase().replace(/_/g, '-'));
+    const isQueryApp = a => ['query', 'query_raised', 'query-raised'].includes((a.status||'').toLowerCase().replace(/_/g, '-'));
+    const isApprovedApp = a => ['approved', 'completed', 'certificate_generated', 'certificate-generated'].includes((a.status||'').toLowerCase().replace(/_/g, '-'));
+    const isRejectedApp = a => (a.status||'').toLowerCase() === 'rejected';
+    const isEscalatedApp = a => (a.status||'').toLowerCase() === 'escalated';
+
     setT('.chip-all .summary-chip-val', baseApps.length);
-    setT('.chip-pending .summary-chip-val', baseApps.filter(a => IN_PROGRESS.includes(a.status)).length);
-    setT('.chip-query .summary-chip-val', baseApps.filter(a => a.status === 'query').length);
-    setT('.chip-approved .summary-chip-val', baseApps.filter(a => a.status === 'approved' || a.status === 'completed').length);
-    setT('.chip-rejected .summary-chip-val', baseApps.filter(a => a.status === 'rejected').length);
-    setT('.chip-escalated .summary-chip-val', baseApps.filter(a => a.status === 'escalated').length);
+    setT('.chip-pending .summary-chip-val', baseApps.filter(isUnderReviewApp).length);
+    setT('.chip-query .summary-chip-val', baseApps.filter(isQueryApp).length);
+    setT('.chip-approved .summary-chip-val', baseApps.filter(isApprovedApp).length);
+    setT('.chip-rejected .summary-chip-val', baseApps.filter(isRejectedApp).length);
+    setT('.chip-escalated .summary-chip-val', baseApps.filter(isEscalatedApp).length);
   }
 
   window.handleSearch = () => { query = document.getElementById('searchInput')?.value.toLowerCase() || ''; renderView(); };
@@ -1033,346 +1115,14 @@ export async function initTrackApplication() {
   const appDetail = document.getElementById('appDetail');
   const trackInput = document.getElementById('trackInput');
 
-  async function loadApplication(id) {
-    let app = null;
-    try {
-      const res = await apiGetApplicationById(id);
-      app = res.data;
-    } catch(e) {
-      showToast('Application not found. Check the ID and try again.', 'error');
-      if (appDetail) appDetail.style.display = 'none';
-      if (emptyState) emptyState.style.display = 'block';
-      return;
-    }
-
-    // ── PRIVACY CHECK: Ensure the citizen owns this application ──
-    if (app.citizenId !== session.id) {
-      showToast('You are not authorized to track this application.', 'error');
-      // Hide details and show empty state if an unauthorized ID was entered
-      if (appDetail) appDetail.style.display = 'none';
-      if (emptyState) emptyState.style.display = 'block';
-      return;
-    }
-
-    // Hide empty state, show detail
-    if (emptyState) emptyState.style.display = 'none';
-    if (appDetail) appDetail.style.display = 'block';
-
-    // Populate header
-    setTC('detailAppId', app.id);
-    setTC('detailServiceName', app.serviceName);
-    setTC('detailDept', app.dept);
-    setTC('detailSubmitted', formatDate(app.submittedDate));
-    setTC('detailSla', formatDate(app.slaDate));
-    setTC('detailOfficer', app.officerName || 'Not assigned');
-
-    // Status badge
-    const badge = document.getElementById('detailBadge');
-    if (badge) {
-      const cls = app.status === 'approved' ? 'badge-success'
-        : app.status === 'rejected' ? 'badge-danger'
-        : app.status === 'query' ? 'badge-warning'
-        : 'badge-info';
-      badge.className = `badge ${cls}`;
-      badge.textContent = app.status === 'under-review' ? 'Under Review'
-        : app.status.charAt(0).toUpperCase() + app.status.slice(1);
-    }
-
-    // Payment status badge — show green tick when paid, amber when pending
-    let payBadge = document.getElementById('paymentStatusBadge');
-    if (!payBadge) {
-      payBadge = document.createElement('span');
-      payBadge.id = 'paymentStatusBadge';
-      payBadge.style.marginLeft = '6px';
-      badge?.parentNode?.insertBefore(payBadge, badge.nextSibling);
-    }
-    if (app.fee === 0) {
-      payBadge.className = 'badge badge-success';
-      payBadge.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="vertical-align:-1px;margin-right:3px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Free / No Fee`;
-    } else if (app.paymentStatus === 'paid') {
-      payBadge.className = 'badge badge-success';
-      payBadge.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="vertical-align:-1px;margin-right:3px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Payment Confirmed`;
-    } else {
-      payBadge.className = 'badge badge-warning';
-      payBadge.textContent = 'Payment Pending';
-    }
-
-    // Days left & SLA bar
-    const slaCheck = checkSLA(app);
-    const isClosed = ['approved', 'completed', 'rejected'].includes(app.status);
-    const slaCls = isClosed ? (app.status === 'rejected' ? 'breach' : 'safe') : (slaCheck.daysLeft === null ? '' : slaCheck.daysLeft > 4 ? 'safe' : slaCheck.daysLeft >= 0 ? 'warn' : 'breach');
-    
-    setTC('detailDaysLeft', isClosed ? '—' : (slaCheck.daysLeft !== null ? Math.abs(slaCheck.daysLeft) : '—'));
-
-    const totalDays = Math.max(1, Math.ceil((new Date(app.slaDate) - new Date(app.submittedDate)) / 86400000));
-    const usedDays = isClosed ? totalDays : Math.ceil((new Date() - new Date(app.submittedDate)) / 86400000);
-    const perc = isClosed ? 100 : Math.min(100, Math.max(0, Math.round((usedDays / totalDays) * 100)));
-    
-    setTC('slaPercText', isClosed ? 'Closed' : perc + '%');
-    setTC('slaDayUsed', usedDays + ' days used');
-    setTC('slaDayTotal', totalDays + ' days total');
-    const slaFill = document.getElementById('slaFill');
-    if (slaFill) { 
-      slaFill.style.width = perc + '%'; 
-      slaFill.className = `sla-fill ${slaCls}`; 
-    }
-
-    // Stage bar — maps all real statuses to progress steps
-    // Steps: 1=Submitted, 2=Payment, 3=Officer Verified, 4=Supervisor Review, 5=Approved/Completed
-    const STATUS_STEP = {
-      'pending':              1,
-      'submitted':            2,  // submitted means payment was done
-      'under-review':         3,
-      'query':                3,
-      'pending_external_verification': 3,
-      'officer-approved':     3,
-      'escalated':            4,
-      'supervisor-review':    4,
-      'approved':             5,
-      'completed':            5,
-      'rejected':             -1,
-    };
-
-    // Payment step is done when fee=0 (free) or paymentStatus=paid
-    const paymentDone = app.fee === 0 || app.paymentStatus === 'paid';
-
-    // Helper: map a timeline action string to a step number
-    function actionToStep(action) {
-      const a = (action || '').toLowerCase();
-      if (a.includes('submit')) return 2;
-      if (a.includes('payment') || a.includes('paid')) return 2;
-      if (a.includes('approv') && (a.includes('officer') || a.includes('final'))) return 3;
-      if (a.includes('supervisor') || a.includes('final approv')) return 4;
-      if ((a.includes('approv') || a.includes('complet')) && !a.includes('officer')) return 5;
-      if (a.includes('officer-approved') || a.includes('officer_approved')) return 3;
-      if (a.includes('escalat')) return 4;
-      if (a.includes('under') || a.includes('review') || a.includes('query') || a.includes('pending')) return 3;
-      if (a.includes('reject')) return -1;
-      return 0;
-    }
-
-    // ── Derive the highest step ever reached from the full timeline ──
-    let maxStepReached = STATUS_STEP[app.status] ?? 0;
-    // Payment step is always done if fee paid
-    if (paymentDone && maxStepReached >= 1) maxStepReached = Math.max(maxStepReached, 2);
-    if (app.timeline && app.timeline.length) {
-      for (const t of app.timeline) {
-        const s = actionToStep(t.action);
-        if (s > maxStepReached) maxStepReached = s;
-      }
-    }
-    const currStep = STATUS_STEP[app.status] ?? 0;
-
-    const stages = [
-      { label: 'Application\nSubmitted',   step: 1 },
-      { label: 'Payment\nConfirmed',        step: 2 },
-      { label: 'Officer\nVerified',         step: 3 },
-      { label: 'Supervisor\nReview',        step: 4 },
-      { label: 'Approved /\nCompleted',     step: 5 },
-    ];
-
-    const stageBar = document.getElementById('stageBar');
-    if (stageBar) {
-      stageBar.innerHTML = stages.map(s => {
-        let stStatus;
-
-        if (app.status === 'rejected') {
-          // Mark all stages up to the point of rejection as done, rest empty
-          stStatus = s.step <= maxStepReached ? 'done' : '';
-        } else if (app.status === 'escalated') {
-          // Steps 1 (Submitted) and 2 (Payment) are done, Officer(3) is breach, Supervisor(4) is active
-          if (s.step <= 2) stStatus = 'done';
-          else if (s.step === 3) stStatus = 'breach';
-          else if (s.step === 4) stStatus = 'active';
-          else stStatus = '';
-        } else {
-          // General case: use the high-water mark from timeline
-          if (s.step <= maxStepReached) {
-            stStatus = 'done';
-          } else if (s.step === maxStepReached + 1) {
-            stStatus = 'active';
-          } else {
-            stStatus = '';
-          }
-        }
-
-        const iconMap = {
-          'done':   '<svg width="16" height="16" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>',
-          'active': '<svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-          'breach': '<svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>'
-        };
-
-        return `
-        <div class="stage-node ${stStatus}">
-          <div class="stage-circle">
-            ${iconMap[stStatus] || '○'}
-          </div>
-          <div class="stage-label">${s.label.replace('\n', '<br>')}</div>
-        </div>
-      `;
-      }).join('');
-    }
-
-    // Rejection Alert & Closed Grievance Redressal CTA (Section 28-32)
-    const rejectionAlert = document.getElementById('rejectionAlert');
-    if (rejectionAlert) {
-      const isRejected = app.status === 'rejected';
-      rejectionAlert.style.display = isRejected ? 'block' : 'none';
-      if (isRejected) {
-        const rejectionEvent = app.timeline?.find((t) => t.action.toLowerCase().includes('reject'));
-        const reason = app.rejectionReason || rejectionEvent?.note || 'Insufficient documentation or verification mismatch.';
-        const officer = app.rejectedBy || rejectionEvent?.actor || app.officerName || 'Verification Officer';
-        setTC('rejectionReasonText', reason);
-        setTC('rejectionOfficerText', officer);
-        const grvBtn = document.getElementById('applyGrievanceBtn');
-        if (grvBtn) {
-          grvBtn.href = `raise-grievance.html?appId=${encodeURIComponent(app.id)}&service=${encodeURIComponent(app.serviceName)}&dept=${encodeURIComponent(app.dept)}&reason=${encodeURIComponent(reason)}`;
-        }
-      }
-    }
-
-    // Action alert (query)
-    const actionAlert = document.getElementById('actionAlert');
-    if (actionAlert) {
-      actionAlert.style.display = (app.status === 'query' || app.status === 'QUERY_RAISED') ? 'block' : 'none';
-      const qt = document.getElementById('queryText');
-      if (qt && (app.status === 'query' || app.status === 'QUERY_RAISED')) {
-        const queryNote = app.timeline.find(t => t.action.includes('Query'))?.note || 'Please provide additional details requested by the officer.';
-        qt.textContent = `Officer ${app.officerName || 'Assigned'} has raised a query: "${queryNote}"`;
-      }
-    }
-
-    // Timeline
-    const timeline = document.getElementById('appTimeline');
-    if (timeline && app.timeline) {
-      timeline.innerHTML = app.timeline.map((t, i) => {
-        const isLast = i === app.timeline.length - 1;
-        let dot = 'success';
-        const actionText = t.action.toLowerCase();
-        if (actionText.includes('escalate') || actionText.includes('reject') || actionText.includes('breach')) {
-          dot = 'danger';
-        } else if (isLast) {
-          dot = (app.status === 'approved' ? 'success' : app.status === 'rejected' ? 'danger' : 'active');
-        }
-        
-        return `
-      <div class="timeline-item">
-        <div class="timeline-dot ${dot}">
-          ${dot === 'success' ? '<svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'}
-        </div>
-        <div class="timeline-content">
-          <div class="timeline-label">${t.action}</div>
-          <div style="font-size:0.8125rem;color:var(--slate-600);margin-top:2px;">${t.note || ''}</div>
-          <div class="timeline-time">${formatDateTime(t.date)}</div>
-        </div>
-      </div>
-        `;
-      }).join('');
-    }
-
-    // Documents
-    const docsBody = document.getElementById('docsTableBody');
-    if (docsBody && app.documents) {
-      docsBody.innerHTML = app.documents.map(d => {
-        const bdgClass = d.status === 'verified' ? 'badge-success' : d.status === 'query' ? 'badge-warning' : 'badge-neutral';
-        const bdgText = d.status === 'verified' ? 'Verified' : d.status === 'query' ? 'Query Raised' : 'Uploaded';
-        const fileUrl = d.path ? `http://localhost:3000/${d.path.replace(/\\/g, '/').replace(/^\/+/, '')}` : '';
-        const viewAction = fileUrl 
-          ? `window.open('${fileUrl}', '_blank')`
-          : `if(window.showToast) window.showToast('No physical file attached for ${d.name} (sample record).','warning')`;
-        const downloadAction = fileUrl
-          ? `<button class="btn btn-outline btn-sm" style="font-size:0.72rem;" onclick="downloadFile('${fileUrl}', '${d.name}')" title="Download copy">↓</button>`
-          : `<button class="btn btn-outline btn-sm" style="font-size:0.72rem;" onclick="if(window.showToast) window.showToast('Sample file cannot be downloaded.','warning')">↓</button>`;
-
-        return `
-      <tr>
-        <td style="font-weight:600;color:var(--navy-900);">${d.name}</td>
-        <td><span style="font-size:0.8rem;color:var(--color-text-muted);">${d.type}</span></td>
-        <td>${formatDate(d.date)}</td>
-        <td><span class="badge ${bdgClass}">${bdgText}</span></td>
-        <td>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <button class="btn btn-ghost btn-sm" style="font-size:0.72rem;" onclick="${viewAction}">View</button>
-            ${downloadAction}
-          </div>
-        </td>
-      </tr>`;
-      }).join('');
-    }
-
-    // Details grid
-    const detailsGrid = document.getElementById('detailsGrid');
-    if (detailsGrid) {
-      const details = [
-        { k: 'Application ID', v: app.id }, { k: 'Service', v: app.serviceName },
-        { k: 'Applicant Name', v: app.citizenName || session.name }, 
-        { k: 'Department', v: app.dept }, { k: 'Submitted On', v: formatDate(app.submittedDate) },
-        { k: 'SLA Due Date', v: formatDate(app.slaDate) }, { k: 'Assigned Officer', v: app.officerName || '—' },
-        { k: 'Fee Paid', v: app.fee > 0 ? '₹' + app.fee : 'Free' }, { k: 'Payment Method', v: app.paymentMethod },
-        { k: 'Status', v: app.status.toUpperCase() },
-      ];
-      detailsGrid.innerHTML = details.map(d => `
-      <div class="review-item"><span class="review-key">${d.k}</span><span class="review-value">${d.v}</span></div>
-      `).join('');
-    }
-
-    // Download cert button
-    const certBtn = document.getElementById('downloadCertBtn');
-    if (certBtn) {
-      certBtn.style.display = (app.status === 'approved' || app.status === 'completed' || app.certificateId) ? 'inline-flex' : 'none';
-      certBtn.onclick = () => {
-        if (app.certificateId) {
-          window.open(`http://localhost:3000/api/v1/certificates/${app.certificateId}`, '_blank');
-        } else {
-          window.downloadDigitalCertificate(app);
-        }
-      };
-    }
-  }
-
-  // Auto-load if ID in URL
-  if (appId) {
-    loadApplication(appId);
-  } else {
-    // If no ID is passed, default to first citizen application if tracking from menu.
-    apiGetMyApplications().then(res => {
-      const myApps = res.data || [];
-      if(myApps.length > 0) loadApplication(myApps[0].id);
-    }).catch(e => {
-      if (emptyState) emptyState.style.display = 'block';
-    });
-  }
-
-  // Search button / enter
-  if (trackInput) {
-    trackInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') loadApplication(trackInput.value.trim().toUpperCase());
-    });
-  }
-  const trackBtn = document.querySelector('.btn-primary');
-  if (trackBtn && trackBtn.closest('#emptyState, [style*="display"]')) {
-    document.querySelectorAll('.btn-primary').forEach(btn => {
-      if (btn.textContent.includes('Track') && !btn.textContent.includes('Application')) {
-        btn.addEventListener('click', () => {
-          if (trackInput) loadApplication(trackInput.value.trim().toUpperCase());
-        });
-      }
-    });
-  }
-
-  // Tab switching and Modals exported to window
-  window.trackApplication = function(id) {
-    if (id) loadApplication(id.trim().toUpperCase());
-  };
-
+  // Define tab switching and modals immediately on window
   window.switchTab = function(id, el) {
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
     
     const panel = document.getElementById('tab-' + id);
-    if(panel) panel.classList.add('active');
-    
-    if(el) el.classList.add('active');
+    if (panel) panel.classList.add('active');
+    if (el) el.classList.add('active');
   };
 
   window.openQueryResponseModal = function() {
@@ -1413,9 +1163,326 @@ export async function initTrackApplication() {
       uploadedFile.style.display = 'block';
       uploadedFile.innerHTML = fileListHtml;
     }
-    // Enable the Submit button now that files are chosen
     if (submitBtn) submitBtn.disabled = false;
   };
+
+  window.trackApplication = function(id) {
+    if (id) loadApplication(id.trim().toUpperCase());
+  };
+
+  async function loadApplication(id) {
+    let app = null;
+    try {
+      const res = await apiGetApplicationById(id);
+      app = res.data;
+    } catch(e) {
+      if (window.showToast) showToast('Application not found. Check the ID and try again.', 'error');
+      if (appDetail) appDetail.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+
+    if (!app) {
+      if (appDetail) appDetail.style.display = 'none';
+      if (emptyState) emptyState.style.display = 'block';
+      return;
+    }
+
+    // Hide empty state, show detail
+    if (emptyState) emptyState.style.display = 'none';
+    if (appDetail) appDetail.style.display = 'block';
+
+    const submittedDate = app.submittedDate || app.appliedDate || app.createdAt;
+    const slaDate = app.slaDate;
+    const officerName = app.officerName || app.assignedOfficerName || 'Not assigned';
+    const dept = app.dept || app.departmentName || '—';
+
+    // Populate header
+    setTC('detailAppId', app.id);
+    setTC('detailServiceName', app.serviceName);
+    setTC('detailDept', dept);
+    setTC('detailSubmitted', formatDate(submittedDate));
+    setTC('detailSla', slaDate ? formatDate(slaDate) : '—');
+    setTC('detailOfficer', officerName);
+
+    // Status badge
+    const normStatus = (app.status || '').toLowerCase().replace(/_/g, '-');
+    const isApproved = ['approved', 'completed', 'certificate-generated'].includes(normStatus);
+    const isQuery = ['query', 'query-raised'].includes(normStatus);
+    const isRejected = normStatus === 'rejected';
+    const isEscalated = normStatus === 'escalated';
+
+    let statusClass = 'badge-info';
+    let statusLabel = 'Under Review';
+    if (isApproved) { statusClass = 'badge-success'; statusLabel = 'Approved'; }
+    else if (isRejected) { statusClass = 'badge-danger'; statusLabel = 'Rejected'; }
+    else if (isQuery) { statusClass = 'badge-warning'; statusLabel = 'Query Raised'; }
+    else if (isEscalated) { statusClass = 'badge-purple'; statusLabel = 'Escalated'; }
+
+    const badge = document.getElementById('detailBadge');
+    if (badge) {
+      badge.className = `badge ${statusClass}`;
+      badge.textContent = statusLabel;
+    }
+
+    // Payment status badge
+    let payBadge = document.getElementById('paymentStatusBadge');
+    if (!payBadge) {
+      payBadge = document.createElement('span');
+      payBadge.id = 'paymentStatusBadge';
+      payBadge.style.marginLeft = '6px';
+      badge?.parentNode?.insertBefore(payBadge, badge.nextSibling);
+    }
+    if (app.fee === 0) {
+      payBadge.className = 'badge badge-success';
+      payBadge.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="vertical-align:-1px;margin-right:3px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Free / No Fee`;
+    } else if (app.paymentStatus === 'paid') {
+      payBadge.className = 'badge badge-success';
+      payBadge.innerHTML = `<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" style="vertical-align:-1px;margin-right:3px;"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>Payment Confirmed`;
+    } else {
+      payBadge.className = 'badge badge-warning';
+      payBadge.textContent = 'Payment Pending';
+    }
+
+    // SLA calculations
+    const slaCheck = checkSLA(app);
+    const isClosed = isApproved || isRejected;
+    const slaCls = isClosed ? (isRejected ? 'breach' : 'safe') : (slaCheck.daysLeft === null ? 'safe' : slaCheck.daysLeft > 4 ? 'safe' : slaCheck.daysLeft >= 0 ? 'warn' : 'breach');
+    setTC('detailDaysLeft', isClosed ? '—' : (slaCheck.daysLeft !== null ? Math.abs(slaCheck.daysLeft) : '—'));
+
+    const totalDays = Number(app.slaTotal || app.slaDays || 15);
+    const daysRemaining = slaCheck.daysLeft !== null ? slaCheck.daysLeft : totalDays;
+    const usedDays = isClosed ? totalDays : Math.max(0, totalDays - daysRemaining);
+    const perc = isClosed ? 100 : Math.min(100, Math.max(0, Math.round((usedDays / totalDays) * 100)));
+
+    setTC('slaPercText', isClosed ? 'Closed' : perc + '%');
+    setTC('slaDayUsed', usedDays + ' days used');
+    setTC('slaDayTotal', totalDays + ' days total');
+    const slaFill = document.getElementById('slaFill');
+    if (slaFill) { 
+      slaFill.style.width = perc + '%'; 
+      slaFill.className = `sla-fill ${slaCls}`; 
+    }
+
+    // Dynamic stages from workflow definition or standard fallback
+    let stages = [];
+    const wfSteps = (app.workflowSteps && app.workflowSteps.length > 0) ? app.workflowSteps : null;
+    if (wfSteps) {
+      stages.push({ label: 'Application\nSubmitted', step: 0 });
+      wfSteps.forEach((ws, idx) => {
+        stages.push({ 
+          label: (ws.stepName || `Stage ${ws.stepNumber || idx + 1}`).replace(/ \(/g, '\n('), 
+          step: ws.stepNumber || (idx + 1) 
+        });
+      });
+      stages.push({ label: 'Certificate\nGenerated', step: wfSteps.length + 1 });
+    } else {
+      stages = [
+        { label: 'Application\nSubmitted',   step: 1 },
+        { label: 'Payment\nConfirmed',        step: 2 },
+        { label: 'Officer\nVerified',         step: 3 },
+        { label: 'Supervisor\nReview',        step: 4 },
+        { label: 'Approved /\nCompleted',     step: 5 },
+      ];
+    }
+
+    const currentStepNum = Number(app.currentStepNumber || app.currentStep) || 1;
+    const stageBar = document.getElementById('stageBar');
+    if (stageBar) {
+      stageBar.innerHTML = stages.map((s, idx) => {
+        let stStatus = '';
+        if (isApproved) {
+          stStatus = 'done';
+        } else if (isRejected) {
+          if (s.step < currentStepNum) stStatus = 'done';
+          else if (s.step === currentStepNum) stStatus = 'breach';
+          else stStatus = '';
+        } else if (isEscalated) {
+          if (s.step < currentStepNum) stStatus = 'done';
+          else if (s.step === currentStepNum) stStatus = 'breach';
+          else stStatus = 'active';
+        } else {
+          if (s.step < currentStepNum) stStatus = 'done';
+          else if (s.step === currentStepNum) stStatus = 'active';
+          else stStatus = '';
+        }
+
+        const iconMap = {
+          'done':   '<svg width="16" height="16" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>',
+          'active': '<svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+          'breach': '<svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>'
+        };
+
+        return `
+          <div class="stage-node ${stStatus}">
+            <div class="stage-circle">
+              ${iconMap[stStatus] || (idx + 1)}
+            </div>
+            <div class="stage-label">${s.label.replace('\n', '<br>')}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Rejection Alert
+    const rejectionAlert = document.getElementById('rejectionAlert');
+    if (rejectionAlert) {
+      rejectionAlert.style.display = isRejected ? 'block' : 'none';
+      if (isRejected) {
+        const rejectionEvent = app.timeline?.find((t) => (t.action || t.stepName || '').toLowerCase().includes('reject'));
+        const reason = app.rejectionReason || rejectionEvent?.note || rejectionEvent?.remarks || 'Insufficient documentation or verification mismatch.';
+        const officer = app.rejectedBy || rejectionEvent?.actor || officerName;
+        setTC('rejectionReasonText', reason);
+        setTC('rejectionOfficerText', officer);
+        const grvBtn = document.getElementById('applyGrievanceBtn');
+        if (grvBtn) {
+          grvBtn.href = `raise-grievance.html?appId=${encodeURIComponent(app.id)}&service=${encodeURIComponent(app.serviceName)}&dept=${encodeURIComponent(dept)}&reason=${encodeURIComponent(reason)}`;
+        }
+      }
+    }
+
+    // Action alert (query)
+    const actionAlert = document.getElementById('actionAlert');
+    if (actionAlert) {
+      actionAlert.style.display = isQuery ? 'block' : 'none';
+      const qt = document.getElementById('queryText');
+      if (qt && isQuery) {
+        const queryNote = app.queryMessage || app.timeline?.find(t => (t.action || t.stepName || '').includes('Query'))?.note || 'Please provide additional details requested by the officer.';
+        qt.textContent = `Officer ${officerName} has raised a query: "${queryNote}"`;
+      }
+    }
+
+    // Timeline
+    const timeline = document.getElementById('appTimeline');
+    if (timeline && app.timeline) {
+      timeline.innerHTML = app.timeline.map((t, i) => {
+        const isLast = i === app.timeline.length - 1;
+        let dot = 'success';
+        const actName = (t.action || t.stepName || 'Status Update');
+        const actLower = actName.toLowerCase();
+        if (actLower.includes('escalate') || actLower.includes('reject') || actLower.includes('breach')) {
+          dot = 'danger';
+        } else if (actLower.includes('query')) {
+          dot = 'warning';
+        } else if (isLast) {
+          dot = (isApproved ? 'success' : isRejected ? 'danger' : 'active');
+        }
+        const tDate = t.date || t.completedDate || submittedDate;
+        const tNote = t.note || t.remarks || '';
+        const tActor = t.actor ? `<span style="font-size:0.75rem;color:var(--slate-500);margin-left:6px;">— ${t.actor}</span>` : '';
+        
+        return `
+          <div class="timeline-item">
+            <div class="timeline-dot ${dot}">
+              ${dot === 'success' ? '<svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>' : '<svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'}
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-label">${actName}${tActor}</div>
+              ${tNote ? `<div style="font-size:0.8125rem;color:var(--slate-600);margin-top:2px;">${tNote}</div>` : ''}
+              <div class="timeline-time">${formatDateTime(tDate)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Documents
+    const docsBody = document.getElementById('docsTableBody');
+    if (docsBody && app.documents) {
+      docsBody.innerHTML = app.documents.map(d => {
+        const bdgClass = d.status === 'verified' ? 'badge-success' : d.status === 'query' ? 'badge-warning' : 'badge-neutral';
+        const bdgText = d.status === 'verified' ? 'Verified' : d.status === 'query' ? 'Query Raised' : 'Uploaded';
+        const dDate = d.date || submittedDate;
+        return `
+          <tr>
+            <td style="font-weight:600;color:var(--navy-900);">${d.name}</td>
+            <td><span style="font-size:0.8rem;color:var(--color-text-muted);">${d.type || 'Document'}</span></td>
+            <td>${formatDate(dDate)}</td>
+            <td><span class="badge ${bdgClass}">${bdgText}</span></td>
+            <td>
+              <button class="btn btn-ghost btn-sm" style="font-size:0.75rem;" onclick="if(window.showToast) window.showToast('Document verified in registry: ${d.name}','info')">View Proof</button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+
+    // Full Details grid
+    const detailsGrid = document.getElementById('detailsGrid');
+    if (detailsGrid) {
+      const details = [
+        { k: 'Application ID', v: app.id },
+        { k: 'Service Name', v: app.serviceName },
+        { k: 'Service Type', v: (app.serviceType || 'Certificate').toUpperCase() },
+        { k: 'Department', v: dept },
+        { k: 'Applicant Name', v: app.citizenName || session.name },
+        { k: 'Jurisdiction Node', v: app.jurisdictionPath || app.jurisdiction || '—' },
+        { k: 'Assigned Officer', v: officerName },
+        { k: 'Current Workflow Stage', v: `Stage ${currentStepNum} of ${app.totalWorkflowSteps || (stages.length - 2 || 3)}` },
+        { k: 'Submitted Date', v: formatDate(submittedDate) },
+        { k: 'SLA Due Date', v: slaDate ? formatDate(slaDate) : '—' },
+        { k: 'Fee Paid', v: app.fee > 0 ? `₹${app.fee}` : 'Free / ₹0' },
+        { k: 'Payment Status', v: (app.paymentStatus || 'paid').toUpperCase() + (app.paymentTransactionId ? ` (${app.paymentTransactionId})` : '') },
+        { k: 'Overall Status', v: statusLabel.toUpperCase() },
+      ];
+
+      if (app.formData && typeof app.formData === 'object') {
+        for (const [key, val] of Object.entries(app.formData)) {
+          if (val !== undefined && val !== null && val !== '') {
+            const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            details.push({ k: formattedKey, v: String(val) });
+          }
+        }
+      }
+
+      detailsGrid.innerHTML = details.map(d => `
+        <div class="review-item" style="padding:10px 14px;background:var(--slate-50);border-radius:8px;border:1px solid var(--slate-200);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="review-key" style="font-size:0.8rem;color:var(--slate-600);font-weight:500;">${d.k}</span>
+          <span class="review-value" style="font-size:0.875rem;color:var(--navy-900);font-weight:600;">${d.v}</span>
+        </div>
+      `).join('');
+    }
+
+    // Download cert button
+    const certBtn = document.getElementById('downloadCertBtn');
+    if (certBtn) {
+      certBtn.style.display = isApproved ? 'inline-flex' : 'none';
+      certBtn.onclick = () => {
+        if (app.certificateId) {
+          window.open(`http://localhost:3000/api/v1/certificates/${app.certificateId}`, '_blank');
+        } else if (window.downloadDigitalCertificate) {
+          window.downloadDigitalCertificate(app);
+        } else {
+          showToast('Downloading certificate for ' + app.id, 'success');
+        }
+      };
+    }
+  }
+
+  // Auto-load if ID in URL
+  if (appId) {
+    loadApplication(appId);
+  } else {
+    // If no ID is passed, default to first citizen application
+    apiGetMyApplications().then(res => {
+      const myApps = res.data || [];
+      if (myApps.length > 0) loadApplication(myApps[0].id);
+    }).catch(() => {
+      if (emptyState) emptyState.style.display = 'block';
+    });
+  }
+
+  // Search button / enter
+  if (trackInput) {
+    trackInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') loadApplication(trackInput.value.trim().toUpperCase());
+    });
+  }
+  const trackBtn = document.querySelector('.btn-accent');
+  if (trackBtn) {
+    trackBtn.addEventListener('click', () => {
+      if (trackInput) loadApplication(trackInput.value.trim().toUpperCase());
+    });
+  }
 
 
   window.submitQueryResponse = async function() {

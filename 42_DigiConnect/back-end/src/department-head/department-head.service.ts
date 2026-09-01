@@ -272,14 +272,37 @@ export class DepartmentHeadService {
     db.services.push({
       id: newService.id,
       name: newService.name,
+      code: newService.code,
       dept: dept.name,
+      departmentId: newService.departmentId,
+      stateId: newService.stateId,
       description: newService.description,
       fee: newService.totalFee,
+      serviceFee: newService.serviceFee,
+      platformFee: newService.platformFee,
+      totalFee: newService.totalFee,
       status: 'Active',
       slaDays: 7,
       category: 'Certificate',
       requirements: dto.documentRequirements.map((d) => d.name),
+      fields: newService.fields,
+      documentRequirements: newService.documentRequirements,
+      workflowSteps: newService.workflowSteps,
+      stages: newService.workflowSteps?.length || 2,
     } as any);
+
+    if (db.workflowConfig) {
+      db.workflowConfig.push({
+        id: newService.id,
+        name: newService.name,
+        code: newService.code,
+        departmentId: newService.departmentId,
+        stateId: newService.stateId,
+        stages: newService.workflowSteps.map((st) => st.stepName),
+        slaTotal: 15,
+        steps: newService.workflowSteps,
+      } as any);
+    }
 
     db.auditLogs.push({
       id: `AUD-${Date.now()}`,
@@ -346,9 +369,24 @@ export class DepartmentHeadService {
     const dbSrv = db.services.find((s) => s.id === id) as any;
     if (dbSrv) {
       dbSrv.name = service.name;
+      dbSrv.code = service.code;
       dbSrv.fee = service.totalFee;
+      dbSrv.serviceFee = service.serviceFee;
+      dbSrv.platformFee = service.platformFee;
+      dbSrv.totalFee = service.totalFee;
       dbSrv.description = service.description;
       dbSrv.requirements = service.documentRequirements.map((d) => d.name);
+      dbSrv.workflowSteps = service.workflowSteps;
+      dbSrv.fields = service.fields;
+      dbSrv.documentRequirements = service.documentRequirements;
+      dbSrv.stages = service.workflowSteps?.length || 2;
+    }
+
+    const wf = (db.workflowConfig || []).find((w: any) => w.id === id);
+    if (wf && service.workflowSteps) {
+      wf.name = service.name;
+      wf.stages = service.workflowSteps.map((st: any) => st.stepName);
+      wf.steps = service.workflowSteps;
     }
 
     db.auditLogs.push({
