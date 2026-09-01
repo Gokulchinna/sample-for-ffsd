@@ -281,6 +281,7 @@ export class DepartmentHeadService {
       serviceFee: newService.serviceFee,
       platformFee: newService.platformFee,
       totalFee: newService.totalFee,
+      feeLabel: newService.totalFee === 0 ? 'Free' : `₹${newService.totalFee}`,
       status: 'Active',
       slaDays: 7,
       category: 'Certificate',

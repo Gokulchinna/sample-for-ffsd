@@ -22,7 +22,15 @@ export async function initApplyService() {
   const citizenStateId = session.stateId || (session.stateName?.toLowerCase().includes('karnataka') ? 'state_ka' : session.stateName?.toLowerCase().includes('kerala') ? 'state_kl' : session.stateName?.toLowerCase().includes('tamil') ? 'state_tn' : 'state_ap');
   try {
       const res = await apiGetServices();
-      const allServices = (res.data || []).filter(s => s.status === 'Active' || s.status === 'ACTIVE');
+      const allServices = (res.data || []).filter(s => s.status === 'Active' || s.status === 'ACTIVE').map(s => {
+        const feeVal = Number(s.totalFee ?? s.fee ?? 0);
+        const feeLabel = s.feeLabel || (feeVal === 0 ? 'Free' : `₹${feeVal}`);
+        return {
+          ...s,
+          fee: feeVal,
+          feeLabel: feeLabel,
+        };
+      });
       const stateServices = allServices.filter(s => s.stateId === citizenStateId);
       services = stateServices.length > 0 ? stateServices : allServices;
   } catch(e) { console.error(e); }
@@ -219,8 +227,8 @@ export async function initApplyService() {
         </div>
         <div style="font-size:0.8rem;color:var(--slate-600);margin-bottom:var(--space-sm);line-height:1.5;">${s.desc}</div>
         <div style="display:flex;gap:var(--space-md);font-size:0.75rem;color:var(--color-text-muted);margin-bottom:var(--space-md);">
-          <span>SLA: <strong>${s.sla} days</strong></span>
-          <span>Fee: <strong>${s.feeLabel}</strong></span>
+          <span>SLA: <strong>${s.sla || 15} days</strong></span>
+          <span>Fee: <strong>${s.feeLabel || (Number(s.fee ?? s.totalFee ?? 0) === 0 ? 'Free' : `₹${s.fee ?? s.totalFee}`)}</strong></span>
         </div>
         <button class="btn btn-primary btn-sm" style="width:100%;" onclick="window.selectService('${s.id}')">Apply Now</button>
       </div>
@@ -298,13 +306,15 @@ export async function initApplyService() {
     selectedService = services.find(s => s.id === serviceId);
     if (!selectedService) return;
     // Update selected service banner
+    const feeVal = Number(selectedService.fee ?? selectedService.totalFee ?? 0);
+    const feeText = selectedService.feeLabel || (feeVal === 0 ? 'Free' : `₹${feeVal}`);
     setTC('selectedSvcName', selectedService.name);
     setTC('selectedSvcDept', selectedService.dept);
-    setTC('selectedSvcSla', selectedService.sla + ' days');
-    setTC('selectedSvcFee', selectedService.feeLabel);
-    setTC('ps_fee', selectedService.feeLabel);
+    setTC('selectedSvcSla', (selectedService.sla || 15) + ' days');
+    setTC('selectedSvcFee', feeText);
+    setTC('ps_fee', feeText);
     setTC('rev_svc', selectedService.name);
-    setTC('rev_fee', selectedService.feeLabel);
+    setTC('rev_fee', feeText);
     // Application reference will be assigned by backend on submission
     setTC('appRefId', 'Pending...');
     setTC('successAppId', '...');
@@ -552,8 +562,9 @@ export async function initApplyService() {
       if (selectedService) {
         tc('rev_svc', selectedService.name);
         tc('rev_dept', selectedService.dept);
-        tc('rev_sla', selectedService.sla + ' Working Days');
-        tc('rev_fee', selectedService.feeLabel);
+        tc('rev_sla', (selectedService.sla || 15) + ' Working Days');
+        const revFeeVal = Number(selectedService.fee ?? selectedService.totalFee ?? 0);
+        tc('rev_fee', selectedService.feeLabel || (revFeeVal === 0 ? 'Free' : `₹${revFeeVal}`));
       }
 
       // Count uploaded slots by checking for the 'uploaded' class
