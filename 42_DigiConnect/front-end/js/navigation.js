@@ -7,7 +7,6 @@ export { getSession, setSession };
 import { getRoleConfig, svgIcons, isRoleAllowed, getRoleDashboardPath } from './role-manager.js';
 import { getInitials, toggleSidebar, setupGlobalClickHandlers, initEventDelegation, showToast } from './utils.js';
 import { logout } from './auth.js';
-import { initDemoSwitcher } from './demo-switcher.js';
 
 /**
  * Determine the base path for navigation links based on current page location
@@ -270,7 +269,6 @@ export function initPage(options = {}) {
   // Setup global handlers
   setupGlobalClickHandlers();
   initEventDelegation();
-  initDemoSwitcher();
 
   return session;
 }
