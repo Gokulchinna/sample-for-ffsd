@@ -48,6 +48,8 @@ const MOCK_USERS: any[] = [
     dept: 'Ministry of Electronics & IT (MeitY)',
     jurisdiction: 'All',
     password: 'password123',
+    securityQuestion: "What is your mother's maiden name?",
+    securityAnswer: 'Sharma',
     services: [],
     cases: 0,
     sla: 100,
@@ -299,6 +301,8 @@ const MOCK_USERS: any[] = [
     state: 'Andhra Pradesh',
     address: '1-45, Main Bazar, Chandragiri Village, Tirupati - 517101',
     password: 'password123',
+    securityQuestion: "What is your mother's maiden name?",
+    securityAnswer: 'Sujatha',
   },
   {
     id: 'CIT-AP-002',
@@ -314,6 +318,8 @@ const MOCK_USERS: any[] = [
     state: 'Andhra Pradesh',
     address: 'Flat 302, Bhavani Nagar, Tirupati - 517501',
     password: 'password123',
+    securityQuestion: 'What was the name of your first school?',
+    securityAnswer: 'Zilla Parishad High School',
   },
   {
     id: 'CIT-KA-001',
@@ -329,6 +335,8 @@ const MOCK_USERS: any[] = [
     state: 'Karnataka',
     address: 'Post Bilikere, Hunsur Taluk, Mysuru - 571103',
     password: 'password123',
+    securityQuestion: 'What city were you born in?',
+    securityAnswer: 'Mysuru',
   },
   {
     id: 'CIT-KA-002',
@@ -344,6 +352,8 @@ const MOCK_USERS: any[] = [
     state: 'Karnataka',
     address: '4th Cross, Green Glen Layout, Bellandur, Bengaluru - 560103',
     password: 'password123',
+    securityQuestion: "What is your pet's name?",
+    securityAnswer: 'Bruno',
   },
   {
     id: 'CIT-KL-001',
@@ -359,6 +369,8 @@ const MOCK_USERS: any[] = [
     state: 'Kerala',
     address: 'TC 14/204, Vembayam, Nedumangad, Thiruvananthapuram - 695615',
     password: 'password123',
+    securityQuestion: "What is your mother's maiden name?",
+    securityAnswer: 'Parvathy',
   },
   {
     id: 'CIT-KL-002',
@@ -374,6 +386,8 @@ const MOCK_USERS: any[] = [
     state: 'Kerala',
     address: 'House No 45, Palayam, Thiruvananthapuram - 695034',
     password: 'password123',
+    securityQuestion: 'What was the name of your first school?',
+    securityAnswer: 'Govt Model High School',
   },
   {
     id: 'CIT-TN-001',
@@ -389,6 +403,8 @@ const MOCK_USERS: any[] = [
     state: 'Tamil Nadu',
     address: 'South Street, Valayankulam, Thiruparankundram, Madurai - 625022',
     password: 'password123',
+    securityQuestion: 'What city were you born in?',
+    securityAnswer: 'Madurai',
   },
   {
     id: 'CIT-TN-002',
@@ -404,6 +420,8 @@ const MOCK_USERS: any[] = [
     state: 'Tamil Nadu',
     address: 'Old No. 12, New No. 28, Royapuram, Chennai - 600013',
     password: 'password123',
+    securityQuestion: "What is your pet's name?",
+    securityAnswer: 'Chiku',
   },
 ];
 

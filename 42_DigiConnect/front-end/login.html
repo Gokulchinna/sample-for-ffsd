@@ -220,6 +220,33 @@
                         <div class="spinner" id="loginSpinner"
                             style="display:none; border-color:rgba(255,255,255,0.3); border-top-color:#fff;"></div>
                     </button>
+
+                    <!-- Quick Demo Credentials Box -->
+                    <div style="margin-top: 18px; padding: 12px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: #475569; letter-spacing: 0.05em;">Quick Demo Credentials (Password: password123)</span>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 0.75rem;">
+                            <button type="button" class="btn btn-sm" style="text-align: left; justify-content: flex-start; padding: 5px 8px; border: 1px solid #e2e8f0; background: #fff; cursor:pointer; font-size:0.72rem;" onclick="fillDemoCredentials('citizen', 'ravi.ap@gmail.com')">
+                                <span style="font-weight: 700; color: #0284c7; margin-right:4px;">Citizen:</span> ravi.ap@gmail.com
+                            </button>
+                            <button type="button" class="btn btn-sm" style="text-align: left; justify-content: flex-start; padding: 5px 8px; border: 1px solid #e2e8f0; background: #fff; cursor:pointer; font-size:0.72rem;" onclick="fillDemoCredentials('officer', 'suresh.vro@ap.gov.in')">
+                                <span style="font-weight: 700; color: #16a34a; margin-right:4px;">Officer:</span> suresh.vro@ap.gov.in
+                            </button>
+                            <button type="button" class="btn btn-sm" style="text-align: left; justify-content: flex-start; padding: 5px 8px; border: 1px solid #e2e8f0; background: #fff; cursor:pointer; font-size:0.72rem;" onclick="fillDemoCredentials('department_head', 'head.rev@ap.gov.in')">
+                                <span style="font-weight: 700; color: #9333ea; margin-right:4px;">Dept Head:</span> head.rev@ap.gov.in
+                            </button>
+                            <button type="button" class="btn btn-sm" style="text-align: left; justify-content: flex-start; padding: 5px 8px; border: 1px solid #e2e8f0; background: #fff; cursor:pointer; font-size:0.72rem;" onclick="fillDemoCredentials('state_admin', 'admin@ap.gov.in')">
+                                <span style="font-weight: 700; color: #d97706; margin-right:4px;">State Admin:</span> admin@ap.gov.in
+                            </button>
+                            <button type="button" class="btn btn-sm" style="text-align: left; justify-content: flex-start; padding: 5px 8px; border: 1px solid #e2e8f0; background: #fff; cursor:pointer; font-size:0.72rem;" onclick="fillDemoCredentials('central_admin', 'superuser@gov.in')">
+                                <span style="font-weight: 700; color: #dc2626; margin-right:4px;">Central Admin:</span> superuser@gov.in
+                            </button>
+                            <button type="button" class="btn btn-sm" style="text-align: left; justify-content: flex-start; padding: 5px 8px; border: 1px solid #e2e8f0; background: #fff; cursor:pointer; font-size:0.72rem;" onclick="fillDemoCredentials('grievance', 'OFF-AP-REV-GRV1-01')">
+                                <span style="font-weight: 700; color: #0891b2; margin-right:4px;">Grievance:</span> OFF-AP-REV-GRV1-01
+                            </button>
+                        </div>
+                    </div>
                 </form>
                 <br>
                 <p style="font-size:0.75rem; color:var(--color-text-muted); text-align:center;">

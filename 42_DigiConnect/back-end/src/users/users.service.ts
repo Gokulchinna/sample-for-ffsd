@@ -59,12 +59,14 @@ export class UsersService {
   }
 
   findAccountForReset(identity: string): any {
-    const identityLower = identity.toLowerCase();
-    const identityDigits = identity.replace(/\D/g, '');
+    const identityLower = (identity || '').toLowerCase().trim();
+    const identityDigits = identityLower.replace(/\D/g, '');
 
     const user = db.users.find(u =>
       (u.email && u.email.toLowerCase() === identityLower) ||
-      (u.phone && u.phone.replace(/\D/g, '') === identityDigits && identityDigits.length >= 10)
+      (u.id && u.id.toLowerCase() === identityLower) ||
+      (u.phone && u.phone.replace(/\D/g, '') === identityDigits && identityDigits.length >= 10) ||
+      (u.aadhaar && u.aadhaar.replace(/\D/g, '') === identityDigits && identityDigits.length === 12)
     );
 
     if (!user) throw new NotFoundException('Account not found');
@@ -152,7 +154,19 @@ export class UsersService {
   }
 
   login(loginDto: any): User {
-    const user = db.users.find(u => u.email.toLowerCase() === loginDto.email.toLowerCase() && u.password === loginDto.password);
+    const identifier = (loginDto.email || loginDto.username || loginDto.loginId || loginDto.identifier || '').toLowerCase().trim();
+    const identifierDigits = identifier.replace(/\D/g, '');
+
+    const user = db.users.find(u => {
+      const matchIdentity =
+        (u.email && u.email.toLowerCase() === identifier) ||
+        (u.id && u.id.toLowerCase() === identifier) ||
+        (u.phone && u.phone.replace(/\D/g, '') === identifierDigits && identifierDigits.length >= 10) ||
+        (u.aadhaar && u.aadhaar.replace(/\D/g, '') === identifierDigits && identifierDigits.length === 12);
+
+      return matchIdentity && u.password === loginDto.password;
+    });
+
     if (!user) {
       throw new BadRequestException('Invalid credentials');
     }

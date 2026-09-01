@@ -24,6 +24,7 @@ export interface OfficerUser {
   name: string;
   email: string;
   phone?: string;
+  password?: string;
   departmentId: string;
   designationId: string;
   designationTitle: string;

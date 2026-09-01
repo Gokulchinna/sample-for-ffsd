@@ -273,23 +273,45 @@ export function initLoginPage() {
 
   let selectedRole = 'citizen';
 
-  // Role selector
+  // Role selector handler
+  window.selectRole = (opt, role) => {
+    document.querySelectorAll('.role-option').forEach(o => o.classList.remove('selected'));
+    if (opt) opt.classList.add('selected');
+    const radio = opt ? opt.querySelector('input[type="radio"]') : document.querySelector(`.role-option input[value="${role}"]`);
+    if (radio) {
+      radio.checked = true;
+      selectedRole = radio.value;
+      const parent = radio.closest('.role-option');
+      if (parent) parent.classList.add('selected');
+    }
+    const labels = {
+      citizen: 'Phone / Aadhaar / Email',
+      officer: 'Officer Email / Employee ID',
+      department_head: 'Dept Head Email / Username',
+      state_admin: 'State Admin Email / Username',
+      central_admin: 'Central Admin Username / Email',
+      grievance: 'Grievance Officer ID / Email'
+    };
+    const labelEl = document.getElementById('loginIdLabel');
+    if (labelEl) labelEl.textContent = labels[selectedRole] || 'Username';
+  };
+
+  window.fillDemoCredentials = (role, idOrEmail, password = 'password123') => {
+    const radio = document.querySelector(`.role-option input[value="${role}"]`);
+    if (radio) {
+      window.selectRole(radio.closest('.role-option'), role);
+    }
+    const idInput = document.getElementById('loginId');
+    const pwInput = document.getElementById('password');
+    if (idInput) idInput.value = idOrEmail;
+    if (pwInput) pwInput.value = password;
+    showToast(`Filled demo credentials for ${role.replace(/_/g, ' ').toUpperCase()}`, 'info');
+  };
+
   document.querySelectorAll('.role-option').forEach(opt => {
     opt.addEventListener('click', () => {
-      document.querySelectorAll('.role-option').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected');
       const radio = opt.querySelector('input[type="radio"]');
-      if (radio) { radio.checked = true; selectedRole = radio.value; }
-      const labels = {
-        citizen: 'Phone / Aadhaar / Username',
-        officer: 'Officer Email / Employee ID',
-        department_head: 'Dept Head Email / Username',
-        state_admin: 'State Admin Email / Username',
-        central_admin: 'Central Admin Username',
-        grievance: 'Grievance Officer ID / Email'
-      };
-      const labelEl = document.getElementById('loginIdLabel');
-      if (labelEl) labelEl.textContent = labels[selectedRole] || 'Username';
+      if (radio) window.selectRole(opt, radio.value);
     });
   });
 
